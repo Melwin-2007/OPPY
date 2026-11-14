@@ -6,6 +6,28 @@
 (function () {
   'use strict';
 
+  // Canvas roundRect polyfill for broad browser compatibility
+  if (typeof CanvasRenderingContext2D !== 'undefined' && !CanvasRenderingContext2D.prototype.roundRect) {
+    CanvasRenderingContext2D.prototype.roundRect = function (x, y, w, h, radii) {
+      if (!radii) radii = 0;
+      var r = typeof radii === 'number' ? radii : (Array.isArray(radii) ? (radii[0] || 0) : 0);
+      r = Math.min(r, Math.abs(w) / 2, Math.abs(h) / 2);
+      this.beginPath();
+      this.moveTo(x + r, y);
+      this.lineTo(x + w - r, y);
+      this.quadraticCurveTo(x + w, y, x + w, y + r);
+      this.lineTo(x + w, y + h - r);
+      this.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
+      this.lineTo(x + r, y + h);
+      this.quadraticCurveTo(x, y + h, x, y + h - r);
+      this.lineTo(x, y + r);
+      this.quadraticCurveTo(x, y, x + r, y);
+      this.closePath();
+      return this;
+    };
+  }
+
+
   // 1. ACTS DATABASE (Martian Terrain & Environmental Parameters)
               // =========================================================================
             // 1. MISSION DATABASE: 6 HISTORICAL ACTS & 7 EXPANDABLE 3D SUBSYSTEMS
@@ -547,142 +569,99 @@
 
   
             function setHealthPillStyle(container, dot, statusLevel) {
+                if (!container || !dot) return;
                 if (statusLevel === 'ok') {
                     container.className = 'px-2 py-0.5 rounded bg-emerald-950/60 border border-emerald-500/40 text-emerald-300 flex items-center gap-1';
                     dot.className = 'w-1.5 h-1.5 rounded-full bg-emerald-400';
                 } else if (statusLevel === 'warn') {
-                    container.className = 'px-2 py-0.5 rounded bg-amber-950/70 border border-amber-500/50 text-amber-300 flex items-center gap-1';
+                    container.className = 'px-2 py-0.5 rounded bg-amber-950/60 border border-amber-500/40 text-amber-300 flex items-center gap-1';
                     dot.className = 'w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse';
                 } else {
-                    container.className = 'px-2 py-0.5 rounded bg-red-950/80 border border-red-500/60 text-red-300 flex items-center gap-1';
+                    container.className = 'px-2 py-0.5 rounded bg-red-950/70 border border-red-500/50 text-red-300 flex items-center gap-1';
                     dot.className = 'w-1.5 h-1.5 rounded-full bg-red-500 animate-ping';
                 }
             }
 
             function updateHUD() {
                 const act = getActForKm(state.odometerKm);
-                dom.hudActBadge.textContent = act.name;
-                dom.hudSol.textContent = `SOL ${state.sol}`;
-                dom.hudOdometer.textContent = `${state.odometerKm.toFixed(2)} km`;
-                dom.hudSolar.textContent = `${state.solarWh} Wh`;
 
-                const solarPct = Math.max(3, Math.min(100, (state.solarWh / 900) * 100));
-                dom.hudSolarBar.style.width = `${solarPct}%`;
-                if (state.solarWh > 450) {
-                    dom.hudSolar.className = 'font-mono-tech font-bold text-xs text-emerald-400';
-                    dom.hudSolarBar.className = 'h-full bg-emerald-400 transition-all duration-150';
-                } else if (state.solarWh > 150) {
-                    dom.hudSolar.className = 'font-mono-tech font-bold text-xs text-amber-400';
-                    dom.hudSolarBar.className = 'h-full bg-amber-400 transition-all duration-150';
-                } else {
-                    dom.hudSolar.className = 'font-mono-tech font-bold text-xs text-red-400 animate-pulse';
-                    dom.hudSolarBar.className = 'h-full bg-red-500 transition-all duration-150';
+                if (dom.hudActBadge) dom.hudActBadge.textContent = act.name;
+                if (dom.hudSol) dom.hudSol.textContent = `SOL ${state.sol}`;
+                if (dom.hudOdometer) dom.hudOdometer.textContent = `${state.odometerKm.toFixed(2)} km`;
+                if (dom.hudSolar) dom.hudSolar.textContent = `${state.solarWh} Wh`;
+                if (dom.hudSolarBar) {
+                    const pct = Math.min(100, Math.max(3, (state.solarWh / 950) * 100));
+                    dom.hudSolarBar.style.width = `${pct}%`;
+                    dom.hudSolarBar.className = state.solarWh < 100
+                        ? 'h-full bg-red-500 transition-all duration-150 animate-pulse'
+                        : state.solarWh < 300
+                            ? 'h-full bg-amber-500 transition-all duration-150'
+                            : 'h-full bg-emerald-400 transition-all duration-150';
                 }
 
                 const tauPrefix = state.tau >= 10.75 ? '>10.8' : state.tau.toFixed(2);
-                dom.hudTau.textContent = `τ = ${tauPrefix}`;
-                if (state.tau < 1.5) {
-                    dom.hudTauState.textContent = 'CLEAR';
-                    dom.hudTauState.className = 'text-[8px] font-mono-tech text-emerald-400';
-                } else if (state.tau < 4.5) {
-                    dom.hudTauState.textContent = 'HAZY';
-                    dom.hudTauState.className = 'text-[8px] font-mono-tech text-amber-400';
-                } else {
-                    dom.hudTauState.textContent = 'STORM!';
-                    dom.hudTauState.className = 'text-[8px] font-mono-tech text-red-400 font-bold animate-pulse';
-                }
-
-                if (state.odometerKm < 3.8) {
-                    dom.txtSteering.textContent = '4-CORNER OK';
-                    setHealthPillStyle(dom.healthSteering, dom.dotSteering, 'ok');
-                } else if (state.odometerKm < 18.0) {
-                    dom.txtSteering.textContent = 'RF ACTUATOR JAM (-8°)';
-                    setHealthPillStyle(dom.healthSteering, dom.dotSteering, 'warn');
-                } else {
-                    dom.txtSteering.textContent = 'REV DRIVE (RF LOCKED)';
-                    setHealthPillStyle(dom.healthSteering, dom.dotSteering, 'warn');
-                }
-
-                if (state.odometerKm < 2.5) {
-                    dom.txtHeater.textContent = 'NOMINAL';
-                    setHealthPillStyle(dom.healthHeater, dom.dotHeater, 'ok');
-                } else if (state.odometerKm < 44.2) {
-                    dom.txtHeater.textContent = 'SHLDR SW STUCK ON';
-                    setHealthPillStyle(dom.healthHeater, dom.dotHeater, 'warn');
-                } else {
-                    dom.txtHeater.textContent = 'FROST LOCK (-105°C)';
-                    setHealthPillStyle(dom.healthHeater, dom.dotHeater, 'crit');
-                }
-
-                if (state.odometerKm < 36.5) {
-                    dom.txtFlash.textContent = 'FLASH 7-BANK OK';
-                    setHealthPillStyle(dom.healthFlash, dom.dotFlash, 'ok');
-                } else if (state.odometerKm < 39.8) {
-                    dom.txtFlash.textContent = 'BANK 7 AMNESIA!';
-                    setHealthPillStyle(dom.healthFlash, dom.dotFlash, 'crit');
-                } else {
-                    dom.txtFlash.textContent = 'RAM-ONLY MODE';
-                    setHealthPillStyle(dom.healthFlash, dom.dotFlash, 'warn');
-                }
-
-                if (state.dustFactor > 0.65) {
-                    dom.txtDust.textContent = `CLEAN (${state.dustFactor.toFixed(2)})`;
-                    setHealthPillStyle(dom.healthDust, dom.dotDust, 'ok');
-                } else if (state.dustFactor > 0.28) {
-                    dom.txtDust.textContent = `DUSTY (${state.dustFactor.toFixed(2)})`;
-                    setHealthPillStyle(dom.healthDust, dom.dotDust, 'warn');
-                } else {
-                    dom.txtDust.textContent = `CRITICAL (${state.dustFactor.toFixed(2)})`;
-                    setHealthPillStyle(dom.healthDust, dom.dotDust, 'crit');
-                }
-
-                dom.missionScrubber.value = state.odometerKm;
-                dom.scrubberPct.textContent = `${Math.round((state.odometerKm / 45.16) * 100)}%`;
-
-                document.querySelectorAll('.act-jump-btn').forEach((btn) => {
-                    const btnAct = parseInt(btn.getAttribute('data-act'), 10);
-                    if (btnAct === act.id) {
-                        btn.className = 'act-jump-btn px-2 py-0.5 rounded text-[9px] font-mono-tech border border-amber-400 bg-amber-500/25 text-white font-semibold shrink-0 transition';
+                if (dom.hudTau) dom.hudTau.textContent = `τ = ${tauPrefix}`;
+                if (dom.hudTauState) {
+                    if (state.tau < 1.5) {
+                        dom.hudTauState.textContent = 'CLEAR';
+                        dom.hudTauState.className = 'text-[8px] font-mono-tech text-emerald-400';
+                    } else if (state.tau < 4.5) {
+                        dom.hudTauState.textContent = 'HAZY';
+                        dom.hudTauState.className = 'text-[8px] font-mono-tech text-amber-400';
                     } else {
-                        btn.className = 'act-jump-btn px-2 py-0.5 rounded text-[9px] font-mono-tech border border-slate-700 bg-slate-900/90 text-slate-300 hover:border-amber-400/50 shrink-0 transition';
+                        dom.hudTauState.textContent = 'STORM!';
+                        dom.hudTauState.className = 'text-[8px] font-mono-tech text-red-400 font-bold animate-pulse';
                     }
-                });
-
-                dom.cinemaChapterHeader.textContent = act.fullTitle;
-                dom.cinemaYearBadge.textContent = act.dateStr;
-                if (state.drivingBackward) {
-                    dom.cinemaDriveModeBadge.textContent = '◀ REV DRIVE (RF SPARED)';
-                    dom.cinemaDriveModeBadge.className = 'hud-glass px-2 py-0.5 rounded-full text-[9px] font-mono-tech text-amber-300 border border-amber-500/40';
-                } else {
-                    dom.cinemaDriveModeBadge.textContent = '▶ FWD DRIVE';
-                    dom.cinemaDriveModeBadge.className = 'hud-glass px-2 py-0.5 rounded-full text-[9px] font-mono-tech text-emerald-300';
                 }
 
-                dom.landmarkTitle.textContent = act.landmarkName;
-                dom.landmarkSub.textContent = act.landmarkHint;
-                dom.active2DHardwareText.textContent = act.activeHardware;
-                dom.movieSubtitleText.textContent = act.subtitle;
-                dom.movieScienceNote.textContent = act.scienceNote;
+                if (dom.cinemaChapterHeader) dom.cinemaChapterHeader.textContent = act.fullTitle;
+                if (dom.cinemaYearBadge) dom.cinemaYearBadge.textContent = act.dateStr;
 
-                if (act.id === 6 && state.odometerKm >= 44.6) {
-                    dom.pancamStaticPip.classList.remove('hidden');
-                    dom.pancamStaticPip.classList.add('flex');
-                } else {
-                    dom.pancamStaticPip.classList.add('hidden');
-                    dom.pancamStaticPip.classList.remove('flex');
+                if (dom.cinemaDriveModeBadge) {
+                    if (Math.abs(state.velocityKmPerSec) < 0.01) {
+                        dom.cinemaDriveModeBadge.textContent = '■ PARKED / STANDBY';
+                        dom.cinemaDriveModeBadge.className = 'px-2 py-0.5 rounded-full text-[9px] font-mono-tech text-slate-400';
+                    } else if (state.drivingBackward) {
+                        dom.cinemaDriveModeBadge.textContent = '◀ REV DRIVE';
+                        dom.cinemaDriveModeBadge.className = 'px-2 py-0.5 rounded-full text-[9px] font-mono-tech text-sky-400 font-semibold';
+                    } else {
+                        dom.cinemaDriveModeBadge.textContent = '▶ FWD DRIVE';
+                        dom.cinemaDriveModeBadge.className = 'px-2 py-0.5 rounded-full text-[9px] font-mono-tech text-emerald-400 font-semibold';
+                    }
                 }
 
-                if (state.odometerKm >= 45.15 && !state.finaleShown && !state.finaleDismissed) {
-                    state.finaleShown = true;
-                    state.autoCruise = false;
-                    document.getElementById('btnAutoCruise').textContent = 'AUTO-DRIVE: OFF';
-                    dom.finaleOverlay.classList.remove('hidden');
-                    audioEngine.playFinaleChord();
-                } else if (state.odometerKm < 45.05) {
-                    state.finaleDismissed = false;
-                    if (state.finaleShown) {
-                        state.finaleShown = false;
-                        dom.finaleOverlay.classList.add('hidden');
+                if (dom.active2DHardwareText) dom.active2DHardwareText.textContent = act.activeHardware;
+                if (dom.landmarkTitle) dom.landmarkTitle.textContent = act.landmarkName;
+                if (dom.landmarkSub) dom.landmarkSub.textContent = act.landmarkHint;
+                if (dom.movieSubtitleText) dom.movieSubtitleText.textContent = act.subtitle;
+                if (dom.movieScienceNote) dom.movieScienceNote.textContent = act.scienceNote;
+
+                if (dom.missionScrubber) dom.missionScrubber.value = state.odometerKm;
+                if (dom.scrubberPct) dom.scrubberPct.textContent = `${Math.round((state.odometerKm / 45.16) * 100)}%`;
+
+                if (dom.pancamStaticPip) {
+                    if (act.id === 6 && state.tau > 8.0) {
+                        dom.pancamStaticPip.classList.remove('hidden');
+                        dom.pancamStaticPip.classList.add('flex');
+                    } else {
+                        dom.pancamStaticPip.classList.add('hidden');
+                        dom.pancamStaticPip.classList.remove('flex');
+                    }
+                }
+
+                if (dom.finaleOverlay) {
+                    if (state.odometerKm >= 45.15 && !state.finaleDismissed) {
+                        state.finaleShown = true;
+                        const btnAuto = document.getElementById('btnAutoCruise');
+                        if (btnAuto) btnAuto.textContent = 'AUTO-DRIVE: OFF';
+                        dom.finaleOverlay.classList.remove('hidden');
+                        audioEngine.playFinaleChord();
+                    } else if (state.odometerKm < 45.05) {
+                        state.finaleDismissed = false;
+                        if (state.finaleShown) {
+                            state.finaleShown = false;
+                            dom.finaleOverlay.classList.add('hidden');
+                        }
                     }
                 }
             }
@@ -729,8 +708,6 @@
     }
   }
 
-  // Replace Canvas variable definitions in extracted renderFuncs
-  // Extracted renderFuncs has getTerrainElevation, drawHybrid25DWheel, etc.
               // =========================================================================
             // 6. HYBRID 2.5D PERSPECTIVE STORY ENGINE (HTML5 CANVAS)
             // =========================================================================
@@ -1017,6 +994,18 @@
             }
 
             function render2DStory(dt, timeSec) {
+
+                if (storyCanvas && storyCanvas.parentElement) {
+                    const rect = storyCanvas.parentElement.getBoundingClientRect();
+                    const dpr = Math.min(window.devicePixelRatio || 1, 2);
+                    const targetW = Math.max(300, Math.floor(rect.width * dpr));
+                    const targetH = Math.max(200, Math.floor(rect.height * dpr));
+                    if (storyCanvas.width !== targetW || storyCanvas.height !== targetH) {
+                        storyCanvas.width = targetW;
+                        storyCanvas.height = targetH;
+                    }
+                }
+
                 const W = storyCanvas.width;
                 const H = storyCanvas.height;
                 const dpr = Math.min(window.devicePixelRatio || 1, 2);
@@ -2028,7 +2017,7 @@
     state.armDeployProgress += (state.armTargetDeploy - state.armDeployProgress) * Math.min(1, dt * 6.0);
 
     audioEngine.update(dt);
-    if (typeof render2DStory === 'function') render2DStory(dt, timeSec);
+    try { if (typeof render2DStory === 'function') render2DStory(dt, timeSec); } catch (e) { console.error('render2DStory error:', e); }
   }
 
   // 10. PUBLIC MODULE INTERFACE
