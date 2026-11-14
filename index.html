@@ -759,40 +759,83 @@
       setTimeout(() => el.classList.add('hidden'), 200);
     }
 
+    let overlayCloseTimer = null;
+
     function openExperienceView() {
-      closeOverlays();
+      if (overlayCloseTimer) {
+        clearTimeout(overlayCloseTimer);
+        overlayCloseTimer = null;
+      }
+      const hw = document.getElementById('hardware-overlay');
+      if (hw) {
+        hw.classList.add('opacity-0');
+        hw.classList.add('hidden');
+      }
+
       const el = document.getElementById('experience-overlay');
       if (!el) return;
       el.classList.remove('hidden');
       requestAnimationFrame(() => {
         el.classList.remove('opacity-0');
         if (window.startMissionExperience) {
-          window.startMissionExperience();
+          try {
+            window.startMissionExperience();
+          } catch (e) {
+            console.error('startMissionExperience error:', e);
+          }
         }
       });
     }
 
     function openHardwareView() {
-      const el = document.getElementById('hardware-overlay');
-      el.classList.remove('hidden');
-      setTimeout(() => el.classList.remove('opacity-0'), 10);
-      if (!window.__hw3dInitialized) {
-        init3DHardwareViewer();
-        window.__hw3dInitialized = true;
+      if (overlayCloseTimer) {
+        clearTimeout(overlayCloseTimer);
+        overlayCloseTimer = null;
       }
+      if (window.pauseMissionExperience) {
+        try { window.pauseMissionExperience(); } catch (e) {}
+      }
+      const exp = document.getElementById('experience-overlay');
+      if (exp) {
+        exp.classList.add('opacity-0');
+        exp.classList.add('hidden');
+      }
+
+      const el = document.getElementById('hardware-overlay');
+      if (!el) return;
+      el.classList.remove('hidden');
+      requestAnimationFrame(() => {
+        el.classList.remove('opacity-0');
+        if (!window.__hw3dInitialized) {
+          init3DHardwareViewer();
+          window.__hw3dInitialized = true;
+        }
+      });
     }
 
     function closeOverlays() {
+      if (overlayCloseTimer) {
+        clearTimeout(overlayCloseTimer);
+        overlayCloseTimer = null;
+      }
       if (window.pauseMissionExperience) {
-        window.pauseMissionExperience();
+        try { window.pauseMissionExperience(); } catch (e) {}
       }
       ['hardware-overlay', 'experience-overlay'].forEach(id => {
         const el = document.getElementById(id);
         if (el) {
           el.classList.add('opacity-0');
-          setTimeout(() => el.classList.add('hidden'), 300);
         }
       });
+      overlayCloseTimer = setTimeout(() => {
+        ['hardware-overlay', 'experience-overlay'].forEach(id => {
+          const el = document.getElementById(id);
+          if (el && el.classList.contains('opacity-0')) {
+            el.classList.add('hidden');
+          }
+        });
+        overlayCloseTimer = null;
+      }, 300);
     }
 
     // Web Audio Synthesizer (Martian Wind)
