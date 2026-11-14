@@ -612,7 +612,7 @@
       <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 mb-16 items-stretch">
         
         <!-- 3D WebGL Canvas Viewport (Col 8) -->
-        <div class="lg:col-span-8 relative rounded-md border border-oppy-border bg-oppy-card overflow-hidden flex flex-col h-[560px]" id="rover-viewport-box">
+        <div class="lg:col-span-8 relative rounded-md border border-oppy-border bg-oppy-card overflow-hidden flex flex-col h-[640px]" id="rover-viewport-box">
           
           <!-- Viewport Header Toolbar -->
           <div class="absolute top-0 left-0 right-0 z-20 px-4 py-3 bg-[#101113]/85 backdrop-blur-md border-b border-oppy-border/60 flex flex-wrap items-center justify-between gap-2 text-xs font-mono">
@@ -667,6 +667,63 @@
               <!-- Progress Bar -->
               <div class="w-56 h-1 bg-oppy-border rounded-full mt-4 overflow-hidden">
                 <div class="h-full bg-oppy-accent transition-all duration-300 w-1/3" id="rover-loading-bar"></div>
+              </div>
+            </div>
+
+
+            <!-- Mission Simulation & Animation Console Overlay -->
+            <div class="absolute bottom-2 left-2 right-2 z-20 pointer-events-none" id="mission-anim-overlay">
+              <div class="bg-[#0c0d0f]/90 backdrop-blur-md border border-oppy-border/80 rounded-md p-2 pointer-events-auto flex flex-col sm:flex-row items-center justify-between gap-2.5 text-xs font-mono shadow-2xl">
+                
+                <!-- Animation Mode Buttons -->
+                <div class="flex items-center flex-wrap gap-1.5" id="anim-mode-group">
+                  <span class="text-[9px] text-oppy-textMuted uppercase font-bold tracking-wider mr-1 hidden lg:inline">SIMULATION:</span>
+                  <button class="anim-mode-btn active px-2.5 py-1 rounded text-[10px] font-mono border border-oppy-accent bg-oppy-surface text-white transition-all shadow-sm" data-mode="idle" title="Static CAD hardware inspection">
+                    STATIC
+                  </button>
+                  <button class="anim-mode-btn px-2.5 py-1 rounded text-[10px] font-mono border border-oppy-border bg-oppy-bg text-oppy-textSecondary hover:border-oppy-borderLight hover:text-white transition-all flex items-center space-x-1" data-mode="drive" title="Traverse simulation: 6-wheel roll, rocker-bogie crawl, dust plumes, odometer">
+                    <span>🚗</span> <span>DRIVE</span>
+                  </button>
+                  <button class="anim-mode-btn px-2.5 py-1 rounded text-[10px] font-mono border border-oppy-border bg-oppy-bg text-oppy-textSecondary hover:border-oppy-borderLight hover:text-white transition-all flex items-center space-x-1" data-mode="scan" title="Panoramic survey: Mast 360° pan, elevation tilt, stereoscopic camera vision cone">
+                    <span>🔭</span> <span>PANCAM SCAN</span>
+                  </button>
+                  <button class="anim-mode-btn px-2.5 py-1 rounded text-[10px] font-mono border border-oppy-border bg-oppy-bg text-oppy-textSecondary hover:border-oppy-borderLight hover:text-white transition-all flex items-center space-x-1" data-mode="sample" title="In-situ science: IDD robotic arm deployment to rock target, RAT grinding abrasion sparks, APXS laser">
+                    <span>🦾</span> <span>IDD SAMPLE</span>
+                  </button>
+                  <button class="anim-mode-btn px-2.5 py-1 rounded text-[10px] font-mono border border-oppy-border bg-oppy-bg text-oppy-textSecondary hover:border-oppy-borderLight hover:text-white transition-all flex items-center space-x-1" data-mode="comm" title="Telemetry downlink: High-Gain Antenna Earth tracking, pulsing X-band RF wavefront rings to DSN">
+                    <span>📡</span> <span>EARTH COMM</span>
+                  </button>
+                  <button class="anim-mode-btn px-2.5 py-1 rounded text-[10px] font-mono border border-emerald-500/50 bg-emerald-950/30 text-emerald-300 hover:border-emerald-400 hover:text-white transition-all flex items-center space-x-1.5" data-mode="mission" title="Continuous full-Sol mission demonstration cycle: Drive -> Scan -> Sample -> Comm">
+                    <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
+                    <span>AUTO MISSION DEMO</span>
+                  </button>
+                </div>
+
+                <!-- Playback & Speed Controls -->
+                <div class="flex items-center space-x-2 shrink-0">
+                  <button id="anim-play-pause-btn" class="px-2.5 py-1 rounded bg-oppy-surface border border-oppy-border hover:border-oppy-accent text-white text-[10px] flex items-center space-x-1 transition-colors" title="Play / Pause simulation">
+                    <span id="anim-play-icon">⏸</span>
+                    <span id="anim-play-text">PAUSE</span>
+                  </button>
+                  <div class="flex items-center space-x-1 bg-oppy-bg border border-oppy-border rounded p-0.5 text-[9px]">
+                    <button class="anim-speed-btn active px-1.5 py-0.5 rounded text-white bg-oppy-surface font-bold" data-speed="1" title="Real Opportunity speed (5 cm/s)">1X</button>
+                    <button class="anim-speed-btn px-1.5 py-0.5 rounded text-oppy-textMuted hover:text-white" data-speed="2" title="2x speed acceleration">2X</button>
+                    <button class="anim-speed-btn px-1.5 py-0.5 rounded text-oppy-textMuted hover:text-white" data-speed="4" title="4x speed acceleration">4X</button>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Live Simulated Mission Telemetry Ticker -->
+              <div class="mt-1 px-3 py-1.5 rounded bg-[#0c0d0f]/85 backdrop-blur-md border border-oppy-border/50 text-[10px] font-mono text-oppy-textSecondary flex flex-wrap items-center justify-between pointer-events-auto">
+                <div class="flex items-center space-x-2">
+                  <span class="w-1.5 h-1.5 rounded-full bg-oppy-accent animate-ping" id="sim-telemetry-beacon"></span>
+                  <span id="sim-telemetry-status" class="text-white font-semibold">STATUS: ⏸ CAD STANDBY · FLIGHT HARDWARE ON MERIDIANI PLANUM</span>
+                </div>
+                <div class="hidden sm:flex items-center space-x-4 text-oppy-textMuted">
+                  <span id="sim-telemetry-stat1">ACTUATORS: NOMINAL (28V DC)</span>
+                  <span id="sim-telemetry-stat2">ODOMETER: 45.161 km</span>
+                  <span id="sim-telemetry-stat3" class="text-oppy-accent">TARGET: PERSEVERANCE VALLEY</span>
+                </div>
               </div>
             </div>
 
@@ -1189,65 +1246,66 @@
 
   <!-- BEGIN: Enhanced Three.js 3D Rover Viewer & CAD Subsystem Controller -->
   <script data-purpose="threejs-rover-viewer">
+    // Subsystem Telemetry Specifications & Camera Focal Datums
     const subsystemData = {
       mast: {
         id: "SUBSYSTEM // 01",
         name: "Pancam Mast Assembly (PMA)",
         mass: "7.2 kg",
-        desc: "Elevates stereo Pancam and Navcam sensors 1.5 meters above the ground, replicating human eye height. Incorporates 360° azimuthal pan and ±90° elevation gimbals with 16 narrow-band multispectral filters.",
+        desc: "Elevates stereo Pancam and Navcam sensors 1.5 meters above the Martian ground, replicating human eye height. Incorporates 360° azimuthal pan and ±90° elevation gimbals with 16 narrow-band multispectral filters.",
         volt: "28–32 V DC",
-        spec: "0.27 mrad/pixel stereo",
-        temp: "-40°C to +40°C",
-        camPos: { x: 0.45, y: 1.55, z: 1.25 },
-        target: { x: 0.0, y: 1.25, z: 0.38 }
+        spec: "0.27 mrad/pixel · 16 Filters",
+        temp: "-40°C to +40°C Operational",
+        camPos: { x: 0.9, y: 1.85, z: 1.4 },
+        target: { x: -0.02, y: 1.15, z: 0.36 }
       },
       power: {
         id: "SUBSYSTEM // 02",
-        name: "Gallium Arsenide Solar Arrays",
-        mass: "19.5 kg",
-        desc: "Planar triple-junction GaAs/Ge solar array covering 1.3 m². Produced up to 900 Wh per sol on fresh deployment. Unexpected Martian wind cleaning events repeatedly cleared atmospheric dust, multiplying mission lifetime by 56x.",
-        volt: "32 V Nominal Bus",
-        spec: "140 W Peak / 1.3 m²",
-        temp: "-105°C to +80°C",
-        camPos: { x: 0.0, y: 2.8, z: 1.1 },
-        target: { x: 0.0, y: 0.65, z: -0.1 }
+        name: "GaAs Solar Array Wings",
+        mass: "19.8 kg",
+        desc: "1.3 m² triple-junction Gallium Arsenide (GaAs/Ge) photovoltaic cells generating 140 W at landing, degrading to ~100 W under atmospheric dust. Cleaned repeatedly by unexpected Martian aeolian cleaning events.",
+        volt: "28–34 V Regulated",
+        spec: "140 W Peak (1.3 m² Area)",
+        temp: "-100°C to +80°C Survivable",
+        camPos: { x: 0.0, y: 2.1, z: 1.1 },
+        target: { x: 0.0, y: 0.65, z: 0.0 }
       },
       mobility: {
         id: "SUBSYSTEM // 03",
-        name: "Rocker-Bogie 6-Wheel Mobility",
-        mass: "38.0 kg",
-        desc: "Six 25-cm cleated aluminum wheels mounted on passive titanium rocker-bogies. Equalizes weight distribution across all wheels without springs. Traversed an extraterrestrial world record 45.16 kilometers across boulder fields and sand ripples.",
-        volt: "28 V DC",
-        spec: "0.05 m/s (5 cm/s) Top Speed",
-        temp: "-55°C to +50°C",
-        camPos: { x: -1.9, y: 0.45, z: 1.3 },
+        name: "Rocker-Bogie Mobility System",
+        mass: "35.5 kg",
+        desc: "Six independently motorized 26-cm diameter aluminum cleated wheels linked via differential rocker-bogie linkages without springs. Allows scaling obstacles larger than wheel diameter (25 cm) with chassis tilt limited to ±25°.",
+        volt: "28 V DC Brushless",
+        spec: "0.05 m/s Max Speed (5 cm/s)",
+        temp: "-55°C to +50°C Rated",
+        camPos: { x: 1.8, y: 0.45, z: 0.9 },
         target: { x: 0.0, y: 0.25, z: 0.0 }
       },
       arm: {
         id: "SUBSYSTEM // 04",
         name: "Instrument Deployment Device (IDD)",
-        mass: "12.3 kg",
-        desc: "5-degree-of-freedom robotic arm positioning contact science tools directly against rock targets. Houses the Rock Abrasion Tool (RAT), Microscopic Imager (MI), Mössbauer Spectrometer, and Alpha Particle X-Ray Spectrometer (APXS).",
-        volt: "28 V DC",
-        spec: "5 DOF · 0.8 m Reach",
-        temp: "-70°C to +40°C",
-        camPos: { x: 0.35, y: 0.52, z: 1.15 },
-        target: { x: 0.0, y: 0.38, z: 0.42 }
+        mass: "10.5 kg",
+        desc: "5-degree-of-freedom robotic manipulator carrying a 4-instrument turret: Mössbauer Spectrometer (MIMOS II), Alpha Particle X-Ray Spectrometer (APXS), Microscopic Imager (MI), and Rock Abrasion Tool (RAT).",
+        volt: "28 V DC Stepper Actuated",
+        spec: "5 DOF · 4-Sided Science Turret",
+        temp: "-55°C to +50°C Operational",
+        camPos: { x: 0.65, y: 0.6, z: 1.35 },
+        target: { x: 0.08, y: 0.35, z: 0.55 }
       },
       antenna: {
         id: "SUBSYSTEM // 05",
-        name: "High-Gain Steerable Antenna (HGA)",
-        mass: "4.5 kg",
-        desc: "0.28-meter parabolic dish communicating directly with NASA's Deep Space Network in X-Band (7–8 GHz). Dual-axis gimbal tracks Earth across the sky even during rover traverses.",
-        volt: "28 V DC",
-        spec: "X-Band 12 kbps direct-to-Earth",
-        temp: "-50°C to +60°C",
-        camPos: { x: -1.1, y: 1.45, z: -0.7 },
-        target: { x: -0.25, y: 0.9, z: -0.2 }
+        name: "High-Gain Steerable Dish (HGA)",
+        mass: "5.4 kg",
+        desc: "0.28-meter parabolic reflector dish steerable in azimuth and elevation to beam telemetry directly to Earth's Deep Space Network (DSN) via X-Band (8.4 GHz) at bitrates between 3.5 kbps and 128 kbps.",
+        volt: "28 V DC Gimbaled",
+        spec: "8.4 GHz X-Band · 128 kbps Max",
+        temp: "-105°C to +50°C Passive",
+        camPos: { x: 1.1, y: 1.35, z: -0.6 },
+        target: { x: 0.38, y: 0.85, z: -0.24 }
       },
       avionics: {
         id: "SUBSYSTEM // 06",
-        name: "Warm Electronics Box & RAD6000",
+        name: "RAD6000 Warm Electronics Box (WEB)",
         mass: "22.0 kg",
         desc: "Centrally mounted insulated compartment housing the BAE RAD6000 20 MHz 32-bit RISC processor, 128 MB RAM, and dual 8 Ah Li-ion batteries. Kept warm by aerogel insulation and 8 Radioisotope Heater Units (RHUs).",
         volt: "28–34 V Bus",
@@ -1264,17 +1322,19 @@
       const loadingOverlay = document.getElementById('rover-3d-loading');
       const loadingText = document.getElementById('rover-loading-text');
       const loadingBar = document.getElementById('rover-loading-bar');
-      const loadingSubtext = document.getElementById('rover-loading-subtext');
       const corsNotice = document.getElementById('rover-cors-notice');
       const camTelemetry = document.getElementById('hud-cam-telemetry');
       if (!canvas || !container) return;
 
-      let isWireframe = false;
-      let isAutoOrbit = true;
-      let roverMeshGroup = new THREE.Group();
-      let activeSubsystemKey = 'mast';
+      // Animation State Variables
+      let animMode = 'idle'; // 'idle' | 'drive' | 'scan' | 'sample' | 'comm' | 'mission'
+      let isAnimPlaying = true;
+      let simSpeed = 1.0;
+      let missionCycleTimer = 0.0;
+      let odometerKm = 45.161;
+      let animTime = 0.0;
 
-      // Categorized subsystem material handles for highlight pulsing
+      // Subsystem Material Collections
       const subMaterials = {
         mast: [],
         power: [],
@@ -1284,20 +1344,30 @@
         avionics: []
       };
 
-      // Scene Setup
-      const scene = new THREE.Scene();
-      scene.background = new THREE.Color(0x111316);
+      let activeSubsystemKey = 'mast';
+      let isWireframe = false;
+      let isAutoOrbit = false;
 
-      // Camera Setup
+      // Camera Animation Targets
+      let targetCamPos = new THREE.Vector3(2.4, 1.7, 2.7);
+      let targetControlsLookAt = new THREE.Vector3(0.0, 0.65, 0.0);
+      let isTransitioningCam = false;
+
+      // Three.js Core Architecture
+      const scene = new THREE.Scene();
+      scene.background = new THREE.Color(0x0c0d0f);
+      scene.fog = new THREE.FogExp2(0x0c0d0f, 0.045);
+
+      const clock = new THREE.Clock();
+
       const camera = new THREE.PerspectiveCamera(
         42,
         container.clientWidth / container.clientHeight,
-        0.05,
-        50
+        0.1,
+        100
       );
       camera.position.set(2.4, 1.7, 2.7);
 
-      // Renderer Setup with High-Fidelity PBR & Tone Mapping
       const renderer = new THREE.WebGLRenderer({
         canvas: canvas,
         antialias: true,
@@ -1306,134 +1376,99 @@
       });
       renderer.setSize(container.clientWidth, container.clientHeight);
       renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-      renderer.outputEncoding = THREE.sRGBEncoding;
       renderer.toneMapping = THREE.ACESFilmicToneMapping;
-      renderer.toneMappingExposure = 1.35;
+      renderer.toneMappingExposure = 1.15;
       renderer.shadowMap.enabled = true;
       renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+      renderer.outputEncoding = THREE.sRGBEncoding;
 
-      // Orbit Controls
       const controls = new THREE.OrbitControls(camera, renderer.domElement);
       controls.enableDamping = true;
-      controls.dampingFactor = 0.06;
+      controls.dampingFactor = 0.05;
+      controls.maxPolarAngle = Math.PI / 2 - 0.02; // Prevent subsurface orbit
       controls.minDistance = 0.7;
-      controls.maxDistance = 7.0;
-      controls.maxPolarAngle = Math.PI / 2 + 0.02; // Prevent camera from dropping below ground
+      controls.maxDistance = 8.5;
       controls.target.set(0.0, 0.65, 0.0);
-      controls.autoRotate = true;
-      controls.autoRotateSpeed = 0.75;
+      controls.autoRotate = false;
+      controls.autoRotateSpeed = 0.8;
 
-      // Smooth camera transition interpolation vectors
-      const targetCamPos = camera.position.clone();
-      const targetControlsLookAt = controls.target.clone();
-      let isTransitioningCam = false;
-
-      // Pause auto-rotation on user interaction
-      controls.addEventListener('start', () => {
-        isTransitioningCam = false;
-      });
-
-      // 1. Procedural Martian Sky Environment Map using PMREMGenerator
-      try {
-        const pmremGenerator = new THREE.PMREMGenerator(renderer);
-        pmremGenerator.compileEquirectangularShader();
-
-        const envCanvas = document.createElement('canvas');
-        envCanvas.width = 512;
-        envCanvas.height = 256;
-        const eCtx = envCanvas.getContext('2d');
-
-        // Sky atmosphere gradient
-        const skyGrad = eCtx.createLinearGradient(0, 0, 0, 256);
-        skyGrad.addColorStop(0.0, '#1c1e24'); // Upper space zenith
-        skyGrad.addColorStop(0.42, '#382f28'); // Amber dust layer
-        skyGrad.addColorStop(0.50, '#66422f'); // Horizon limb
-        skyGrad.addColorStop(0.58, '#442617'); // Rusty ground bounce
-        skyGrad.addColorStop(1.0, '#1a100b'); // Nadir
-        eCtx.fillStyle = skyGrad;
-        eCtx.fillRect(0, 0, 512, 256);
-
-        // Sun disc glare for sharp specular sheen on solar array
-        const sunGrad = eCtx.createRadialGradient(256, 100, 2, 256, 100, 50);
-        sunGrad.addColorStop(0.0, '#ffffff');
-        sunGrad.addColorStop(0.2, '#fff1e0');
-        sunGrad.addColorStop(1.0, 'rgba(102, 66, 47, 0)');
-        eCtx.fillStyle = sunGrad;
-        eCtx.beginPath();
-        eCtx.arc(256, 100, 50, 0, Math.PI * 2);
-        eCtx.fill();
-
-        const envTexture = new THREE.CanvasTexture(envCanvas);
-        const envMap = pmremGenerator.fromEquirectangular(envTexture).texture;
-        scene.environment = envMap;
-        envTexture.dispose();
-        pmremGenerator.dispose();
-      } catch (e) {
-        console.warn('Procedural PMREM environment fallback:', e);
-      }
-
-      // 2. Multi-Directional Martian Solar & Ambient Lighting
-      const ambientLight = new THREE.AmbientLight(0xffeedd, 0.7);
-      scene.add(ambientLight);
-
-      // Primary Direct Martian Sunlight
-      const sunLight = new THREE.DirectionalLight(0xfff5ea, 2.0);
-      sunLight.position.set(4.5, 7.5, 3.5);
+      // Realistic Martian Sunlight & Ambient Environment
+      const sunLight = new THREE.DirectionalLight(0xfff1e0, 2.8);
+      sunLight.position.set(4.5, 7.5, 3.8);
       sunLight.castShadow = true;
       sunLight.shadow.mapSize.width = 2048;
       sunLight.shadow.mapSize.height = 2048;
+      sunLight.shadow.bias = -0.0003;
       sunLight.shadow.camera.near = 0.5;
-      sunLight.shadow.camera.far = 18;
-      sunLight.shadow.camera.left = -2.5;
-      sunLight.shadow.camera.right = 2.5;
-      sunLight.shadow.camera.top = 2.5;
-      sunLight.shadow.camera.bottom = -2.5;
-      sunLight.shadow.bias = -0.0004;
+      sunLight.shadow.camera.far = 20;
+      sunLight.shadow.camera.left = -2.8;
+      sunLight.shadow.camera.right = 2.8;
+      sunLight.shadow.camera.top = 2.8;
+      sunLight.shadow.camera.bottom = -2.8;
       scene.add(sunLight);
 
-      // Warm ground bounce from Martian regolith
-      const groundBounce = new THREE.DirectionalLight(0xbf673b, 0.7);
-      groundBounce.position.set(-3.0, -2.5, -2.0);
-      scene.add(groundBounce);
+      const ambientLight = new THREE.AmbientLight(0x352822, 1.4);
+      scene.add(ambientLight);
 
-      // Silhouette rim light
-      const rimLight = new THREE.DirectionalLight(0xd4d5d6, 0.8);
-      rimLight.position.set(-3.5, 3.0, -3.5);
-      scene.add(rimLight);
+      const hemiLight = new THREE.HemisphereLight(0xffd5b8, 0x1f1917, 1.1);
+      scene.add(hemiLight);
 
-      // 3. Martian Ground Contact Shadow & Concentric Range Reticles
+      // Procedural Equirectangular Martian Skybox
+      function generateMarsEnvMap(glRenderer) {
+        const pmremGenerator = new THREE.PMREMGenerator(glRenderer);
+        pmremGenerator.compileEquirectangularShader();
+
+        const canvasEnv = document.createElement('canvas');
+        canvasEnv.width = 512;
+        canvasEnv.height = 256;
+        const ctx = canvasEnv.getContext('2d');
+
+        const grad = ctx.createLinearGradient(0, 0, 0, 256);
+        grad.addColorStop(0.0, '#3a1e12');
+        grad.addColorStop(0.45, '#7a3e22');
+        grad.addColorStop(0.55, '#c86a3d');
+        grad.addColorStop(1.0, '#1a100b');
+        ctx.fillStyle = grad;
+        ctx.fillRect(0, 0, 512, 256);
+
+        const tex = new THREE.CanvasTexture(canvasEnv);
+        tex.mapping = THREE.EquirectangularReflectionMapping;
+        const envRenderTarget = pmremGenerator.fromEquirectangular(tex);
+        tex.dispose();
+        pmremGenerator.dispose();
+        return envRenderTarget.texture;
+      }
+
+      const marsEnvTexture = generateMarsEnvMap(renderer);
+      scene.environment = marsEnvTexture;
+
+      // Rover Mesh Root & Groups
+      const roverMeshGroup = new THREE.Group();
+      roverMeshGroup.position.set(0.0, 0.0026, 0.0869);
+      scene.add(roverMeshGroup);
+
+      // Subsystem Articulation Pivot Groups
+      const mastPivotGroup = new THREE.Group();
+      mastPivotGroup.position.set(-0.020, 0.713, 0.356);
+
+      const armPivotGroup = new THREE.Group();
+      armPivotGroup.position.set(0.104, 0.464, 0.423);
+
+      const antennaPivotGroup = new THREE.Group();
+      antennaPivotGroup.position.set(0.387, 0.814, -0.236);
+
+      // Ground Elements & Props Group
       const groundGroup = new THREE.Group();
+      scene.add(groundGroup);
 
-      // Procedural soft contact shadow texture under the rover wheels
-      const shadowCanvas = document.createElement('canvas');
-      shadowCanvas.width = 256;
-      shadowCanvas.height = 256;
-      const sCtx = shadowCanvas.getContext('2d');
-      const radGrad = sCtx.createRadialGradient(128, 128, 20, 128, 128, 120);
-      radGrad.addColorStop(0.0, 'rgba(10, 11, 13, 0.9)');
-      radGrad.addColorStop(0.5, 'rgba(16, 17, 19, 0.5)');
-      radGrad.addColorStop(1.0, 'rgba(16, 17, 19, 0)');
-      sCtx.fillStyle = radGrad;
-      sCtx.fillRect(0, 0, 256, 256);
+      const martianPropsGroup = new THREE.Group();
+      scene.add(martianPropsGroup);
 
-      const shadowTex = new THREE.CanvasTexture(shadowCanvas);
-      const contactGeo = new THREE.PlaneGeometry(3.6, 3.2);
-      const contactMat = new THREE.MeshBasicMaterial({
-        map: shadowTex,
-        transparent: true,
-        opacity: 0.85,
-        depthWrite: false
-      });
-      const contactPlane = new THREE.Mesh(contactGeo, contactMat);
-      contactPlane.rotation.x = -Math.PI / 2;
-      contactPlane.position.set(0, 0.001, 0);
-      groundGroup.add(contactPlane);
-
-      // High-Tech Concentric Polar Range Rings
-      const ringMat = new THREE.LineBasicMaterial({ color: 0x34383e, transparent: true, opacity: 0.55 });
-      const ringAccentMat = new THREE.LineBasicMaterial({ color: 0x737980, transparent: true, opacity: 0.75 });
-
-      [1.0, 1.8, 2.6].forEach((radius, i) => {
+      // Polar Range Reticles
+      const ringMat = new THREE.LineBasicMaterial({ color: 0x3d434d, transparent: true, opacity: 0.4 });
+      const ringAccentMat = new THREE.LineBasicMaterial({ color: 0x38bdf8, transparent: true, opacity: 0.7 });
+      const radii = [0.8, 1.6, 2.4, 3.2];
+      radii.forEach((radius, i) => {
         const ringGeo = new THREE.BufferGeometry();
         const pts = [];
         const segs = 64;
@@ -1446,13 +1481,196 @@
         groundGroup.add(line);
       });
 
-      // Subtle Grid Floor
+      // Ground Grid Helper
       const gridHelper = new THREE.GridHelper(6, 18, 0x4b5058, 0x22252a);
       gridHelper.position.y = 0;
       groundGroup.add(gridHelper);
 
-      scene.add(groundGroup);
-      scene.add(roverMeshGroup);
+      // Ground Contact Shadow Disc
+      const shadowDiscGeo = new THREE.PlaneGeometry(2.6, 2.2);
+      shadowDiscGeo.rotateX(-Math.PI / 2);
+      const shadowDiscCanvas = document.createElement('canvas');
+      shadowDiscCanvas.width = 128;
+      shadowDiscCanvas.height = 128;
+      const sctx = shadowDiscCanvas.getContext('2d');
+      const sGrad = sctx.createRadialGradient(64, 64, 10, 64, 64, 62);
+      sGrad.addColorStop(0.0, 'rgba(0,0,0,0.7)');
+      sGrad.addColorStop(0.6, 'rgba(0,0,0,0.3)');
+      sGrad.addColorStop(1.0, 'rgba(0,0,0,0.0)');
+      sctx.fillStyle = sGrad;
+      sctx.fillRect(0, 0, 128, 128);
+      const shadowDiscTex = new THREE.CanvasTexture(shadowDiscCanvas);
+      const shadowDiscMat = new THREE.MeshBasicMaterial({
+        map: shadowDiscTex,
+        transparent: true,
+        opacity: 0.85,
+        depthWrite: false
+      });
+      const shadowDisc = new THREE.Mesh(shadowDiscGeo, shadowDiscMat);
+      shadowDisc.position.set(0, 0.001, 0.1);
+      groundGroup.add(shadowDisc);
+
+      // Martian Wheel Tracks (Drive Mode)
+      const trackMat = new THREE.MeshBasicMaterial({
+        color: 0x421b12,
+        transparent: true,
+        opacity: 0.35,
+        depthWrite: false
+      });
+      const leftTrackGeo = new THREE.PlaneGeometry(0.16, 4.2);
+      leftTrackGeo.rotateX(-Math.PI / 2);
+      const leftTrack = new THREE.Mesh(leftTrackGeo, trackMat);
+      leftTrack.position.set(-0.522, 0.0025, -1.3);
+      const rightTrack = leftTrack.clone();
+      rightTrack.position.x = 0.522;
+      martianPropsGroup.add(leftTrack);
+      martianPropsGroup.add(rightTrack);
+
+      // Martian Rock Outcrop (IDD Sampling Mode Target)
+      const rockGeo = new THREE.DodecahedronGeometry(0.08, 1);
+      const rockPosAttr = rockGeo.attributes.position;
+      for (let i = 0; i < rockPosAttr.count; i++) {
+        const vx = rockPosAttr.getX(i);
+        const vy = rockPosAttr.getY(i);
+        const vz = rockPosAttr.getZ(i);
+        const noise = 1.0 + Math.sin(vx * 25 + vy * 15 + vz * 20) * 0.14;
+        rockPosAttr.setXYZ(i, vx * noise, Math.max(0.005, vy * noise), vz * noise);
+      }
+      rockGeo.computeVertexNormals();
+      const rockMat = new THREE.MeshStandardMaterial({
+        color: 0x693a2b,
+        roughness: 0.88,
+        metalness: 0.12
+      });
+      const rockMesh = new THREE.Mesh(rockGeo, rockMat);
+      rockMesh.position.set(0.08, 0.04, 0.68);
+      rockMesh.castShadow = true;
+      rockMesh.receiveShadow = true;
+      martianPropsGroup.add(rockMesh);
+
+      // RAT Grinding Spark Particle Emitter
+      const sparkCount = 35;
+      const sparkGeo = new THREE.BufferGeometry();
+      const sparkPositions = new Float32Array(sparkCount * 3);
+      const sparkVels = [];
+      for (let i = 0; i < sparkCount; i++) {
+        sparkPositions[i * 3 + 0] = 0.08;
+        sparkPositions[i * 3 + 1] = 0.06;
+        sparkPositions[i * 3 + 2] = 0.68;
+        sparkVels.push(new THREE.Vector3(
+          (Math.random() - 0.5) * 0.35,
+          Math.random() * 0.45 + 0.05,
+          (Math.random() - 0.5) * 0.35
+        ));
+      }
+      sparkGeo.setAttribute('position', new THREE.BufferAttribute(sparkPositions, 3));
+      const sparkMat = new THREE.PointsMaterial({
+        color: 0xfacc15,
+        size: 0.035,
+        transparent: true,
+        opacity: 0.0,
+        blending: THREE.AdditiveBlending
+      });
+      const sparkPoints = new THREE.Points(sparkGeo, sparkMat);
+      martianPropsGroup.add(sparkPoints);
+
+      // APXS Spectrometer Laser Beam
+      const laserGeo = new THREE.BufferGeometry().setFromPoints([
+        new THREE.Vector3(0.08, 0.12, 0.65),
+        new THREE.Vector3(0.08, 0.045, 0.68)
+      ]);
+      const laserMat = new THREE.LineBasicMaterial({
+        color: 0xf97316,
+        transparent: true,
+        opacity: 0.0
+      });
+      const laserLine = new THREE.Line(laserGeo, laserMat);
+      martianPropsGroup.add(laserLine);
+
+      // Pancam Stereo Vision Frustum & Ground Reticle
+      const visionFrustumGeo = new THREE.ConeGeometry(0.35, 1.8, 4, 1, true);
+      visionFrustumGeo.rotateX(-Math.PI / 2);
+      visionFrustumGeo.translate(0, 0, 0.9);
+      const visionFrustumMat = new THREE.MeshBasicMaterial({
+        color: 0x38bdf8,
+        wireframe: true,
+        transparent: true,
+        opacity: 0.0,
+        depthWrite: false
+      });
+      const visionFrustum = new THREE.Mesh(visionFrustumGeo, visionFrustumMat);
+      visionFrustum.position.set(0.02, 0.73, 0.08);
+      mastPivotGroup.add(visionFrustum);
+
+      const reticleGeo = new THREE.RingGeometry(0.12, 0.15, 32);
+      reticleGeo.rotateX(-Math.PI / 2);
+      const reticleMat = new THREE.MeshBasicMaterial({
+        color: 0x38bdf8,
+        transparent: true,
+        opacity: 0.0,
+        side: THREE.DoubleSide
+      });
+      const groundReticle = new THREE.Mesh(reticleGeo, reticleMat);
+      groundReticle.position.set(0, 0.005, 1.8);
+      martianPropsGroup.add(groundReticle);
+
+      // High Gain Antenna Deep Space Network RF Wavefronts
+      const rfWaveGroup = new THREE.Group();
+      rfWaveGroup.position.set(0.387, 0.88, -0.236);
+      rfWaveGroup.rotation.set(-0.72, 0.40, 0.0);
+      const rfRingGeo = new THREE.RingGeometry(0.08, 0.12, 32);
+      const rfRings = [];
+      for (let i = 0; i < 4; i++) {
+        const rMat = new THREE.MeshBasicMaterial({
+          color: 0x60a5fa,
+          transparent: true,
+          opacity: 0.0,
+          side: THREE.DoubleSide,
+          depthWrite: false
+        });
+        const ring = new THREE.Mesh(rfRingGeo, rMat);
+        rfWaveGroup.add(ring);
+        rfRings.push({ mesh: ring, progress: i * 0.25 });
+      }
+      martianPropsGroup.add(rfWaveGroup);
+
+      // Martian Ferric Dust Plume Particle System (Drive Mode)
+      const dustCount = 80;
+      const dustGeo = new THREE.BufferGeometry();
+      const dustPositions = new Float32Array(dustCount * 3);
+      const dustLifes = new Float32Array(dustCount);
+      const dustSpawns = [
+        [-0.52, 0.02,  0.60], [ 0.52, 0.02,  0.60],
+        [-0.52, 0.02, -0.06], [ 0.52, 0.02, -0.06],
+        [-0.52, 0.02, -0.60], [ 0.52, 0.02, -0.60]
+      ];
+      for (let i = 0; i < dustCount; i++) {
+        const sp = dustSpawns[i % dustSpawns.length];
+        dustPositions[i * 3 + 0] = sp[0] + (Math.random() - 0.5) * 0.08;
+        dustPositions[i * 3 + 1] = sp[1] + Math.random() * 0.04;
+        dustPositions[i * 3 + 2] = sp[2] + (Math.random() - 0.5) * 0.08;
+        dustLifes[i] = Math.random();
+      }
+      dustGeo.setAttribute('position', new THREE.BufferAttribute(dustPositions, 3));
+      const dustMat = new THREE.PointsMaterial({
+        color: 0xc86a3d,
+        size: 0.042,
+        transparent: true,
+        opacity: 0.0
+      });
+      const dustParticles = new THREE.Points(dustGeo, dustMat);
+      martianPropsGroup.add(dustParticles);
+
+      // Procedural Fallback Mesh References
+      const procWheels = [];
+      let procMastHead = null;
+      let procArm = null;
+      let procDish = null;
+
+      // GPU Wheel Rotation Shader Uniforms
+      const wheelUniforms = {
+        uWheelAngle: { value: 0.0 }
+      };
 
       // Exploded View Assembly Registrations & CAD Alignment Rails
       const explodedParts = [];
@@ -1509,83 +1727,139 @@
         });
       }
 
-      // Helper: Process Loaded Mesh Materials & Align Model to Ground
+      // Configure Loaded 3D GLB Model Architecture & Inject GPU Wheel Shader
       function setupRoverModel(model) {
-        // Real model bounds from 24883_MER_static.glb:
-        // X: [-1.14, 1.14], Y: [-0.0026, 1.582], Z: [-0.911, 0.737]
-        // Scale 1:1 matches actual engineering dimensions (185 kg, 2.3m width)
-        model.position.set(0.0, 0.0026, 0.0869);
+        roverMeshGroup.add(model);
 
-        model.traverse((child) => {
-          if (child.isMesh) {
-            child.castShadow = true;
-            child.receiveShadow = true;
+        // Collect all meshes to prevent iterator invalidation during reparenting
+        const meshes = [];
+        model.traverse((c) => {
+          if (c.isMesh) meshes.push(c);
+        });
 
-            if (child.material) {
-              const mat = child.material;
-              mat.envMapIntensity = 1.3;
-              mat.wireframe = isWireframe;
+        meshes.forEach((child) => {
+          child.castShadow = true;
+          child.receiveShadow = true;
 
-              // Ensure normal maps have full crisp definition
-              if (mat.normalMap) {
-                mat.normalScale.set(1.0, 1.0);
-              }
+          const mat = child.material;
+          if (!mat) return;
 
-              // Guard against over-dark metallic falloff
-              if (mat.metalness !== undefined) {
-                mat.roughness = Math.max(0.18, mat.roughness);
-              }
+          mat.envMapIntensity = 1.3;
+          mat.wireframe = isWireframe;
 
-              // Categorize materials by subsystem & assign CAD explosion vectors
-              const name = (mat.name || '').toLowerCase();
-              let explodeDelta = new THREE.Vector3(0, 0, 0);
-              let sysKey = 'avionics';
+          if (mat.normalMap) mat.normalScale.set(1.0, 1.0);
+          if (mat.metalness !== undefined) mat.roughness = Math.max(0.18, mat.roughness);
 
-              if (name.includes('mast')) {
-                subMaterials.mast.push(mat);
-                explodeDelta.set(0.0, 0.80, 0.18);
-                sysKey = 'mast';
-              } else if (name.includes('foil')) {
-                subMaterials.avionics.push(mat);
-                explodeDelta.set(0.0, 0.80, 0.18);
-                sysKey = 'mast';
-              } else if (name.includes('panels')) {
-                subMaterials.power.push(mat);
-                explodeDelta.set(0.0, 0.42, -0.06);
-                sysKey = 'power';
-              } else if (name.includes('instruments')) {
-                subMaterials.antenna.push(mat);
-                explodeDelta.set(0.15, 0.50, -0.40);
-                sysKey = 'antenna';
-              } else if (name.includes('silver')) {
-                subMaterials.avionics.push(mat);
-                explodeDelta.set(0.15, 0.50, -0.40);
-                sysKey = 'antenna';
-              } else if (name.includes('arm')) {
-                subMaterials.arm.push(mat);
-                explodeDelta.set(0.0, -0.12, 0.60);
-                sysKey = 'arm';
-              } else if (name.includes('suspension')) {
-                subMaterials.mobility.push(mat);
-                explodeDelta.set(0.0, -0.38, 0.0);
-                sysKey = 'mobility';
-              } else {
-                subMaterials.avionics.push(mat);
-                explodeDelta.set(0.0, 0.0, 0.0);
-                sysKey = 'avionics';
-              }
+          const name = (mat.name || '').toLowerCase();
 
-              explodedParts.push({
-                mesh: child,
-                basePos: child.position.clone(),
-                delta: explodeDelta,
-                sysKey: sysKey
-              });
-            }
+          if (name.includes('mast')) {
+            subMaterials.mast.push(mat);
+            child.position.set(0.020, -0.713, -0.356);
+            mastPivotGroup.add(child);
+          } else if (name.includes('foil')) {
+            subMaterials.avionics.push(mat);
+            child.position.set(0.020, -0.713, -0.356);
+            mastPivotGroup.add(child);
+          } else if (name.includes('arm')) {
+            subMaterials.arm.push(mat);
+            child.position.set(-0.104, -0.464, -0.423);
+            armPivotGroup.add(child);
+          } else if (name.includes('silver')) {
+            subMaterials.avionics.push(mat);
+            child.position.set(-0.387, -0.814, 0.236);
+            antennaPivotGroup.add(child);
+          } else if (name.includes('suspension')) {
+            subMaterials.mobility.push(mat);
+
+            // In-situ GLSL ES Shader Injection for Continuous GPU 6-Wheel Rotation
+            mat.onBeforeCompile = (shader) => {
+              shader.uniforms.uWheelAngle = wheelUniforms.uWheelAngle;
+              shader.vertexShader = 'uniform float uWheelAngle;\n' +
+                'void rotateWheel(inout vec3 pos, inout vec3 norm, vec3 c, float angle) {\n' +
+                '  float dx = abs(pos.x - c.x);\n' +
+                '  float dyz = length(vec2(pos.y - c.y, pos.z - c.z));\n' +
+                '  if (dx < 0.14 && dyz < 0.165) {\n' +
+                '    float cy = pos.y - c.y;\n' +
+                '    float cz = pos.z - c.z;\n' +
+                '    float cosA = cos(angle);\n' +
+                '    float sinA = sin(angle);\n' +
+                '    pos.y = c.y + (cy * cosA - cz * sinA);\n' +
+                '    pos.z = c.z + (cy * sinA + cz * cosA);\n' +
+                '    float ny = norm.y;\n' +
+                '    float nz = norm.z;\n' +
+                '    norm.y = ny * cosA - nz * sinA;\n' +
+                '    norm.z = ny * sinA + nz * cosA;\n' +
+                '  }\n' +
+                '}\n' + shader.vertexShader;
+
+              shader.vertexShader = shader.vertexShader.replace(
+                '#include <begin_vertex>',
+                '#include <begin_vertex>\n' +
+                'rotateWheel(transformed, transformedNormal, vec3(-0.520, 0.151,  0.605), uWheelAngle);\n' +
+                'rotateWheel(transformed, transformedNormal, vec3( 0.522, 0.151,  0.605), uWheelAngle);\n' +
+                'rotateWheel(transformed, transformedNormal, vec3(-0.525, 0.127, -0.065), uWheelAngle);\n' +
+                'rotateWheel(transformed, transformedNormal, vec3( 0.525, 0.127, -0.065), uWheelAngle);\n' +
+                'rotateWheel(transformed, transformedNormal, vec3(-0.531, 0.140, -0.606), uWheelAngle);\n' +
+                'rotateWheel(transformed, transformedNormal, vec3( 0.528, 0.145, -0.606), uWheelAngle);\n'
+              );
+            };
+
+            explodedParts.push({
+              mesh: child,
+              basePos: child.position.clone(),
+              delta: new THREE.Vector3(0.0, -0.38, 0.0),
+              sysKey: 'mobility'
+            });
+          } else if (name.includes('panels')) {
+            subMaterials.power.push(mat);
+            explodedParts.push({
+              mesh: child,
+              basePos: child.position.clone(),
+              delta: new THREE.Vector3(0.0, 0.42, -0.06),
+              sysKey: 'power'
+            });
+          } else if (name.includes('instruments')) {
+            subMaterials.antenna.push(mat);
+            explodedParts.push({
+              mesh: child,
+              basePos: child.position.clone(),
+              delta: new THREE.Vector3(0.15, 0.50, -0.40),
+              sysKey: 'antenna'
+            });
+          } else {
+            subMaterials.avionics.push(mat);
+            explodedParts.push({
+              mesh: child,
+              basePos: child.position.clone(),
+              delta: new THREE.Vector3(0.0, 0.0, 0.0),
+              sysKey: 'avionics'
+            });
           }
         });
 
-        roverMeshGroup.add(model);
+        // Add Articulated Subsystem Pivot Groups to Root Model
+        model.add(mastPivotGroup);
+        model.add(armPivotGroup);
+        model.add(antennaPivotGroup);
+
+        explodedParts.push({
+          mesh: mastPivotGroup,
+          basePos: mastPivotGroup.position.clone(),
+          delta: new THREE.Vector3(0.0, 0.80, 0.18),
+          sysKey: 'mast'
+        });
+        explodedParts.push({
+          mesh: armPivotGroup,
+          basePos: armPivotGroup.position.clone(),
+          delta: new THREE.Vector3(0.0, -0.12, 0.60),
+          sysKey: 'arm'
+        });
+        explodedParts.push({
+          mesh: antennaPivotGroup,
+          basePos: antennaPivotGroup.position.clone(),
+          delta: new THREE.Vector3(0.15, 0.50, -0.40),
+          sysKey: 'antenna'
+        });
 
         // Hide Loading Indicator
         if (loadingBar) loadingBar.style.width = '100%';
@@ -1596,7 +1870,6 @@
           }
         }, 150);
 
-        // Highlight default selected subsystem
         highlightSubsystem('mast');
       }
 
@@ -1642,16 +1915,16 @@
 
         // Pancam Head
         const headGeo = new THREE.BoxGeometry(0.24, 0.1, 0.14);
-        const head = new THREE.Mesh(headGeo, silverMat);
-        head.position.set(0.35, 1.6, 0.3);
-        proceduralGroup.add(head);
+        procMastHead = new THREE.Mesh(headGeo, silverMat);
+        procMastHead.position.set(0.35, 1.6, 0.3);
+        proceduralGroup.add(procMastHead);
 
         // HGA Dish
         const dishGeo = new THREE.CylinderGeometry(0.2, 0.02, 0.04, 16);
-        const dish = new THREE.Mesh(dishGeo, silverMat);
-        dish.position.set(-0.35, 0.86, -0.25);
-        dish.rotation.x = 0.4;
-        proceduralGroup.add(dish);
+        procDish = new THREE.Mesh(dishGeo, silverMat);
+        procDish.position.set(-0.35, 0.86, -0.25);
+        procDish.rotation.x = 0.4;
+        proceduralGroup.add(procDish);
 
         // 6 Wheels & Rocker-Bogie Tubes
         const wheelGeo = new THREE.CylinderGeometry(0.14, 0.14, 0.1, 16);
@@ -1667,6 +1940,7 @@
           const wheel = new THREE.Mesh(wheelGeo, darkMat);
           wheel.position.set(pos[0], pos[1], pos[2]);
           proceduralGroup.add(wheel);
+          procWheels.push(wheel);
 
           const legGeo = new THREE.CylinderGeometry(0.02, 0.02, 0.5, 8);
           const leg = new THREE.Mesh(legGeo, silverMat);
@@ -1677,17 +1951,17 @@
 
         // Robotic Arm (IDD)
         const armGeo = new THREE.CylinderGeometry(0.025, 0.025, 0.45, 8);
-        const arm = new THREE.Mesh(armGeo, silverMat);
-        arm.position.set(0.2, 0.35, 0.55);
-        arm.rotation.x = 0.8;
-        proceduralGroup.add(arm);
+        procArm = new THREE.Mesh(armGeo, silverMat);
+        procArm.position.set(0.2, 0.35, 0.55);
+        procArm.rotation.x = 0.8;
+        proceduralGroup.add(procArm);
 
         const pParts = [
           { mesh: mast, delta: new THREE.Vector3(0.0, 0.80, 0.18), sysKey: 'mast' },
-          { mesh: head, delta: new THREE.Vector3(0.0, 0.80, 0.18), sysKey: 'mast' },
+          { mesh: procMastHead, delta: new THREE.Vector3(0.0, 0.80, 0.18), sysKey: 'mast' },
           { mesh: solar, delta: new THREE.Vector3(0.0, 0.42, -0.06), sysKey: 'power' },
-          { mesh: dish, delta: new THREE.Vector3(0.15, 0.50, -0.40), sysKey: 'antenna' },
-          { mesh: arm, delta: new THREE.Vector3(0.0, -0.12, 0.60), sysKey: 'arm' },
+          { mesh: procDish, delta: new THREE.Vector3(0.15, 0.50, -0.40), sysKey: 'antenna' },
+          { mesh: procArm, delta: new THREE.Vector3(0.0, -0.12, 0.60), sysKey: 'arm' },
           { mesh: chassis, delta: new THREE.Vector3(0.0, 0.0, 0.0), sysKey: 'avionics' }
         ];
         pParts.forEach((p) => {
@@ -1707,7 +1981,6 @@
         const loader = new THREE.GLTFLoader();
 
         if (window.ROVER_MODEL_B64 && typeof window.ROVER_MODEL_B64 === 'string') {
-          // Decode embedded offline model directly without fetch CORS barrier
           if (loadingText) loadingText.textContent = 'DECODING OFFLINE CAD TELEMETRY...';
           if (loadingBar) loadingBar.style.width = '70%';
 
@@ -1719,81 +1992,53 @@
               for (let i = 0; i < len; i++) {
                 bytes[i] = binaryString.charCodeAt(i);
               }
+
               loader.parse(
                 bytes.buffer,
                 '',
-                function (gltf) {
+                (gltf) => {
                   setupRoverModel(gltf.scene);
                 },
-                function (err) {
-                  console.error('Base64 parse error:', err);
-                  loadViaUrl();
+                (err) => {
+                  console.warn('Base64 parse failed, fallback to procedural:', err);
+                  const proc = createProceduralRover();
+                  roverMeshGroup.add(proc);
+                  if (loadingOverlay) loadingOverlay.style.display = 'none';
+                  if (corsNotice) corsNotice.classList.remove('hidden');
                 }
               );
-            } catch (b64Err) {
-              console.warn('Base64 decode error:', b64Err);
-              loadViaUrl();
+            } catch (err) {
+              console.warn('Base64 decoding error:', err);
+              const proc = createProceduralRover();
+              roverMeshGroup.add(proc);
+              if (loadingOverlay) loadingOverlay.style.display = 'none';
+              if (corsNotice) corsNotice.classList.remove('hidden');
             }
           }, 30);
         } else {
-          loadViaUrl();
-        }
-
-        function loadViaUrl() {
-          if (loadingText) loadingText.textContent = 'STREAMING 3D TELEMETRY ASSET...';
           loader.load(
             '24883_MER_static.glb',
-            function (gltf) {
+            (gltf) => {
               setupRoverModel(gltf.scene);
             },
-            function (xhr) {
-              if (xhr.lengthComputable && loadingText && loadingBar) {
+            (xhr) => {
+              if (xhr.lengthComputable && loadingBar) {
                 const percent = Math.round((xhr.loaded / xhr.total) * 100);
-                loadingText.textContent = `STREAMING 3D TELEMETRY: ${percent}%`;
                 loadingBar.style.width = `${percent}%`;
               }
             },
-            function (error) {
-              console.warn('URL GLB load error (fallback procedural):', error);
+            (error) => {
+              console.warn('Direct GLB load failed, falling back to procedural:', error);
+              const proc = createProceduralRover();
+              roverMeshGroup.add(proc);
               if (loadingOverlay) loadingOverlay.style.display = 'none';
               if (corsNotice) corsNotice.classList.remove('hidden');
-              const fallbackRover = createProceduralRover();
-              roverMeshGroup.add(fallbackRover);
             }
           );
         }
-      } else {
-        if (loadingOverlay) loadingOverlay.style.display = 'none';
-        const fallbackRover = createProceduralRover();
-        roverMeshGroup.add(fallbackRover);
       }
 
-      // Drag and Drop Local GLB onto Viewport
-      container.addEventListener('dragover', (e) => e.preventDefault());
-      container.addEventListener('drop', (e) => {
-        e.preventDefault();
-        const file = e.dataTransfer.files[0];
-        if (file && (file.name.endsWith('.glb') || file.name.endsWith('.gltf'))) {
-          const reader = new FileReader();
-          if (loadingOverlay) {
-            loadingOverlay.style.display = 'flex';
-            loadingOverlay.style.opacity = '1';
-            loadingText.textContent = `IMPORTING ${file.name.toUpperCase()}...`;
-          }
-          reader.onload = function (evt) {
-            const loader = new THREE.GLTFLoader();
-            loader.parse(evt.target.result, '', function (gltf) {
-              while (roverMeshGroup.children.length > 0) {
-                roverMeshGroup.remove(roverMeshGroup.children[0]);
-              }
-              setupRoverModel(gltf.scene);
-            });
-          };
-          reader.readAsArrayBuffer(file);
-        }
-      });
-
-      // Pulse Subsystem Highlight Material
+      // Subsystem Highlight Glow Pulse
       function highlightSubsystem(key) {
         activeSubsystemKey = key;
         const mats = subMaterials[key];
@@ -1802,7 +2047,7 @@
         mats.forEach((m) => {
           if (!m._origEmissive) m._origEmissive = m.emissive ? m.emissive.clone() : new THREE.Color(0x000000);
           if (m.emissive) {
-            m.emissive.setHex(0x38bdf8); // Glowing cyan HUD pulse
+            m.emissive.setHex(0x38bdf8);
             setTimeout(() => {
               m.emissive.copy(m._origEmissive);
             }, 1200);
@@ -1810,7 +2055,299 @@
         });
       }
 
-      // Exploded View Slider & Toggle Event Handlers
+      // Procedural Rover Sound Synthesizer Dispatcher
+      function emitAudioFeedback(type) {
+        if (typeof window.triggerRoverSound === 'function') {
+          window.triggerRoverSound(type);
+        }
+      }
+
+      // Subsystem Telemetry HUD Ticker Elements
+      const simStatusEl = document.getElementById('sim-telemetry-status');
+      const simStat1El = document.getElementById('sim-telemetry-stat1');
+      const simStat2El = document.getElementById('sim-telemetry-stat2');
+      const simStat3El = document.getElementById('sim-telemetry-stat3');
+
+      // Mission Animation Engine Update Loop
+      function updateRoverAnimations(delta) {
+        if (!isAnimPlaying) return;
+        const dt = delta * simSpeed;
+        animTime += dt;
+
+        // Auto Mission Demo State Machine (28s Total Sol Cycle)
+        let activeMode = animMode;
+        if (animMode === 'mission') {
+          missionCycleTimer = (missionCycleTimer + dt) % 28.0;
+          if (missionCycleTimer < 7.0) {
+            activeMode = 'drive';
+          } else if (missionCycleTimer < 14.0) {
+            activeMode = 'scan';
+          } else if (missionCycleTimer < 21.0) {
+            activeMode = 'sample';
+          } else {
+            activeMode = 'comm';
+          }
+        }
+
+        // 1. DRIVE / TRAVERSE SIMULATION
+        if (activeMode === 'drive') {
+          wheelUniforms.uWheelAngle.value += dt * 3.8;
+          procWheels.forEach((w) => (w.rotation.x += dt * 3.8));
+
+          // Rocker-Bogie Undulating Terrain Articulation
+          const pitch = Math.sin(animTime * 2.8) * 0.024 + Math.cos(animTime * 1.5) * 0.012;
+          const roll = Math.cos(animTime * 2.0) * 0.018 + Math.sin(animTime * 3.2) * 0.008;
+          const heave = Math.sin(animTime * 5.6) * 0.005;
+
+          roverMeshGroup.rotation.x = pitch;
+          roverMeshGroup.rotation.z = roll;
+          roverMeshGroup.position.y = 0.0026 + heave;
+
+          // Mast & Arm Rest Stow Position
+          mastPivotGroup.rotation.set(0, 0, 0);
+          armPivotGroup.rotation.set(0, 0, 0);
+          antennaPivotGroup.rotation.set(0, 0, 0);
+
+          // Ferric Dust Plumes Update
+          dustParticles.material.opacity = 0.65;
+          const dPos = dustParticles.geometry.attributes.position.array;
+          for (let i = 0; i < dustCount; i++) {
+            dustLifes[i] += dt * 1.2;
+            dPos[i * 3 + 2] -= dt * 0.4; // Drift backward in thin atmosphere
+            dPos[i * 3 + 1] += dt * 0.12; // Rise slightly
+            if (dustLifes[i] > 1.0) {
+              const sp = dustSpawns[i % dustSpawns.length];
+              dPos[i * 3 + 0] = sp[0] + (Math.random() - 0.5) * 0.08;
+              dPos[i * 3 + 1] = sp[1] + Math.random() * 0.04;
+              dPos[i * 3 + 2] = sp[2] + (Math.random() - 0.5) * 0.08;
+              dustLifes[i] = 0.0;
+            }
+          }
+          dustParticles.geometry.attributes.position.needsUpdate = true;
+
+          // Accumulate Odometer at ~5 cm/s
+          odometerKm += (0.05 * dt) / 1000;
+
+          // Visual Props Visibility
+          visionFrustum.material.opacity = 0.0;
+          groundReticle.material.opacity = 0.0;
+          sparkPoints.material.opacity = 0.0;
+          laserLine.material.opacity = 0.0;
+          rfRings.forEach((r) => (r.mesh.material.opacity = 0.0));
+
+          if (simStatusEl) simStatusEl.textContent = `STATUS: 🚗 MARS TRAVERSE · SPEED: ${(0.05 * simSpeed).toFixed(2)} m/s · 6-WHEEL ROLL (5.2 RPM)`;
+          if (simStat1El) simStat1El.textContent = `PITCH: ${(pitch * 180 / Math.PI).toFixed(1)}° · ROLL: ${(roll * 180 / Math.PI).toFixed(1)}°`;
+          if (simStat2El) simStat2El.textContent = `ODOMETER: ${odometerKm.toFixed(3)} km`;
+          if (simStat3El) simStat3El.textContent = `SLIP: 1.8% · ROCKER-BOGIE NOMINAL`;
+
+          if (Math.random() < 0.03) emitAudioFeedback('drive');
+
+        // 2. PANCAM STEREO SCAN SIMULATION
+        } else if (activeMode === 'scan') {
+          roverMeshGroup.rotation.x *= 0.92;
+          roverMeshGroup.rotation.z *= 0.92;
+          roverMeshGroup.position.y += (0.0026 - roverMeshGroup.position.y) * 0.08;
+
+          const panAz = Math.sin(animTime * 0.8) * 1.45; // Sweeps ±83°
+          const tiltEl = -0.16 + Math.sin(animTime * 1.6) * 0.15; // Tilts -18° to +1°
+
+          mastPivotGroup.rotation.y = panAz;
+          mastPivotGroup.rotation.x = tiltEl;
+          if (procMastHead) {
+            procMastHead.rotation.y = panAz;
+            procMastHead.rotation.x = tiltEl;
+          }
+
+          armPivotGroup.rotation.set(0, 0, 0);
+          antennaPivotGroup.rotation.set(0, 0, 0);
+
+          // Vision Frustum & Ground Target Reticle
+          visionFrustum.material.opacity = 0.22;
+          groundReticle.material.opacity = 0.75;
+          groundReticle.position.set(Math.sin(panAz) * 1.75, 0.005, 0.35 + Math.cos(panAz) * 1.75);
+
+          dustParticles.material.opacity = 0.0;
+          sparkPoints.material.opacity = 0.0;
+          laserLine.material.opacity = 0.0;
+          rfRings.forEach((r) => (r.mesh.material.opacity = 0.0));
+
+          if (simStatusEl) simStatusEl.textContent = `STATUS: 🔭 PANCAM 360° STEREO SURVEY · AZ: ${(panAz * 180 / Math.PI).toFixed(1)}° · EL: ${(tiltEl * 180 / Math.PI).toFixed(1)}°`;
+          if (simStat1El) simStat1El.textContent = `13 FILTERS (440–1000nm) · 0.27 mrad/px`;
+          if (simStat2El) simStat2El.textContent = `TARGET: PERSEVERANCE VALLEY RIM`;
+          if (simStat3El) simStat3El.textContent = `SUN SENSOR: ACQUIRED`;
+
+          if (Math.random() < 0.035) emitAudioFeedback('servo');
+
+        // 3. IDD ROBOTIC ARM SCIENCE SAMPLING
+        } else if (activeMode === 'sample') {
+          roverMeshGroup.rotation.x *= 0.92;
+          roverMeshGroup.rotation.z *= 0.92;
+          roverMeshGroup.position.y += (0.0026 - roverMeshGroup.position.y) * 0.08;
+
+          // Mast Looks Down at Rock Target
+          mastPivotGroup.rotation.set(-0.32, 0.12, 0);
+
+          // Arm Articulation & Turret Contact
+          const armX = -1.02 + Math.sin(animTime * 1.8) * 0.05;
+          const armY = -0.28 + Math.cos(animTime * 1.4) * 0.03;
+          armPivotGroup.rotation.x = armX;
+          armPivotGroup.rotation.y = armY;
+          armPivotGroup.rotation.z = 0.16;
+          if (procArm) {
+            procArm.rotation.x = 1.15 + Math.sin(animTime * 1.8) * 0.05;
+          }
+
+          antennaPivotGroup.rotation.set(0, 0, 0);
+
+          // RAT Grinding Spark Emitter
+          sparkPoints.material.opacity = 0.95;
+          const sPos = sparkPoints.geometry.attributes.position.array;
+          for (let i = 0; i < sparkCount; i++) {
+            const v = sparkVels[i];
+            sPos[i * 3 + 0] += v.x * dt;
+            sPos[i * 3 + 1] += v.y * dt;
+            sPos[i * 3 + 2] += v.z * dt;
+            v.y -= dt * 0.98; // Mars gravity (3.72 m/s²)
+            if (sPos[i * 3 + 1] < 0.04) {
+              sPos[i * 3 + 0] = 0.08 + (Math.random() - 0.5) * 0.02;
+              sPos[i * 3 + 1] = 0.055;
+              sPos[i * 3 + 2] = 0.68 + (Math.random() - 0.5) * 0.02;
+              v.set((Math.random() - 0.5) * 0.35, Math.random() * 0.45 + 0.08, (Math.random() - 0.5) * 0.35);
+            }
+          }
+          sparkPoints.geometry.attributes.position.needsUpdate = true;
+
+          // APXS Spectrometer Glow
+          laserLine.material.opacity = 0.65 + Math.sin(animTime * 8) * 0.35;
+
+          visionFrustum.material.opacity = 0.0;
+          groundReticle.material.opacity = 0.0;
+          dustParticles.material.opacity = 0.0;
+          rfRings.forEach((r) => (r.mesh.material.opacity = 0.0));
+
+          if (simStatusEl) simStatusEl.textContent = `STATUS: 🦾 IDD CONTACT SCIENCE · ROCK ABRASION TOOL (RAT) ACTIVE`;
+          if (simStat1El) simStat1El.textContent = `PENETRATION: ${(4.8 + Math.sin(animTime) * 0.4).toFixed(1)} mm · MOTOR: 8.4 W`;
+          if (simStat2El) simStat2El.textContent = `APXS: HEMATITE SPHERULES & JAROSITE`;
+          if (simStat3El) simStat3El.textContent = `MÖSSBAUER MIMOS II INTEGRATING`;
+
+          if (Math.random() < 0.05) emitAudioFeedback('rat');
+
+        // 4. EARTH COMM TELEMETRY DOWNLINK
+        } else if (activeMode === 'comm') {
+          roverMeshGroup.rotation.x *= 0.92;
+          roverMeshGroup.rotation.z *= 0.92;
+          roverMeshGroup.position.y += (0.0026 - roverMeshGroup.position.y) * 0.08;
+
+          mastPivotGroup.rotation.set(0, 0, 0);
+          armPivotGroup.rotation.set(0, 0, 0);
+
+          // Antenna Gimbal Tracking Earth
+          const dishY = 0.38 + Math.sin(animTime * 0.4) * 0.12;
+          const dishX = -0.74 + Math.cos(animTime * 0.3) * 0.06;
+          antennaPivotGroup.rotation.y = dishY;
+          antennaPivotGroup.rotation.x = dishX;
+          if (procDish) {
+            procDish.rotation.y = dishY;
+            procDish.rotation.x = dishX;
+          }
+
+          // Concentric Deep Space Network RF Wavefronts
+          rfRings.forEach((r) => {
+            r.progress = (r.progress + dt * 0.75) % 1.0;
+            const scale = 0.2 + r.progress * 3.5;
+            r.mesh.scale.set(scale, scale, 1);
+            r.mesh.position.z = r.progress * 1.8;
+            r.mesh.material.opacity = (1.0 - r.progress) * 0.85;
+          });
+
+          dustParticles.material.opacity = 0.0;
+          sparkPoints.material.opacity = 0.0;
+          laserLine.material.opacity = 0.0;
+          visionFrustum.material.opacity = 0.0;
+          groundReticle.material.opacity = 0.0;
+
+          if (simStatusEl) simStatusEl.textContent = `STATUS: 📡 DEEP SPACE NETWORK (DSN) X-BAND TELEMETRY DOWNLINK ACTIVE`;
+          if (simStat1El) simStat1El.textContent = `FREQUENCY: 8.41 GHz · STATION: DSS-14 (70m)`;
+          if (simStat2El) simStat2El.textContent = `SIGNAL: -114.2 dBm · BITRATE: 128 kbps`;
+          if (simStat3El) simStat3El.textContent = `DATA RETURN: 184 MB / 184 MB (100%)`;
+
+          if (Math.random() < 0.04) emitAudioFeedback('comm');
+
+        // 5. STATIC / IDLE STANDBY
+        } else {
+          roverMeshGroup.rotation.x *= 0.92;
+          roverMeshGroup.rotation.z *= 0.92;
+          roverMeshGroup.position.y += (0.0026 - roverMeshGroup.position.y) * 0.08;
+
+          mastPivotGroup.rotation.set(0, 0, 0);
+          armPivotGroup.rotation.set(0, 0, 0);
+          antennaPivotGroup.rotation.set(0, 0, 0);
+
+          dustParticles.material.opacity = 0.0;
+          sparkPoints.material.opacity = 0.0;
+          laserLine.material.opacity = 0.0;
+          visionFrustum.material.opacity = 0.0;
+          groundReticle.material.opacity = 0.0;
+          rfRings.forEach((r) => (r.mesh.material.opacity = 0.0));
+
+          if (simStatusEl) simStatusEl.textContent = `STATUS: ⏸ CAD STANDBY · MER-B OPPORTUNITY ON MERIDIANI PLANUM`;
+          if (simStat1El) simStat1El.textContent = `POWER BUS: 28.4V · BATTERY: 100% SOC`;
+          if (simStat2El) simStat2El.textContent = `ODOMETER: ${odometerKm.toFixed(3)} km`;
+          if (simStat3El) simStat3El.textContent = `ALL SUBSYSTEMS NOMINAL`;
+        }
+      }
+
+      // Mode Selector Buttons
+      const animModeBtns = document.querySelectorAll('.anim-mode-btn');
+      animModeBtns.forEach((btn) => {
+        btn.addEventListener('click', () => {
+          const mode = btn.getAttribute('data-mode');
+          animMode = mode;
+          missionCycleTimer = 0.0;
+
+          animModeBtns.forEach((b) => {
+            b.classList.remove('border-oppy-accent', 'bg-oppy-surface', 'text-white');
+            b.classList.add('border-oppy-border', 'bg-oppy-bg', 'text-oppy-textSecondary');
+          });
+          btn.classList.add('border-oppy-accent', 'bg-oppy-surface', 'text-white');
+          btn.classList.remove('border-oppy-border', 'bg-oppy-bg', 'text-oppy-textSecondary');
+
+          // Highlight corresponding subsystem focus
+          if (mode === 'drive') highlightSubsystem('mobility');
+          else if (mode === 'scan') highlightSubsystem('mast');
+          else if (mode === 'sample') highlightSubsystem('arm');
+          else if (mode === 'comm') highlightSubsystem('antenna');
+        });
+      });
+
+      // Play / Pause Simulation Button
+      const playPauseBtn = document.getElementById('anim-play-pause-btn');
+      const playIcon = document.getElementById('anim-play-icon');
+      const playText = document.getElementById('anim-play-text');
+      if (playPauseBtn) {
+        playPauseBtn.addEventListener('click', () => {
+          isAnimPlaying = !isAnimPlaying;
+          if (playIcon) playIcon.textContent = isAnimPlaying ? '⏸' : '▶';
+          if (playText) playText.textContent = isAnimPlaying ? 'PAUSE' : 'PLAY';
+          playPauseBtn.classList.toggle('border-oppy-accent', !isAnimPlaying);
+        });
+      }
+
+      // Simulation Speed Multipliers (1X, 2X, 4X)
+      const speedBtns = document.querySelectorAll('.anim-speed-btn');
+      speedBtns.forEach((sBtn) => {
+        sBtn.addEventListener('click', () => {
+          simSpeed = parseFloat(sBtn.getAttribute('data-speed')) || 1.0;
+          speedBtns.forEach((b) => {
+            b.classList.remove('bg-oppy-surface', 'text-white', 'font-bold');
+            b.classList.add('text-oppy-textMuted');
+          });
+          sBtn.classList.add('bg-oppy-surface', 'text-white', 'font-bold');
+          sBtn.classList.remove('text-oppy-textMuted');
+        });
+      });
+
+      // Exploded View Slider & Toggle Handlers
       let currentExplodeFactor = 0.0;
       let targetExplodeFactor = 0.0;
       let isAnimatingExplode = false;
@@ -1883,7 +2420,7 @@
         });
       }
 
-      // Subsystem Button Click Handlers (Auto-tracks separated exploded position)
+      // Subsystem Button Click Handlers
       const subBtns = document.querySelectorAll('.subsystem-btn');
       subBtns.forEach((btn) => {
         btn.addEventListener('click', () => {
@@ -1891,7 +2428,6 @@
           const data = subsystemData[sysKey];
           if (!data) return;
 
-          // Update active button state
           subBtns.forEach((b) => {
             b.classList.remove('border-oppy-accent', 'bg-oppy-surface', 'text-white');
             b.classList.add('border-oppy-border', 'bg-oppy-bg', 'text-oppy-textSecondary');
@@ -1899,7 +2435,6 @@
           btn.classList.add('border-oppy-accent', 'bg-oppy-surface', 'text-white');
           btn.classList.remove('border-oppy-border', 'bg-oppy-bg', 'text-oppy-textSecondary');
 
-          // Update text content
           document.getElementById('sub-id').textContent = data.id;
           document.getElementById('sub-name').textContent = data.name;
           document.getElementById('sub-mass').textContent = `MASS: ${data.mass}`;
@@ -1908,10 +2443,9 @@
           document.getElementById('sub-spec').textContent = data.spec;
           document.getElementById('sub-temp').textContent = data.temp;
 
-          // Trigger material pulse on the 3D model
           highlightSubsystem(sysKey);
 
-          // Calculate current exploded offset for focus targeting
+          // Focus camera on subsystem
           let deltaOffset = new THREE.Vector3(0, 0, 0);
           if (sysKey === 'mast') deltaOffset.set(0.0, 0.80, 0.18);
           else if (sysKey === 'power') deltaOffset.set(0.0, 0.42, -0.06);
@@ -1946,11 +2480,16 @@
         camTelemetry.textContent = `AZ: ${az}° · EL: ${el}° · RANGE: ${r.toFixed(1)}m`;
       }
 
-      // Smooth Render Loop
+      // Smooth Animation & Render Loop
       function animate() {
         requestAnimationFrame(animate);
 
-        // Smooth exploded view interpolation
+        const delta = Math.min(clock.getDelta(), 0.1);
+
+        // Update Physical Rover Animations
+        updateRoverAnimations(delta);
+
+        // Smooth Exploded View Interpolation
         if (isAnimatingExplode) {
           currentExplodeFactor += (targetExplodeFactor - currentExplodeFactor) * 0.08;
           if (Math.abs(currentExplodeFactor - targetExplodeFactor) < 0.002) {
@@ -1969,7 +2508,7 @@
           }
         }
 
-        // Smooth camera gliding
+        // Smooth Camera Transition Gliding
         if (isTransitioningCam) {
           camera.position.lerp(targetCamPos, 0.07);
           controls.target.lerp(targetControlsLookAt, 0.07);
