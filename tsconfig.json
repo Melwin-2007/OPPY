@@ -10,17 +10,13 @@
     "isolatedModules": true,
     "noEmit": true,
     "jsx": "react-jsx",
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
     "strict": true,
     "baseUrl": ".",
     "paths": {
       "*": ["client/node_modules/*", "*"]
-    },
-    "typeRoots": [
-      "./client/node_modules/@types",
-      "./node_modules/@types"
-    ]
+    }
   },
-  "include": [
-    "client/src/**/*"
-  ]
+  "include": ["client/src/**/*"]
 }

@@ -1,6 +1,6 @@
 import React, { useRef, useMemo } from 'react';
 import { useFrame } from '@react-three/fiber';
-import * as THREE from 'three';
+import { Points, Group, Mesh, DodecahedronGeometry, BufferGeometry, Vector3, BufferAttribute, AdditiveBlending } from 'three';
 
 interface VisualPropsComponentProps {
   mode: 'idle' | 'drive' | 'scan' | 'sample' | 'comm';
@@ -8,14 +8,12 @@ interface VisualPropsComponentProps {
 }
 
 export const VisualProps: React.FC<VisualPropsComponentProps> = ({ mode, simSpeed = 1.0 }) => {
-  const sparkPointsRef = useRef<THREE.Points>(null);
-  const dustPointsRef = useRef<THREE.Points>(null);
-  const rfGroupRef = useRef<THREE.Group>(null);
-  const reticleRef = useRef<THREE.Mesh>(null);
+  const sparkPointsRef = useRef<Points>(null);
+  const dustPointsRef = useRef<Points>(null);
 
   // 1. Martian Rock Outcrop Geometry
   const rockGeo = useMemo(() => {
-    const geo = new THREE.DodecahedronGeometry(0.08, 1);
+    const geo = new DodecahedronGeometry(0.08, 1);
     const pos = geo.attributes.position;
     for (let i = 0; i < pos.count; i++) {
       const vx = pos.getX(i);
@@ -31,27 +29,27 @@ export const VisualProps: React.FC<VisualPropsComponentProps> = ({ mode, simSpee
   // 2. RAT Spark Particles
   const sparkCount = 35;
   const { sparkGeo, sparkVels } = useMemo(() => {
-    const geo = new THREE.BufferGeometry();
+    const geo = new BufferGeometry();
     const pos = new Float32Array(sparkCount * 3);
-    const vels: THREE.Vector3[] = [];
+    const vels: Vector3[] = [];
     for (let i = 0; i < sparkCount; i++) {
       pos[i * 3 + 0] = 0.08;
       pos[i * 3 + 1] = 0.06;
       pos[i * 3 + 2] = 0.68;
-      vels.push(new THREE.Vector3(
+      vels.push(new Vector3(
         (Math.random() - 0.5) * 0.35,
         Math.random() * 0.45 + 0.05,
         (Math.random() - 0.5) * 0.35
       ));
     }
-    geo.setAttribute('position', new THREE.BufferAttribute(pos, 3));
+    geo.setAttribute('position', new BufferAttribute(pos, 3));
     return { sparkGeo: geo, sparkVels: vels };
   }, []);
 
   // 3. Ferric Dust Particles
   const dustCount = 80;
   const { dustGeo, dustLifes, dustSpawns } = useMemo(() => {
-    const geo = new THREE.BufferGeometry();
+    const geo = new BufferGeometry();
     const pos = new Float32Array(dustCount * 3);
     const lifes = new Float32Array(dustCount);
     const spawns = [
@@ -66,7 +64,7 @@ export const VisualProps: React.FC<VisualPropsComponentProps> = ({ mode, simSpee
       pos[i * 3 + 2] = sp[2] + (Math.random() - 0.5) * 0.08;
       lifes[i] = Math.random();
     }
-    geo.setAttribute('position', new THREE.BufferAttribute(pos, 3));
+    geo.setAttribute('position', new BufferAttribute(pos, 3));
     return { dustGeo: geo, dustLifes: lifes, dustSpawns: spawns };
   }, []);
 
@@ -120,7 +118,7 @@ export const VisualProps: React.FC<VisualPropsComponentProps> = ({ mode, simSpee
 
       {/* Spark Emitter */}
       <points ref={sparkPointsRef} geometry={sparkGeo} visible={mode === 'sample'}>
-        <pointsMaterial color="#facc15" size={0.035} transparent opacity={0.95} blending={THREE.AdditiveBlending} />
+        <pointsMaterial color="#facc15" size={0.035} transparent opacity={0.95} blending={AdditiveBlending} />
       </points>
 
       {/* Dust Particles */}

@@ -1,7 +1,7 @@
 import React, { useRef, useEffect, useMemo } from 'react';
 import { useFrame } from '@react-three/fiber';
 import { useGLTF } from '@react-three/drei';
-import * as THREE from 'three';
+import { Group, Object3D, Vector3, Mesh, MeshStandardMaterial } from 'three';
 import { injectWheelRotationShader } from '../../shaders/wheelShader';
 
 interface RoverModelProps {
@@ -14,16 +14,12 @@ interface RoverModelProps {
 
 export const RoverModel: React.FC<RoverModelProps> = ({
   explodedFactor = 0.0,
-  selectedSubsystem = 'mast',
   mode = 'idle',
   simSpeed = 1.0,
   isWireframe = false
 }) => {
   const { scene: gltfScene } = useGLTF('/models/24883_MER_static.glb');
-  const roverGroupRef = useRef<THREE.Group>(null);
-  const mastPivotRef = useRef<THREE.Group>(null);
-  const armPivotRef = useRef<THREE.Group>(null);
-  const antennaPivotRef = useRef<THREE.Group>(null);
+  const roverGroupRef = useRef<Group>(null);
 
   const wheelUniforms = useMemo(() => ({ uWheelAngle: { value: 0.0 } }), []);
 
@@ -31,28 +27,29 @@ export const RoverModel: React.FC<RoverModelProps> = ({
   const { mastGroup, armGroup, antennaGroup, explodedMap } = useMemo(() => {
     const cloned = gltfScene.clone(true);
 
-    const mast = new THREE.Group();
+    const mast = new Group();
     mast.position.set(-0.020, 0.713, 0.356);
 
-    const arm = new THREE.Group();
+    const arm = new Group();
     arm.position.set(0.104, 0.464, 0.423);
 
-    const antenna = new THREE.Group();
+    const antenna = new Group();
     antenna.position.set(0.387, 0.814, -0.236);
 
-    const expMap = new Map<string, { mesh: THREE.Object3D; basePos: THREE.Vector3; delta: THREE.Vector3 }>();
+    const expMap = new Map<string, { mesh: Object3D; basePos: Vector3; delta: Vector3 }>();
 
     // Collect meshes
-    const meshes: THREE.Mesh[] = [];
-    cloned.traverse((child) => {
-      if ((child as THREE.Mesh).isMesh) meshes.push(child as THREE.Mesh);
+    const meshes: Mesh[] = [];
+    cloned.traverse((child: Object3D) => {
+      const m = child as Mesh;
+      if (m.isMesh) meshes.push(m);
     });
 
     meshes.forEach((mesh) => {
       mesh.castShadow = true;
       mesh.receiveShadow = true;
 
-      const mat = mesh.material as THREE.MeshStandardMaterial;
+      const mat = mesh.material as MeshStandardMaterial;
       if (!mat) return;
 
       mat.envMapIntensity = 1.3;
@@ -74,25 +71,25 @@ export const RoverModel: React.FC<RoverModelProps> = ({
         expMap.set('mobility', {
           mesh,
           basePos: mesh.position.clone(),
-          delta: new THREE.Vector3(0.0, -0.38, 0.0)
+          delta: new Vector3(0.0, -0.38, 0.0)
         });
       } else if (name.includes('panels')) {
         expMap.set('power', {
           mesh,
           basePos: mesh.position.clone(),
-          delta: new THREE.Vector3(0.0, 0.42, -0.06)
+          delta: new Vector3(0.0, 0.42, -0.06)
         });
       } else if (name.includes('instruments')) {
         expMap.set('antenna_aux', {
           mesh,
           basePos: mesh.position.clone(),
-          delta: new THREE.Vector3(0.15, 0.50, -0.40)
+          delta: new Vector3(0.15, 0.50, -0.40)
         });
       } else {
         expMap.set('avionics', {
           mesh,
           basePos: mesh.position.clone(),
-          delta: new THREE.Vector3(0.0, 0.0, 0.0)
+          delta: new Vector3(0.0, 0.0, 0.0)
         });
       }
     });
@@ -104,17 +101,17 @@ export const RoverModel: React.FC<RoverModelProps> = ({
     expMap.set('mast', {
       mesh: mast,
       basePos: mast.position.clone(),
-      delta: new THREE.Vector3(0.0, 0.80, 0.18)
+      delta: new Vector3(0.0, 0.80, 0.18)
     });
     expMap.set('arm', {
       mesh: arm,
       basePos: arm.position.clone(),
-      delta: new THREE.Vector3(0.0, -0.12, 0.60)
+      delta: new Vector3(0.0, -0.12, 0.60)
     });
     expMap.set('antenna', {
       mesh: antenna,
       basePos: antenna.position.clone(),
-      delta: new THREE.Vector3(0.15, 0.50, -0.40)
+      delta: new Vector3(0.15, 0.50, -0.40)
     });
 
     return { clonedScene: cloned, mastGroup: mast, armGroup: arm, antennaGroup: antenna, explodedMap: expMap };
@@ -123,9 +120,11 @@ export const RoverModel: React.FC<RoverModelProps> = ({
   // Update wireframe state
   useEffect(() => {
     if (roverGroupRef.current) {
-      roverGroupRef.current.traverse((child) => {
-        if ((child as THREE.Mesh).isMesh && (child as THREE.Mesh).material) {
-          ((child as THREE.Mesh).material as THREE.Material).wireframe = isWireframe;
+      roverGroupRef.current.traverse((child: Object3D) => {
+        const m = child as Mesh;
+        if (m.isMesh && m.material) {
+          const mat = m.material as MeshStandardMaterial;
+          mat.wireframe = isWireframe;
         }
       });
     }

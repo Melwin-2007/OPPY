@@ -1,5 +1,5 @@
 import React, { useMemo } from 'react';
-import * as THREE from 'three';
+import { CanvasTexture, Vector3, BufferGeometry, Line, LineBasicMaterial } from 'three';
 
 export const MartianTerrain: React.FC = () => {
   // Ground Contact Shadow Canvas Texture
@@ -14,21 +14,26 @@ export const MartianTerrain: React.FC = () => {
     grad.addColorStop(1.0, 'rgba(0,0,0,0.0)');
     ctx.fillStyle = grad;
     ctx.fillRect(0, 0, 128, 128);
-    const tex = new THREE.CanvasTexture(canvas);
-    return tex;
+    return new CanvasTexture(canvas);
   }, []);
 
   // Polar Range Reticles (0.8m, 1.6m, 2.4m, 3.2m)
-  const rings = useMemo(() => {
+  const ringLines = useMemo(() => {
     const radii = [0.8, 1.6, 2.4, 3.2];
-    return radii.map((r) => {
-      const pts: THREE.Vector3[] = [];
+    return radii.map((r, idx) => {
+      const pts: Vector3[] = [];
       const segs = 64;
       for (let j = 0; j <= segs; j++) {
         const theta = (j / segs) * Math.PI * 2;
-        pts.push(new THREE.Vector3(Math.cos(theta) * r, 0.002, Math.sin(theta) * r));
+        pts.push(new Vector3(Math.cos(theta) * r, 0.002, Math.sin(theta) * r));
       }
-      return new THREE.BufferGeometry().setFromPoints(pts);
+      const geo = new BufferGeometry().setFromPoints(pts);
+      const mat = new LineBasicMaterial({
+        color: idx === 1 ? 0x38bdf8 : 0x3d434d,
+        transparent: true,
+        opacity: idx === 1 ? 0.7 : 0.4
+      });
+      return new Line(geo, mat);
     });
   }, []);
 
@@ -44,10 +49,8 @@ export const MartianTerrain: React.FC = () => {
       <gridHelper args={[6, 18, '#4b5058', '#22252a']} position={[0, 0, 0]} />
 
       {/* Polar Range Lines */}
-      {rings.map((geo, idx) => (
-        <line key={idx} geometry={geo}>
-          <lineBasicMaterial color={idx === 1 ? '#38bdf8' : '#3d434d'} transparent opacity={idx === 1 ? 0.7 : 0.4} />
-        </line>
+      {ringLines.map((lineObj, idx) => (
+        <primitive key={idx} object={lineObj} />
       ))}
     </group>
   );
