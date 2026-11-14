@@ -92,6 +92,20 @@
     ::-webkit-scrollbar-track { background: #101113; }
     ::-webkit-scrollbar-thumb { background: #2a2d34; border-radius: 3px; }
     ::-webkit-scrollbar-thumb:hover { background: #38bdf8; }
+
+    /* 3D Floating Subsystem Callout Labels */
+    .hw-label-3d {
+      position: absolute;
+      transform: translate(-50%, -50%);
+      pointer-events: auto;
+      cursor: pointer;
+      transition: transform 0.15s ease, background-color 0.15s ease, border-color 0.15s ease;
+      z-index: 20;
+    }
+    .hw-label-3d:hover {
+      transform: translate(-50%, -50%) scale(1.08);
+      z-index: 30;
+    }
   </style>
 </head>
 <body class="relative w-screen h-screen overflow-hidden select-none">
@@ -153,6 +167,10 @@
         <button onclick="openModal('farewell-modal')" class="hover:text-white transition-colors">
           THE FAREWELL
         </button>
+        <a href="legacy/hybrid-lab.html" class="text-amber-400 hover:text-amber-300 font-semibold transition-colors flex items-center gap-1.5">
+          <span class="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse"></span>
+          2.5D &amp; 3D LAB
+        </a>
       </nav>
 
       <!-- Right Mission Status & Audio Control -->
@@ -224,6 +242,19 @@
           </svg>
           <span class="leading-tight text-[11px] font-mono text-oppy-textSecondary group-hover:text-white">UNDERSTAND THE<br /><span class="font-bold text-xs text-white tracking-wider">HARDWARE</span></span>
         </button>
+
+        <!-- Button 3: 2.5D Story & 3D Exploded-View Lab -->
+        <a
+          href="legacy/hybrid-lab.html"
+          class="px-6 py-3.5 rounded border border-amber-500/50 bg-amber-950/40 hover:bg-amber-900/50 backdrop-blur-sm text-amber-200 font-bold tracking-wider uppercase hover:border-amber-400 transition-all flex items-center space-x-3.5 text-left group shadow-lg"
+        >
+          <svg class="w-4 h-4 text-amber-400 shrink-0 transition-transform group-hover:scale-110" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+            <polygon points="12 2 2 7 12 12 22 7 12 2"></polygon>
+            <polyline points="2 17 12 22 22 17"></polyline>
+            <polyline points="2 12 12 17 22 12"></polyline>
+          </svg>
+          <span class="leading-tight text-[11px] font-mono text-amber-300 group-hover:text-amber-100">EXPLORE 2.5D STORY &amp;<br /><span class="font-bold text-xs text-amber-400 tracking-wider">3D EXPLODED LAB</span></span>
+        </a>
 
       </div>
 
@@ -300,6 +331,9 @@
         <!-- WebGL Canvas -->
         <canvas id="hw-canvas" class="w-full h-full block cursor-grab active:cursor-grabbing"></canvas>
 
+        <!-- 3D Floating Subsystem Callout Labels Container -->
+        <div id="hw-labels-container" class="pointer-events-none absolute inset-0 overflow-hidden z-10"></div>
+
         <!-- Simulation Control Bar Overlay -->
         <div class="absolute bottom-2 left-2 right-2 z-10 pointer-events-none">
           <div class="bg-[#0c0d0f]/90 backdrop-blur-md border border-oppy-border/80 rounded-md p-2 pointer-events-auto flex flex-wrap items-center justify-between gap-2 text-xs font-mono">
@@ -325,38 +359,39 @@
             SELECT SUBSYSTEM FOCUS
           </div>
           <div class="grid grid-cols-2 gap-2" id="hw-sub-buttons">
-            <button class="hw-sub-btn active px-2.5 py-2 text-left rounded text-xs border border-oppy-accent bg-oppy-surface text-white" data-sys="mast">01. PANCAM MAST</button>
-            <button class="hw-sub-btn px-2.5 py-2 text-left rounded text-xs border border-oppy-border bg-oppy-bg text-oppy-textSecondary hover:text-white" data-sys="power">02. SOLAR ARRAYS</button>
-            <button class="hw-sub-btn px-2.5 py-2 text-left rounded text-xs border border-oppy-border bg-oppy-bg text-oppy-textSecondary hover:text-white" data-sys="mobility">03. ROCKER-BOGIE</button>
-            <button class="hw-sub-btn px-2.5 py-2 text-left rounded text-xs border border-oppy-border bg-oppy-bg text-oppy-textSecondary hover:text-white" data-sys="arm">04. IDD ROBOTIC ARM</button>
-            <button class="hw-sub-btn px-2.5 py-2 text-left rounded text-xs border border-oppy-border bg-oppy-bg text-oppy-textSecondary hover:text-white" data-sys="antenna">05. HIGH-GAIN DISH</button>
-            <button class="hw-sub-btn px-2.5 py-2 text-left rounded text-xs border border-oppy-border bg-oppy-bg text-oppy-textSecondary hover:text-white" data-sys="avionics">06. RAD6000 CORE</button>
+            <button class="hw-sub-btn active px-2.5 py-2 text-left rounded text-xs border border-oppy-accent bg-oppy-surface text-white" data-sys="arm">01. ROBOTIC ARM &amp; RAT</button>
+            <button class="hw-sub-btn px-2.5 py-2 text-left rounded text-xs border border-oppy-border bg-oppy-bg text-oppy-textSecondary hover:text-white" data-sys="suspension">02. ROCKER-BOGIE</button>
+            <button class="hw-sub-btn px-2.5 py-2 text-left rounded text-xs border border-oppy-border bg-oppy-bg text-oppy-textSecondary hover:text-white" data-sys="solar">03. GAAS SOLAR WINGS</button>
+            <button class="hw-sub-btn px-2.5 py-2 text-left rounded text-xs border border-oppy-border bg-oppy-bg text-oppy-textSecondary hover:text-white" data-sys="mast">04. PANCAM MAST</button>
+            <button class="hw-sub-btn px-2.5 py-2 text-left rounded text-xs border border-oppy-border bg-oppy-bg text-oppy-textSecondary hover:text-white" data-sys="web">05. WEB &amp; RAD6000</button>
+            <button class="hw-sub-btn px-2.5 py-2 text-left rounded text-xs border border-oppy-border bg-oppy-bg text-oppy-textSecondary hover:text-white" data-sys="antennas">06. HGA ANTENNA</button>
+            <button class="hw-sub-btn col-span-2 px-2.5 py-2 text-left rounded text-xs border border-oppy-border bg-oppy-bg text-oppy-textSecondary hover:text-white" data-sys="battery">07. LI-ION BATTERY PACK</button>
           </div>
         </div>
 
         <div class="bg-oppy-card p-5 rounded-md border border-oppy-border flex-1 flex flex-col justify-between">
           <div>
             <div class="flex items-center justify-between text-[11px] text-oppy-accent uppercase mb-1">
-              <span id="hw-sub-id">SUBSYSTEM // 01</span>
-              <span id="hw-sub-mass" class="text-white">MASS: 7.2 kg</span>
+              <span id="hw-sub-id">SUBSYSTEM 01 // IDD-RAT</span>
+              <span id="hw-sub-mass" class="text-white">MASS: ~14.5 kg</span>
             </div>
             <h3 class="text-base font-bold text-white uppercase tracking-tight mb-2 font-sans" id="hw-sub-name">
-              Pancam Mast Assembly (PMA)
+              5-DOF Robotic Arm (IDD) &amp; Instrument Turret
             </h3>
             <p class="text-xs text-oppy-textSecondary leading-relaxed mb-4 font-sans" id="hw-sub-desc">
-              Elevates stereo Pancam and Navcam sensors 1.5 meters above the Martian ground, replicating human eye height with 16 narrow-band multispectral filters.
+              The Instrument Deployment Device (IDD) holds a rotating turret with the diamond-toothed Rock Abrasion Tool (RAT), Microscopic Imager (MI), Mössbauer Spectrometer, and Alpha Particle X-Ray Spectrometer (APXS).
             </p>
             <div class="space-y-1.5 pt-3 border-t border-oppy-border/50 text-[11px]">
-              <div class="flex justify-between text-oppy-textMuted"><span>VOLTAGE:</span><span class="text-white" id="hw-sub-volt">28–32 V DC</span></div>
-              <div class="flex justify-between text-oppy-textMuted"><span>SPEC:</span><span class="text-white" id="hw-sub-spec">0.27 mrad/px</span></div>
-              <div class="flex justify-between text-oppy-textMuted"><span>TEMP:</span><span class="text-white" id="hw-sub-temp">-40°C to +40°C</span></div>
+              <div class="flex justify-between text-oppy-textMuted"><span>SPEC 1:</span><span class="text-white" id="hw-sub-volt">5 Joints · 4-Tool Turret</span></div>
+              <div class="flex justify-between text-oppy-textMuted"><span>SPEC 2:</span><span class="text-white" id="hw-sub-spec">RAT + MI + MB + APXS</span></div>
+              <div class="flex justify-between text-oppy-textMuted"><span>STATUS:</span><span class="text-amber-300" id="hw-sub-temp">NOMINAL (SOL 1–5111)</span></div>
             </div>
           </div>
 
           <div class="mt-4 pt-3 border-t border-oppy-border/60 bg-oppy-surface/40 p-2.5 rounded">
             <div class="text-[9px] text-oppy-accent uppercase font-bold mb-1">ENGINEERING TO DISCOVERY LINK</div>
             <p class="text-[11px] text-oppy-textSecondary leading-normal font-sans" id="hw-sub-link">
-              Pancam multispectral imaging identified fine sedimentary bedding and guided the rover directly to hematite spherules.
+              Ground 4.5 mm into Eagle Crater outcrops on Sol 30, proving ancient liquid water via hematite 'blueberries' and jarosite sulfate.
             </p>
           </div>
         </div>
@@ -855,8 +890,8 @@
       if (!canvas || !container) return;
 
       const scene = new THREE.Scene();
-      scene.background = new THREE.Color(0x0c0d0f);
-      scene.fog = new THREE.FogExp2(0x0c0d0f, 0.045);
+      scene.background = new THREE.Color(0x0e1013);
+      scene.fog = new THREE.FogExp2(0x0e1013, 0.008);
 
       const clock = new THREE.Clock();
 
@@ -867,7 +902,7 @@
       renderer.setSize(container.clientWidth, container.clientHeight);
       renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
       renderer.toneMapping = THREE.ACESFilmicToneMapping;
-      renderer.toneMappingExposure = 1.15;
+      renderer.toneMappingExposure = 1.35;
       renderer.shadowMap.enabled = true;
       renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 
@@ -875,15 +910,45 @@
       controls.enableDamping = true;
       controls.dampingFactor = 0.05;
       controls.maxPolarAngle = Math.PI / 2 - 0.02;
-      controls.target.set(0.0, 0.65, 0.0);
+      controls.target.set(0.0, 0.45, 0.0);
 
-      // Lighting
-      const sun = new THREE.DirectionalLight(0xfff1e0, 2.8);
-      sun.position.set(4.5, 7.5, 3.8);
-      sun.castShadow = true;
-      scene.add(sun);
-      scene.add(new THREE.AmbientLight(0x352822, 1.4));
-      scene.add(new THREE.HemisphereLight(0xffd5b8, 0x1f1917, 1.1));
+      // =========================================================================
+      // MULTI-POINT 360° STUDIO & MARS SURFACE LIGHTING RIG
+      // =========================================================================
+      const ambLight = new THREE.AmbientLight(0xffffff, 0.85);
+      scene.add(ambLight);
+
+      const hemiLight = new THREE.HemisphereLight(0xffffff, 0x5a4838, 1.25);
+      scene.add(hemiLight);
+
+      // Key Sunlight (Front-Right Top)
+      const keyLight = new THREE.DirectionalLight(0xfffaee, 2.4);
+      keyLight.position.set(4.5, 7.5, 4.0);
+      keyLight.castShadow = true;
+      keyLight.shadow.mapSize.width = 2048;
+      keyLight.shadow.mapSize.height = 2048;
+      keyLight.shadow.bias = -0.0005;
+      scene.add(keyLight);
+
+      // Fill Light (Front-Left, removes pitch black shadows)
+      const fillLight = new THREE.DirectionalLight(0xdce7f8, 1.6);
+      fillLight.position.set(-5.0, 4.5, 3.5);
+      scene.add(fillLight);
+
+      // Back Rim Light (Rear-Top, highlights mast, solar panels and edges)
+      const rimLight = new THREE.DirectionalLight(0xffeedd, 1.4);
+      rimLight.position.set(-3.5, 6.0, -5.0);
+      scene.add(rimLight);
+
+      // Undercarriage Bounce Light (Illuminates wheels, cleats, rocker-bogie from below)
+      const underBounce = new THREE.DirectionalLight(0xd4be9c, 1.15);
+      underBounce.position.set(0.0, -4.0, 1.5);
+      scene.add(underBounce);
+
+      // Front Eye-Level Soft Fill
+      const frontFill = new THREE.DirectionalLight(0xffffff, 0.95);
+      frontFill.position.set(0.0, 2.0, 5.0);
+      scene.add(frontFill);
 
       // Ground elements
       const grid = new THREE.GridHelper(6, 18, 0x4b5058, 0x22252a);
@@ -907,6 +972,179 @@
       let isWireframe = false;
       let animMode = 'idle';
 
+      // =========================================================================
+      // 7 EXACT SUBSYSTEMS DATABASE & NAMING FROM MER-B PROJECT
+      // =========================================================================
+      const SUBSYSTEM_DATA = {
+        arm: {
+          code: 'SUBSYSTEM 01 // IDD-RAT',
+          name: '5-DOF Robotic Arm (IDD) & Instrument Turret',
+          shortName: '1. Robotic Arm & RAT',
+          mass: '~14.5 kg',
+          spec1: '5 Azimuth/Elevation Joints · 4-Tool Turret',
+          spec2: 'RAT + Microscopic Imager + MB + APXS',
+          desc: 'The Instrument Deployment Device (IDD) holds a rotating turret with the diamond-toothed Rock Abrasion Tool (RAT), Microscopic Imager (MI), Mössbauer Spectrometer, and Alpha Particle X-Ray Spectrometer (APXS).',
+          link: 'Ground 4.5 mm into Eagle Crater outcrops on Sol 30, proving ancient liquid water via hematite "blueberries" and jarosite sulfate.',
+          anchor: new THREE.Vector3(0.10, 0.42, 0.62),
+          camTarget: new THREE.Vector3(0.10, 0.45, 0.40),
+          camPos: new THREE.Vector3(0.85, 0.70, 1.15)
+        },
+        suspension: {
+          code: 'SUBSYSTEM 02 // MOBILITY',
+          name: 'Rocker-Bogie Suspension & 6 Cleated Wheels',
+          shortName: '2. Rocker-Bogie & Wheels',
+          mass: '~35.0 kg',
+          spec1: '6 × 25 cm Machined Aluminum Wheels',
+          spec2: 'Max Tilt: 32° · Perforated Titanium Struts',
+          desc: 'Springless perforated box-beam Rocker-Bogie linkage connected through a central differential bar keeps all six cleated aluminum wheels planted over boulders larger than the wheel diameter while inner spiral flexures absorb shock.',
+          link: 'Escaped axle-deep sand at Purgatory Dune (Sol 446–484) and drove over 25 km backward after the right-front steering actuator jammed.',
+          anchor: new THREE.Vector3(-0.62, 0.18, 0.0),
+          camTarget: new THREE.Vector3(-0.35, 0.22, 0.0),
+          camPos: new THREE.Vector3(-1.75, 0.55, 0.85)
+        },
+        solar: {
+          code: 'SUBSYSTEM 03 // POWER ARRAY',
+          name: 'Winged Gallium Arsenide Solar Arrays',
+          shortName: '3. GaAs Solar Wings',
+          mass: '~19.8 kg',
+          spec1: 'Triple-Junction GaInP/GaAs/Ge Cells',
+          spec2: 'Peak: 140 W (900 Wh/sol) · Survival: ~100 Wh',
+          desc: 'Deployable 7-facet winged solar array table covered in triple-junction photovoltaic cells, complete with the MarsDial calibration sundial on the rear deck corner.',
+          link: 'Survived the 2007 global dust storm (128 Wh low point) thanks to serendipitous Martian wind "Cleaning Events" that repeatedly swept dust off the panels.',
+          anchor: new THREE.Vector3(0.48, 0.56, -0.15),
+          camTarget: new THREE.Vector3(0.0, 0.55, 0.0),
+          camPos: new THREE.Vector3(1.2, 1.8, 1.2)
+        },
+        mast: {
+          code: 'SUBSYSTEM 04 // PMA MAST',
+          name: 'Pancam & Mini-TES Mast Assembly (PMA)',
+          shortName: '4. Pancam & Mini-TES Mast',
+          mass: '~7.2 kg',
+          spec1: '1.5 m Elevation · 360° Azimuth / ±90° Pitch',
+          spec2: 'Stereo Pancam + Navcams + Mini-TES IR',
+          desc: 'The Pancam Mast Assembly (PMA) acts as the rover’s human-height eyes, housing twin multispectral Panoramic Cameras (Pancam), wide-angle Navigation Cameras, and the Miniature Thermal Emission Spectrometer (Mini-TES) periscope.',
+          link: 'Surveyed the Homestake gypsum vein and ancient smectite clay minerals at Endeavour Crater, confirming neutral, drinkable ancient water.',
+          anchor: new THREE.Vector3(-0.02, 1.25, 0.35),
+          camTarget: new THREE.Vector3(-0.02, 1.05, 0.35),
+          camPos: new THREE.Vector3(-0.65, 1.45, 1.25)
+        },
+        web: {
+          code: 'SUBSYSTEM 05 // AVIONICS & WEB',
+          name: 'Warm Electronics Box (WEB) & RAD6000 Computer',
+          shortName: '5. WEB & RAD6000 CPU',
+          mass: '~24.0 kg',
+          spec1: '20 MHz BAE RAD6000 CPU · 128 MB DRAM',
+          spec2: '256 MB Flash + 8 × Pu-238 RHU Heaters',
+          desc: 'Insulated with crinkled gold Kapton foil and aerogel walls, the WEB protects the radiation-hardened RAD6000 flight computer and 8 Plutonium-238 Radioisotope Heater Units (1 Watt thermal each) against −105°C nights.',
+          link: 'When cosmic rays wore out Bank 7 Flash memory in 2014, JPL reprogrammed the RAD6000 on Sol 4027 to operate in volatile RAM-Only Mode.',
+          anchor: new THREE.Vector3(0.0, 0.42, 0.0),
+          camTarget: new THREE.Vector3(0.0, 0.42, 0.0),
+          camPos: new THREE.Vector3(1.4, 1.1, 1.0)
+        },
+        antennas: {
+          code: 'SUBSYSTEM 06 // TELECOM',
+          name: 'High-Gain (HGA) & UHF Low-Gain Antennas',
+          shortName: '6. HGA & UHF Antennas',
+          mass: '~4.8 kg',
+          spec1: 'Steerable X-Band Dish + UHF Monopole',
+          spec2: 'DSN Direct-to-Earth + Odyssey/MRO Relay',
+          desc: 'The 2-axis gimbaled High-Gain Antenna beams X-Band telemetry directly to Earth’s Deep Space Network dishes, while the omnidirectional UHF antenna on its lattice riser relays daily science through Mars Odyssey and MRO.',
+          link: 'Transmitted every day’s volatile RAM science before sunset in Act V, and received over 1,000 recovery commands plus "I’ll Be Seeing You" in 2019.',
+          anchor: new THREE.Vector3(0.38, 0.85, -0.24),
+          camTarget: new THREE.Vector3(0.38, 0.75, -0.24),
+          camPos: new THREE.Vector3(1.0, 1.3, -0.9)
+        },
+        battery: {
+          code: 'SUBSYSTEM 07 // ENERGY STORAGE',
+          name: 'Lithium-Ion Rechargeable Battery Pack',
+          shortName: '7. Li-Ion Battery Pack',
+          mass: '~14.2 kg',
+          spec1: 'Dual 8-Cell Yardney Li-Ion (2 × 8 Ah)',
+          spec2: '32V Bus · >5,000 Martian Sol Cycles',
+          desc: 'Two rechargeable lithium-ion battery packs mounted inside the forward Warm Electronics Box store daytime solar power to keep survival heaters and the mission clock alive through freezing Martian nights.',
+          link: 'Endured over 5,000 charge-discharge cycles—10× any prior space battery—before the June 10, 2018 storm (τ > 10.8) drained solar input to 22 Wh.',
+          anchor: new THREE.Vector3(0.0, 0.28, 0.20),
+          camTarget: new THREE.Vector3(0.0, 0.28, 0.20),
+          camPos: new THREE.Vector3(0.85, 0.45, 0.85)
+        }
+      };
+
+      // Create Floating 3D Callout Badges
+      const labelsContainer = document.getElementById('hw-labels-container');
+      const subsystemLabels = {};
+      if (labelsContainer) {
+        labelsContainer.innerHTML = '';
+        Object.keys(SUBSYSTEM_DATA).forEach(k => {
+          const item = SUBSYSTEM_DATA[k];
+          const badge = document.createElement('button');
+          badge.type = 'button';
+          badge.className = 'hw-label-3d px-2.5 py-1 rounded-full bg-black/85 border border-amber-400/80 text-[10px] font-mono text-amber-200 hover:bg-amber-500/30 hover:border-white shadow-lg whitespace-nowrap flex items-center gap-1.5';
+          badge.innerHTML = `<span class="w-1.5 h-1.5 rounded-full bg-amber-400"></span><span>${item.shortName}</span>`;
+          badge.addEventListener('click', (e) => {
+            e.stopPropagation();
+            selectSubsystem(k);
+          });
+          labelsContainer.appendChild(badge);
+          subsystemLabels[k] = { badge, anchor: item.anchor.clone() };
+        });
+      }
+
+      function selectSubsystem(key, moveCam = true) {
+        const item = SUBSYSTEM_DATA[key];
+        if (!item) return;
+
+        document.querySelectorAll('.hw-sub-btn').forEach(btn => {
+          if (btn.getAttribute('data-sys') === key) {
+            btn.className = 'hw-sub-btn active px-2.5 py-2 text-left rounded text-xs border border-amber-400 bg-amber-500/20 text-white font-semibold';
+          } else {
+            btn.className = 'hw-sub-btn px-2.5 py-2 text-left rounded text-xs border border-oppy-border bg-oppy-bg text-oppy-textSecondary hover:text-white';
+          }
+        });
+
+        Object.keys(subsystemLabels).forEach(k => {
+          const b = subsystemLabels[k].badge;
+          if (k === key) {
+            b.className = 'hw-label-3d px-2.5 py-1 rounded-full bg-amber-500/40 border-2 border-white text-[10px] font-mono text-white shadow-xl whitespace-nowrap flex items-center gap-1.5 scale-110 z-30';
+          } else {
+            b.className = 'hw-label-3d px-2 py-0.5 rounded-full bg-black/85 border border-amber-400/80 text-[10px] font-mono text-amber-200 hover:bg-amber-500/30 hover:border-white shadow-lg whitespace-nowrap flex items-center gap-1.5 z-20';
+          }
+        });
+
+        const idEl = document.getElementById('hw-sub-id');
+        const massEl = document.getElementById('hw-sub-mass');
+        const nameEl = document.getElementById('hw-sub-name');
+        const descEl = document.getElementById('hw-sub-desc');
+        const voltEl = document.getElementById('hw-sub-volt');
+        const specEl = document.getElementById('hw-sub-spec');
+        const tempEl = document.getElementById('hw-sub-temp');
+        const linkEl = document.getElementById('hw-sub-link');
+
+        if (idEl) idEl.textContent = item.code;
+        if (massEl) massEl.textContent = `MASS: ${item.mass}`;
+        if (nameEl) nameEl.textContent = item.name;
+        if (descEl) descEl.textContent = item.desc;
+        if (voltEl) voltEl.textContent = item.spec1;
+        if (specEl) specEl.textContent = item.spec2;
+        if (tempEl) tempEl.textContent = item.code;
+        if (linkEl) linkEl.textContent = item.link;
+
+        if (moveCam && item.camTarget && item.camPos) {
+          controls.target.copy(item.camTarget);
+          camera.position.copy(item.camPos);
+          controls.update();
+        }
+      }
+
+      document.querySelectorAll('.hw-sub-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const sys = btn.getAttribute('data-sys');
+          if (sys) selectSubsystem(sys);
+        });
+      });
+
+      // Default select first subsystem
+      selectSubsystem('arm', false);
+
       // Load 3D Model
       const loader = new THREE.GLTFLoader();
       
@@ -921,7 +1159,12 @@
           const mat = mesh.material;
           if (!mat) return;
           mat.envMapIntensity = 1.3;
-          mat.roughness = Math.max(0.18, mat.roughness);
+          if (mat.isMeshStandardMaterial || mat.isMeshPhysicalMaterial) {
+            if (mat.metalness > 0.6) mat.metalness = 0.45;
+            if (mat.roughness < 0.25) mat.roughness = 0.35;
+            mat.roughness = Math.min(mat.roughness, 0.85);
+            mat.needsUpdate = true;
+          }
 
           const name = (mat.name || '').toLowerCase();
           if (name.includes('mast') || name.includes('foil')) {
@@ -1064,6 +1307,38 @@
         }
 
         controls.update();
+
+        // Update floating 3D labels on the rover
+        const width = container.clientWidth;
+        const height = container.clientHeight;
+        const tempV = new THREE.Vector3();
+        const expVal = slider ? parseFloat(slider.value) / 100 : 0;
+
+        Object.keys(subsystemLabels).forEach(k => {
+          const { badge, anchor } = subsystemLabels[k];
+          tempV.copy(anchor);
+
+          // If exploded, offset the label position with the exploded subsystem
+          if (expVal > 0) {
+            if (k === 'mast') tempV.y += 0.80 * expVal;
+            else if (k === 'arm') { tempV.y -= 0.12 * expVal; tempV.z += 0.60 * expVal; }
+            else if (k === 'antennas') { tempV.y += 0.50 * expVal; tempV.x += 0.15 * expVal; }
+            else if (k === 'suspension') tempV.y -= 0.38 * expVal;
+            else if (k === 'solar') tempV.y += 0.42 * expVal;
+          }
+
+          tempV.project(camera);
+          // Hide if behind the camera
+          if (tempV.z > 1.0) {
+            badge.style.display = 'none';
+          } else {
+            badge.style.display = 'flex';
+            const sx = (tempV.x * 0.5 + 0.5) * width;
+            const sy = (-tempV.y * 0.5 + 0.5) * height;
+            badge.style.left = `${sx}px`;
+            badge.style.top = `${sy}px`;
+          }
+        });
 
         // Update Cam Telemetry
         const camTel = document.getElementById('hw-cam-telemetry');
