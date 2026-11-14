@@ -50,6 +50,9 @@
   <!-- Offline Base64 3D Model Telemetry Carrier -->
   <script src="client/public/models/model-data.js"></script>
 
+  <!-- NASA MER-B Mission Experience Simulation Engine -->
+  <script src="legacy/mission-experience.js"></script>
+
   <style>
     /* Prevent any scrolling on landing page */
     html, body {
@@ -364,71 +367,211 @@
 
 
   <!-- ========================================================================= -->
-  <!-- 3. INTERACTIVE 6-PHASE STORY MISSION JOURNEY OVERLAY                      -->
+  <!-- 3. INTERACTIVE MARS ODYSSEY MISSION EXPERIENCE OVERLAY                   -->
   <!-- ========================================================================= -->
-  <div id="experience-overlay" class="fixed inset-0 z-50 bg-oppy-bg flex flex-col hidden opacity-0 transition-opacity duration-300">
+  <div id="experience-overlay" class="fixed inset-0 z-50 bg-[#070606] flex flex-col hidden opacity-0 transition-opacity duration-300 select-none">
     
-    <!-- Journey Header -->
-    <div class="px-6 py-3 border-b border-oppy-border/60 bg-[#101113]/90 backdrop-blur-md flex items-center justify-between text-xs font-mono">
+    <!-- Experience Top Telemetry Bar -->
+    <div class="px-4 sm:px-6 py-2.5 border-b border-oppy-border/60 bg-[#0e0b0a]/95 backdrop-blur-md flex flex-wrap items-center justify-between gap-3 text-xs font-mono z-30">
+      
+      <!-- Brand & Current Historical Act -->
       <div class="flex items-center space-x-3">
-        <span class="w-2.5 h-2.5 rounded-full bg-oppy-accent animate-ping"></span>
-        <span class="font-bold tracking-wider text-white">THE COMPLETE MISSION JOURNEY · 2003–2019</span>
-        <span class="text-[10px] px-2 py-0.5 rounded bg-oppy-surface text-oppy-textMuted border border-oppy-border/60" id="exp-phase-badge">
-          PHASE 01 / 06
+        <span class="w-2 h-2 rounded-full bg-amber-400 animate-ping"></span>
+        <span class="font-bold tracking-wider text-white text-[11px] sm:text-xs">OPPY'S LAST DANCE // MARS SURFACE JOURNEY</span>
+        <span id="hudActBadge" class="text-[10px] px-2.5 py-0.5 rounded bg-oppy-surface text-amber-300 border border-amber-500/30">
+          ACT I · EAGLE CRATER
         </span>
       </div>
 
-      <button 
-        onclick="closeOverlays()" 
-        class="px-3 py-1 rounded border border-oppy-border bg-oppy-surface hover:border-red-400 hover:text-red-400 text-white text-[11px] uppercase transition-colors"
-      >
-        ✕ RETURN TO LANDING
-      </button>
-    </div>
-
-    <!-- Main Journey Narrative & Scene View -->
-    <div class="flex-1 relative flex flex-col justify-between p-6 sm:p-12 overflow-hidden">
-      
-      <!-- Floating Narrative Glass Card -->
-      <div class="relative z-10 max-w-xl bg-oppy-card/90 backdrop-blur-md border border-oppy-border/80 rounded-lg p-6 text-oppy-textSecondary shadow-2xl">
-        <div class="flex items-center justify-between text-xs font-mono text-oppy-accent mb-2">
-          <span id="exp-phase-num">PHASE // 01</span>
-          <span id="exp-phase-period" class="text-white px-2 py-0.5 rounded bg-oppy-surface border border-oppy-border/60">2003</span>
+      <!-- Real-Time Mission Telemetry -->
+      <div class="flex items-center space-x-4 sm:space-x-6 text-[11px]">
+        <div class="flex items-center gap-1.5">
+          <span class="text-oppy-textMuted text-[9px] uppercase">SOL:</span>
+          <span id="hudSol" class="text-sky-400 font-bold">SOL 1</span>
         </div>
-        <h2 class="text-2xl sm:text-3xl font-bold text-white tracking-tight mb-2 font-sans" id="exp-phase-title">
-          The Beginning
-        </h2>
-        <h3 class="text-xs font-semibold text-oppy-textPrimary mb-3 font-sans" id="exp-phase-headline">
-          Twin Rovers to Seek Ancient Martian Waters
-        </h3>
-        <p class="text-xs sm:text-sm leading-relaxed text-oppy-textSecondary mb-4 font-sans" id="exp-phase-body">
-          In the early 2000s, NASA initiated the Mars Exploration Rover project to dispatch two identical robotic geologists—Spirit and Opportunity—to search for past water activity.
-        </p>
-        <div class="p-3 rounded bg-oppy-surface/60 border border-oppy-border/50 text-xs">
-          <div class="text-[10px] font-mono text-oppy-accent uppercase font-semibold mb-1">KEY DISCOVERY / OBJECTIVE</div>
-          <div class="text-white font-medium text-xs mb-0.5" id="exp-phase-disc-title">Targeting Gray Crystalline Hematite</div>
-          <p class="text-[11px] text-oppy-textMuted" id="exp-phase-disc-desc">
-            Mars Global Surveyor orbital data identified abundant hematite in Meridiani Planum, marking it as the prime landing zone.
-          </p>
+        <div class="flex items-center gap-1.5">
+          <span class="text-oppy-textMuted text-[9px] uppercase">ODOMETER:</span>
+          <span id="hudOdometer" class="text-amber-400 font-bold">0.00 km</span>
         </div>
-      </div>
-
-      <!-- Journey Timeline Navigation Bar -->
-      <div class="relative z-10 w-full flex justify-center">
-        <div class="bg-[#0c0d0f]/90 backdrop-blur-md border border-oppy-border/80 rounded-md px-4 py-2.5 flex items-center justify-between gap-4 max-w-3xl w-full text-xs font-mono">
-          <button onclick="prevStoryPhase()" class="px-3 py-1 rounded border border-oppy-border bg-oppy-surface hover:border-oppy-accent text-white">
-            ◀ PREV
-          </button>
-          <div class="flex items-center space-x-3" id="exp-nodes-container">
-            <!-- Populated by JS: 6 phase indicator circles -->
+        <div class="flex items-center gap-1.5 hidden md:flex">
+          <span class="text-oppy-textMuted text-[9px] uppercase">SOLAR:</span>
+          <span id="hudSolar" class="text-emerald-400 font-bold">900 Wh</span>
+          <div class="w-10 h-1.5 bg-oppy-surface rounded overflow-hidden">
+            <div id="hudSolarBar" class="h-full bg-emerald-400 w-full transition-all duration-150"></div>
           </div>
-          <button onclick="nextStoryPhase()" class="px-3 py-1 rounded border border-oppy-border bg-oppy-surface hover:border-oppy-accent text-white">
-            NEXT ▶
+        </div>
+        <div class="flex items-center gap-1.5 hidden lg:flex">
+          <span id="hudTau" class="text-amber-300 font-bold">τ = 0.50</span>
+          <span id="hudTauState" class="text-[8px] text-emerald-400 uppercase font-semibold">CLEAR</span>
+        </div>
+      </div>
+
+      <!-- Audio Control & Return Button -->
+      <div class="flex items-center space-x-2.5">
+        <button 
+          id="btnAudioToggle" 
+          class="px-2.5 py-1 rounded border border-oppy-border bg-oppy-surface hover:border-oppy-accent text-white text-[10px] uppercase transition-colors"
+          title="Toggle Procedural Audio Soundscape"
+        >
+          🔊 SFX: ON
+        </button>
+        <button 
+          onclick="closeOverlays()" 
+          class="px-3 py-1 rounded border border-oppy-border bg-oppy-surface hover:border-red-400 hover:text-red-400 text-white text-[11px] uppercase transition-colors"
+        >
+          ✕ RETURN TO LANDING
+        </button>
+      </div>
+
+    </div>
+
+    <!-- Main Fullscreen Interactive Simulation Viewport -->
+    <div class="relative flex-1 w-full h-full overflow-hidden bg-[#070606]">
+      
+      <!-- HTML5 High-Performance 2.5D Canvas -->
+      <canvas id="storyCanvas" class="w-full h-full block cursor-grab active:cursor-grabbing"></canvas>
+
+      <!-- Subtle Parallax Film Grain Overlay -->
+      <div id="filmGrainOverlay" class="pointer-events-none absolute inset-0 film-grain opacity-25 z-10"></div>
+
+      <!-- Minimal Translucent Top Ribbon -->
+      <div class="pointer-events-none absolute top-3 left-4 right-4 flex items-center justify-between z-20">
+        <div class="px-3 py-1 rounded-full bg-black/60 backdrop-blur-md border border-amber-500/20 flex items-center gap-2">
+          <span class="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse"></span>
+          <span id="cinemaChapterHeader" class="font-mono text-[10px] uppercase text-amber-300 tracking-wider">
+            ACT I // THE INTERPLANETARY HOLE-IN-ONE (EAGLE CRATER)
+          </span>
+          <span id="cinemaYearBadge" class="px-1.5 py-0.2 rounded bg-black/60 text-[9px] font-mono text-slate-300">
+            JAN 2004
+          </span>
+        </div>
+        <div class="flex items-center gap-2">
+          <span id="cinemaDriveModeBadge" class="px-2.5 py-1 rounded-full bg-black/60 border border-emerald-500/30 text-[9px] font-mono text-emerald-300">
+            ▶ FWD DRIVE
+          </span>
+          <span id="active2DHardwareText" class="hidden"></span>
+        </div>
+      </div>
+
+      <!-- Sol 5111 Pancam Sky Noise PiP Frame (Triggered during Act VI) -->
+      <div id="pancamStaticPip" class="hidden absolute top-14 right-4 w-32 h-32 bg-black border border-red-500/80 rounded-lg overflow-hidden shadow-2xl z-20 flex flex-col">
+        <div class="bg-red-950/90 px-2 py-0.5 text-[8px] font-mono text-red-200 flex justify-between items-center">
+          <span>PANCAM SKY TAU</span>
+          <span class="animate-pulse">SOL 5111</span>
+        </div>
+        <canvas id="staticNoiseCanvas" width="120" height="90" class="w-full flex-1 block"></canvas>
+        <div class="bg-black/95 px-1 py-0.5 text-[7.5px] font-mono text-slate-400 text-center">
+          TAU &gt; 10.8 · PITCH BLACK
+        </div>
+      </div>
+
+      <!-- Floating Subtitle & Science Telemetry Box (Compact, Bottom Center) -->
+      <div class="pointer-events-none absolute bottom-16 left-4 right-4 flex flex-col items-center z-20">
+        <div class="max-w-xl w-full text-center px-4 py-1.5 rounded-lg bg-black/65 backdrop-blur-md border border-amber-500/20 shadow-xl">
+          <p id="movieSubtitleText" class="text-[11px] sm:text-xs font-medium text-amber-100 leading-snug font-sans drop-shadow">
+            “Designed for just 90 sols and 1 kilometer. Inside Eagle Crater, Oppy reaches out its robotic arm and discovers hematite ‘blueberries’—proving ancient liquid water once soaked Mars.”
+          </p>
+          <div id="movieScienceNote" class="mt-0.5 text-[8.5px] font-mono text-sky-300/90 uppercase tracking-wider">
+            [SCIENCE TELEMETRY]: Mössbauer MIMOS II & APXS confirm jarosite + gray crystalline hematite concretions
+          </div>
+        </div>
+      </div>
+
+      <!-- Sleek Floating Control Bar -->
+      <div class="absolute bottom-3 left-4 right-4 flex flex-wrap items-center justify-between gap-2 z-20 pointer-events-auto">
+        
+        <!-- Left: Drive Controls -->
+        <div class="px-2 py-1 rounded-full bg-black/75 backdrop-blur-md border border-oppy-border flex items-center gap-1 shadow-2xl">
+          <button 
+            id="btnDriveBack"
+            class="px-2.5 py-1 rounded-full bg-black/60 hover:bg-slate-800 active:bg-amber-500/30 text-[10px] font-mono text-slate-200 flex items-center gap-1 transition"
+            title="Hold A or Left Arrow to reverse"
+          >
+            <span>◀</span> <span class="hidden sm:inline">REVERSE</span> <kbd class="px-1 bg-slate-800 rounded text-amber-400 text-[9px]">[A]</kbd>
           </button>
+          <button 
+            id="btnDriveFwd"
+            class="px-3 py-1 rounded-full bg-amber-500/30 hover:bg-amber-500/50 active:bg-amber-500/70 border border-amber-400/60 text-[10px] font-mono font-bold text-amber-100 flex items-center gap-1 transition shadow-lg"
+            title="Hold D or Right Arrow to drive forward"
+          >
+            <span>DRIVE MARS</span> <kbd class="px-1 bg-amber-950/90 rounded text-amber-300 text-[9px]">[D]</kbd> <span>▶</span>
+          </button>
+          <button 
+            id="btnAutoCruise"
+            class="px-2 py-1 rounded-full bg-black/60 hover:bg-slate-800 text-[9px] font-mono text-slate-300 transition"
+          >
+            AUTO-DRIVE: OFF
+          </button>
+        </div>
+
+        <!-- Center: Mission Traverse Scrubber -->
+        <div class="flex items-center gap-2 bg-black/75 backdrop-blur-md border border-oppy-border px-3 py-1.5 rounded-full flex-1 max-w-xs sm:max-w-md shadow-2xl">
+          <span class="text-[9px] font-mono text-oppy-textMuted shrink-0">TRAVERSE:</span>
+          <input 
+            id="missionScrubber" 
+            type="range" 
+            min="0" 
+            max="45.16" 
+            step="0.02" 
+            value="0"
+            class="w-full h-1 bg-oppy-border rounded appearance-none cursor-pointer accent-amber-400"
+            title="Scrub across Opportunity's 45.16 km traverse"
+          />
+          <span id="scrubberPct" class="text-[9px] font-mono text-amber-300 w-8 text-right shrink-0">0%</span>
+        </div>
+
+        <!-- Right: Science Instrument & Atmospheric Controls -->
+        <div class="px-2 py-1 rounded-full bg-black/75 backdrop-blur-md border border-oppy-border flex items-center gap-1 shadow-2xl">
+          <button 
+            id="btnDeployInstrument"
+            class="px-2.5 py-1 rounded-full bg-sky-500/20 hover:bg-sky-500/35 border border-sky-400/40 text-[9.5px] font-mono text-sky-200 transition flex items-center gap-1"
+            title="Deploy IDD Arm & RAT Diamond Grinder"
+          >
+            <span>⚡ DEPLOY RAT</span> <kbd class="px-1 bg-slate-900 rounded text-sky-300 text-[8.5px]">[E]</kbd>
+          </button>
+          <button 
+            id="btnTriggerWindGust"
+            class="px-2.5 py-1 rounded-full bg-emerald-500/15 hover:bg-emerald-500/30 border border-emerald-500/35 text-[9.5px] font-mono text-emerald-300 transition hidden sm:inline-flex items-center gap-1"
+            title="Trigger Martian Dust Devil Cleaning Event"
+          >
+            <span>💨 WIND GUST</span>
+          </button>
+        </div>
+
+      </div>
+
+      <!-- Climax & Finale Modal Overlay (Triggered at 45.16 km) -->
+      <div id="finaleOverlay" class="hidden absolute inset-0 bg-black/90 backdrop-blur-md z-30 flex flex-col items-center justify-center p-6 text-center transition-opacity duration-700">
+        <div class="max-w-lg w-full bg-oppy-card border border-amber-500/40 rounded-2xl p-6 shadow-2xl space-y-4">
+          <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-red-950/80 border border-red-500/50 text-red-300 font-mono text-[10px]">
+            <span class="w-2 h-2 rounded-full bg-red-500 animate-ping"></span>
+            <span>SOL 5111 — FINAL TELEMETRY TRANSMITTED (JUNE 10, 2018)</span>
+          </div>
+
+          <div class="text-xl sm:text-2xl font-serif italic text-white my-3">
+            “My battery is low and it’s getting dark.”
+          </div>
+
+          <p class="text-xs text-oppy-textSecondary leading-relaxed">
+            Engineered for 90 sols and 1,000 meters. Opportunity explored Mars for 5,352 sols (15 years) and traversed 45.16 kilometers—becoming the longest-running off-world mission in human history.
+          </p>
+
+          <div class="flex items-center justify-center gap-3 pt-2">
+            <button id="btnReplayMission" class="px-4 py-2 rounded-md bg-amber-500/30 hover:bg-amber-500/50 border border-amber-400 text-amber-200 text-xs font-mono font-bold">
+              ↺ REPLAY MISSION
+            </button>
+            <button id="btnPlayFinalSong" class="px-4 py-2 rounded-md bg-sky-500/30 hover:bg-sky-500/50 border border-sky-400 text-sky-200 text-xs font-mono font-bold">
+              ♪ PLAY FAREWELL CHORD
+            </button>
+            <button id="btnDismissFinale" class="px-4 py-2 rounded-md border border-oppy-border bg-oppy-surface hover:bg-oppy-card text-white text-xs font-mono">
+              CONTINUE
+            </button>
+          </div>
         </div>
       </div>
 
     </div>
+
   </div>
 
 
@@ -599,10 +742,14 @@
     }
 
     function openExperienceView() {
-      renderStoryPhase();
       const el = document.getElementById('experience-overlay');
       el.classList.remove('hidden');
-      setTimeout(() => el.classList.remove('opacity-0'), 10);
+      setTimeout(() => {
+        el.classList.remove('opacity-0');
+        if (window.startMissionExperience) {
+          window.startMissionExperience();
+        }
+      }, 10);
     }
 
     function openHardwareView() {
@@ -616,10 +763,15 @@
     }
 
     function closeOverlays() {
+      if (window.pauseMissionExperience) {
+        window.pauseMissionExperience();
+      }
       ['hardware-overlay', 'experience-overlay'].forEach(id => {
         const el = document.getElementById(id);
-        el.classList.add('opacity-0');
-        setTimeout(() => el.classList.add('hidden'), 300);
+        if (el) {
+          el.classList.add('opacity-0');
+          setTimeout(() => el.classList.add('hidden'), 300);
+        }
       });
     }
 
