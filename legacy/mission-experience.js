@@ -290,6 +290,14 @@
             // 3. PROCEDURAL WEB AUDIO API SOUNDSCAPE ENGINE
             // =========================================================================
             class ProceduralAudioEngine {
+                setDriving(isDriving) {
+                    if (!this.initialized || !this.ctx || !this.servoGain) return;
+                    try {
+                        const now = this.ctx.currentTime;
+                        this.servoGain.gain.setTargetAtTime(isDriving ? 0.04 : 0.0, now, 0.08);
+                    } catch (e) {}
+                }
+
                 constructor() {
                     this.ctx = null;
                     this.initialized = false;
@@ -2052,7 +2060,7 @@
     state.keys.left = false;
     state.keys.right = false;
     state.autoCruise = false;
-    audioEngine.setDriving(false);
+    if (audioEngine && typeof audioEngine.setDriving === "function") { audioEngine.setDriving(false); }
   };
 
   window.resizeMissionExperience = function () {
