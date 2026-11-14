@@ -1,7 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { Navigation } from '../components/ui/Navigation';
-import { Compass, Cpu } from 'lucide-react';
 
 interface HomePageProps {
   isAudioPlaying?: boolean;
@@ -10,37 +9,54 @@ interface HomePageProps {
 
 export const HomePage: React.FC<HomePageProps> = ({ isAudioPlaying, onToggleAudio }) => {
   return (
-    <div className="relative min-h-screen w-full flex flex-col justify-between bg-oppy-bg overflow-hidden">
+    <div className="relative h-screen w-screen overflow-hidden flex flex-col justify-between bg-oppy-bg select-none">
       
-      {/* Background Cinematic Artwork & Vignette */}
+      {/* 16:9 Master Martian Surface Rover Background */}
       <div 
-        className="absolute inset-0 z-0 bg-cover bg-center opacity-30 grayscale mix-blend-luminosity scale-105 transition-transform duration-1000"
+        className="absolute inset-0 z-0 bg-cover bg-no-repeat bg-[position:right_center] transition-transform duration-1000 scale-100"
         style={{
-          backgroundImage: "url('https://images.unsplash.com/photo-1614728894747-a83421e2b9c9?auto=format&fit=crop&w=2000&q=80')"
+          backgroundImage: "url('/textures/oppy_hero_mars.jpg?v=3')"
         }}
       />
-      <div className="absolute inset-0 z-0 cinematic-vignette" />
-      <div className="absolute inset-0 z-0 bg-gradient-to-t from-oppy-bg via-transparent to-oppy-bg/80" />
+      
+      {/* Cinematic Dark Gradient Mask */}
+      <div 
+        className="absolute inset-0 z-0 pointer-events-none" 
+        style={{
+          background: 'linear-gradient(to right, rgba(16, 17, 19, 0.95) 0%, rgba(16, 17, 19, 0.85) 30%, rgba(16, 17, 19, 0.35) 46%, transparent 60%)'
+        }}
+      />
+      <div className="absolute inset-0 z-0 bg-gradient-to-t from-oppy-bg via-transparent to-oppy-bg/70 pointer-events-none" />
+
+      {/* CRT Scanlines Overlay */}
+      <div 
+        className="absolute inset-0 z-0 opacity-40 pointer-events-none"
+        style={{
+          background: 'linear-gradient(rgba(16, 17, 19, 0) 50%, rgba(0, 0, 0, 0.22) 50%)',
+          backgroundSize: '100% 4px'
+        }}
+      />
 
       {/* Navigation Header */}
       <Navigation isAudioPlaying={isAudioPlaying} onToggleAudio={onToggleAudio} />
 
       {/* Main Hero Showcase */}
-      <main className="relative z-10 flex-1 flex flex-col justify-center items-start px-6 sm:px-16 lg:px-24 max-w-5xl py-20">
+      <main className="relative z-10 flex-1 flex flex-col justify-center items-start px-6 sm:px-16 lg:px-24 max-w-4xl py-12">
         
-        <div className="inline-flex items-center space-x-2 px-3 py-1 rounded bg-oppy-surface/80 border border-oppy-border/80 text-[11px] font-mono text-oppy-textSecondary mb-6">
-          <span className="w-2 h-2 rounded-full bg-oppy-accent" />
-          <span>NASA MARS EXPLORATION ROVER · MER-B · 2003–2019</span>
+        {/* Rover Classification Badge */}
+        <div className="inline-flex items-center space-x-2 px-3 py-1 rounded bg-oppy-card/90 border border-oppy-border/80 text-[10px] font-mono text-oppy-textSecondary uppercase tracking-widest mb-6">
+          <span className="w-1.5 h-1.5 rounded-full bg-oppy-textSecondary" />
+          <span>NASA MARS EXPLORATION ROVER · 2004–2018</span>
         </div>
 
-        <h1 className="text-5xl sm:text-7xl lg:text-8xl font-bold tracking-tight text-white uppercase font-sans mb-6 leading-none">
+        {/* Display Title */}
+        <h1 className="text-6xl sm:text-7xl lg:text-8xl font-extrabold tracking-tight text-white uppercase font-sans mb-6 leading-[0.92]">
           OPPY'S<br />
-          <span className="text-transparent bg-clip-text bg-gradient-to-r from-white via-oppy-textPrimary to-oppy-textSecondary">
-            LAST DANCE
-          </span>
+          LAST DANCE
         </h1>
 
-        <p className="text-base sm:text-lg text-oppy-textSecondary font-sans leading-relaxed max-w-xl mb-10">
+        {/* Description Paragraph */}
+        <p className="text-sm sm:text-base text-oppy-textSecondary font-sans leading-relaxed max-w-lg mb-10">
           Designed to last 90 days. It explored Mars for nearly 15 years. This is the story of the little rover that changed how humanity sees the Red Planet.
         </p>
 
@@ -49,36 +65,40 @@ export const HomePage: React.FC<HomePageProps> = ({ isAudioPlaying, onToggleAudi
           
           <Link
             to="/experience"
-            className="px-8 py-4 rounded-md bg-white text-black font-semibold tracking-wider uppercase hover:bg-oppy-accent hover:text-black transition-all flex items-center justify-center space-x-2 shadow-2xl group"
+            className="px-6 py-3.5 rounded bg-white text-black font-bold tracking-wider uppercase hover:bg-oppy-accent hover:text-black transition-all flex items-center space-x-3.5 shadow-2xl group text-left"
           >
-            <Compass className="w-4 h-4 transition-transform group-hover:rotate-45" />
-            <span>WATCH THE EXPERIENCE</span>
+            <svg className="w-4 h-4 fill-current transition-transform group-hover:scale-110 shrink-0" viewBox="0 0 24 24">
+              <polygon points="5 3 19 12 5 21 5 3" />
+            </svg>
+            <span className="leading-tight text-[11px] font-mono">
+              WATCH THE<br />
+              <span className="font-bold text-xs tracking-wider">EXPERIENCE</span>
+            </span>
           </Link>
 
           <Link
             to="/hardware"
-            className="px-8 py-4 rounded-md border border-oppy-border bg-oppy-surface/90 text-white font-semibold tracking-wider uppercase hover:border-oppy-accent hover:bg-oppy-surface transition-all flex items-center justify-center space-x-2"
+            className="px-6 py-3.5 rounded border border-oppy-border bg-oppy-card/80 backdrop-blur-sm text-white font-bold tracking-wider uppercase hover:border-oppy-accent hover:bg-oppy-surface transition-all flex items-center space-x-3.5 text-left group"
           >
-            <Cpu className="w-4 h-4 text-oppy-accent" />
-            <span>UNDERSTAND THE HARDWARE</span>
+            <svg className="w-4 h-4 text-oppy-accent shrink-0 transition-transform group-hover:scale-110" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+              <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z" />
+              <polyline points="3.27 6.96 12 12.01 20.73 6.96" />
+              <line x1="12" y1="22.08" x2="12" y2="12" />
+            </svg>
+            <span className="leading-tight text-[11px] font-mono text-oppy-textSecondary group-hover:text-white">
+              UNDERSTAND THE<br />
+              <span className="font-bold text-xs text-white tracking-wider">HARDWARE</span>
+            </span>
           </Link>
 
         </div>
 
       </main>
 
-      {/* Minimalist Telemetry Footer HUD */}
-      <footer className="relative z-10 px-6 sm:px-16 py-4 border-t border-oppy-border/30 bg-oppy-bg/60 backdrop-blur-sm flex flex-wrap items-center justify-between gap-4 font-mono text-[11px] text-oppy-textMuted">
-        <div className="flex items-center space-x-6">
-          <span>MISSION: MER-B OPPORTUNITY</span>
-          <span className="hidden sm:inline">LAUNCH: JUL 7, 2003</span>
-          <span className="hidden md:inline">LANDING: JAN 25, 2004</span>
-        </div>
-        <div className="flex items-center space-x-6">
-          <span className="text-white">TOTAL DISTANCE: 45.16 KM</span>
-          <span className="text-oppy-accent">FINAL REST: PERSEVERANCE VALLEY</span>
-        </div>
-      </footer>
+      {/* Telemetry Watermark */}
+      <div className="absolute bottom-5 right-6 sm:right-10 text-[10px] font-mono text-oppy-textMuted tracking-widest uppercase opacity-70 pointer-events-none">
+        PERSEVERANCE VALLEY · ELEVATION: -142m · MER-B
+      </div>
 
     </div>
   );
