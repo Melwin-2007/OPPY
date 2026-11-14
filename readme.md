@@ -41,6 +41,7 @@ e:\OPPY/
 │
 ├── legacy/                       # Standalone zero-dependency HTML prototype
 │   ├── index.html                # Standalone HTML viewer
+│   ├── hybrid-lab.html           # MER-B Hybrid 2.5D Story & 3D Exploded-View Lab
 │   ├── model-data.js             # Offline base64 data
 │   ├── landing.txt               # Text prototype backup
 │   └── workspace-scripts.json    # Legacy scripts
