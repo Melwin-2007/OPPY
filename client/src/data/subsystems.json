@@ -1,0 +1,110 @@
+[
+  {
+    "id": "SUBSYSTEM // 01",
+    "key": "mast",
+    "name": "Pancam Mast Assembly (PMA)",
+    "mass": "7.2 kg",
+    "desc": "Elevates stereo Pancam and Navcam sensors 1.5 meters above the ground, replicating human eye height. Incorporates 360° azimuthal pan and ±90° elevation gimbals with 16 narrow-band multispectral filters.",
+    "volt": "28–32 V DC",
+    "spec": "0.27 mrad/pixel · 16 Filters",
+    "temp": "-40°C to +40°C Operational",
+    "discoveryLink": {
+      "instrument": "Panoramic Camera (Pancam)",
+      "scienceFinding": "Identified the fine layered sedimentary lamination in Eagle Crater cliff walls and pinpointed hematite spherule beds.",
+      "significance": "Proved that sediment was deposited in a body of flowing or undulating liquid water rather than volcanic ash alone."
+    },
+    "camPos": { "x": 0.9, "y": 1.85, "z": 1.4 },
+    "target": { "x": -0.02, "y": 1.15, "z": 0.36 },
+    "explodeDelta": [0.0, 0.80, 0.18]
+  },
+  {
+    "id": "SUBSYSTEM // 02",
+    "key": "power",
+    "name": "GaAs Solar Array Wings",
+    "mass": "19.8 kg",
+    "desc": "1.3 m² triple-junction Gallium Arsenide (GaAs/Ge) photovoltaic cells generating 140 W at landing, degrading to ~100 W under atmospheric dust. Cleaned repeatedly by unexpected Martian aeolian cleaning events.",
+    "volt": "28–34 V Regulated",
+    "spec": "140 W Peak (1.3 m² Area)",
+    "temp": "-100°C to +80°C Survivable",
+    "discoveryLink": {
+      "instrument": "Solar Cells & Pyranometer",
+      "scienceFinding": "Direct measurement of atmospheric optical depth (tau) and discovery of Martian 'cleaning events' caused by wind vortexes.",
+      "significance": "Demonstrated that Martian weather could periodically clean solar panels, enabling mission lifespan to extend from 90 sols to 15 years."
+    },
+    "camPos": { "x": 0.0, "y": 2.1, "z": 1.1 },
+    "target": { "x": 0.0, "y": 0.65, "z": 0.0 },
+    "explodeDelta": [0.0, 0.42, -0.06]
+  },
+  {
+    "id": "SUBSYSTEM // 03",
+    "key": "mobility",
+    "name": "Rocker-Bogie Mobility System",
+    "mass": "35.5 kg",
+    "desc": "Six independently motorized 26-cm diameter aluminum cleated wheels linked via differential rocker-bogie linkages without springs. Allows scaling obstacles larger than wheel diameter (25 cm) with chassis tilt limited to ±25°.",
+    "volt": "28 V DC Brushless",
+    "spec": "0.05 m/s Max Speed (5 cm/s)",
+    "temp": "-55°C to +50°C Rated",
+    "discoveryLink": {
+      "instrument": "Cleated Wheels & Rocker Differential",
+      "scienceFinding": "When Opportunity's right-front steering actuator jammed in 2005, engineers drove the rover backwards. The jammed wheel trench-dragged up pure bright silica deposits.",
+      "significance": "Uncovered hydrothermal vent deposits, indicating ancient volcanic fumaroles or hot springs ideal for micro-organic habitats."
+    },
+    "camPos": { "x": 1.8, "y": 0.45, "z": 0.9 },
+    "target": { "x": 0.0, "y": 0.25, "z": 0.0 },
+    "explodeDelta": [0.0, -0.38, 0.0]
+  },
+  {
+    "id": "SUBSYSTEM // 04",
+    "key": "arm",
+    "name": "Instrument Deployment Device (IDD)",
+    "mass": "10.5 kg",
+    "desc": "5-degree-of-freedom robotic manipulator carrying a 4-instrument turret: Mössbauer Spectrometer (MIMOS II), Alpha Particle X-Ray Spectrometer (APXS), Microscopic Imager (MI), and Rock Abrasion Tool (RAT).",
+    "volt": "28 V DC Stepper Actuated",
+    "spec": "5 DOF · 4-Sided Science Turret",
+    "temp": "-55°C to +50°C Operational",
+    "discoveryLink": {
+      "instrument": "Rock Abrasion Tool & APXS",
+      "scienceFinding": "The RAT ground away 5mm of weathered rock patina from the 'El Capitan' outcrop, allowing the APXS to detect high concentrations of sulfur and jarosite.",
+      "significance": "Provided indisputable chemical fingerprinting that acidic liquid water soaked the Martian surface in its formative geological era."
+    },
+    "camPos": { "x": 0.65, "y": 0.6, "z": 1.35 },
+    "target": { "x": 0.08, "y": 0.35, "z": 0.55 },
+    "explodeDelta": [0.0, -0.12, 0.60]
+  },
+  {
+    "id": "SUBSYSTEM // 05",
+    "key": "antenna",
+    "name": "High-Gain Steerable Dish (HGA)",
+    "mass": "5.4 kg",
+    "desc": "0.28-meter parabolic reflector dish steerable in azimuth and elevation to beam telemetry directly to Earth's Deep Space Network (DSN) via X-Band (8.4 GHz) at bitrates between 3.5 kbps and 128 kbps.",
+    "volt": "28 V DC Gimbaled",
+    "spec": "8.4 GHz X-Band · 128 kbps Max",
+    "temp": "-105°C to +50°C Passive",
+    "discoveryLink": {
+      "instrument": "X-Band Telemetry & Tracking",
+      "scienceFinding": "Ultra-precise Doppler shift tracking of the HGA radio carrier wave as Mars rotated.",
+      "significance": "Allowed planetary geophysicists to measure Mars' core precession, confirming the planet possesses a liquid outer iron core."
+    },
+    "camPos": { "x": 1.1, "y": 1.35, "z": -0.6 },
+    "target": { "x": 0.38, "y": 0.85, "z": -0.24 },
+    "explodeDelta": [0.15, 0.50, -0.40]
+  },
+  {
+    "id": "SUBSYSTEM // 06",
+    "key": "avionics",
+    "name": "RAD6000 Warm Electronics Box (WEB)",
+    "mass": "22.0 kg",
+    "desc": "Centrally mounted insulated compartment housing the BAE RAD6000 20 MHz 32-bit RISC processor, 128 MB RAM, and dual 8 Ah Li-ion batteries. Kept warm by aerogel insulation and 8 Radioisotope Heater Units (RHUs).",
+    "volt": "28–34 V Bus",
+    "spec": "20 MHz RISC · 128 MB DRAM",
+    "temp": "-40°C to +40°C Internal",
+    "discoveryLink": {
+      "instrument": "AutoNav Autonomous Vision Computing",
+      "scienceFinding": "The RAD6000 computed real-time stereo disparity maps from Navcams, allowing Opportunity to autonomously navigate around treacherous sand ripples without Earth intervention.",
+      "significance": "Pioneered planetary rover autonomous traverse, enabling Opportunity to drive hundreds of meters across uncharted extraterrestrial landscapes per Sol."
+    },
+    "camPos": { "x": 1.35, "y": 0.95, "z": 1.05 },
+    "target": { "x": 0.0, "y": 0.5, "z": 0.1 },
+    "explodeDelta": [0.0, 0.0, 0.0]
+  }
+]

@@ -1,31 +1,88 @@
 # OPPY'S LAST DANCE — NASA Opportunity Mars Rover Experience
 
-Interactive documentary and 3D engineering telemetry visualization of NASA's Mars Exploration Rover B (Opportunity, MER-B).
+An interactive 3D educational documentary and engineering exploration platform dedicated to NASA's Mars Exploration Rover B (Opportunity, MER-B).
 
-## Features
+---
 
-- **3D Flight Hardware Engine**: Three.js WebGL viewport rendering the Opportunity flight model `24883_MER_static.glb` (11.9 MB) at 1:1 scale ($2.28\text{ m} \times 1.58\text{ m} \times 1.65\text{ m}$) with PBR materials, procedural Martian atmosphere reflections, PCF soft shadows, ground contact occlusion, wireframe mode, and auto-orbit turntable.
-- **Exploded CAD Subsystems View**: Interactive `[EXPLODE: 0% - 100%]` displacement slider and one-click toggle separating 6 major subsystems along logical operational axes, connected by dynamic cyan dashed CAD alignment guide rails (`#38bdf8`).
-- **Real-Time Operational Animations**:
-  - `DRIVE / TRAVERSE`: 6-wheel forward rotation via GPU GLSL vertex shader ($5\text{ cm/s}$, $5.2\text{ rpm}$), rocker-bogie undulating terrain crawl, dual red-soil wheel tracks, ferric dust plume particle system, and live odometer accumulation.
-  - `PANCAM SCAN`: Mast $360^\circ$ azimuth pan ($\pm 83^\circ$) and elevation tilt, semi-transparent stereoscopic camera vision cone, and sweeping ground targeting reticle.
-  - `IDD SAMPLING`: 5-DOF robotic arm articulation down to a 3D Martian basalt rock outcrop, Rock Abrasion Tool (RAT) grinding spark emitter ($3.72\text{ m/s}^2$ Mars gravity), and APXS laser spectrometer analysis.
-  - `EARTH COMM`: High-Gain Antenna Earth-tracking gimbal with expanding concentric X-band RF wavefront rings ($8.41\text{ GHz}$) radiating to the Deep Space Network (DSN).
-  - `AUTO MISSION DEMO`: Autonomous 28-second Martian Sol workflow cycling sequentially through Drive $\to$ Scan $\to$ Sample $\to$ Comm with dynamic telemetry updates.
-- **Playback & Speed Multipliers**: Play/Pause controls and $1\times$ (real $0.05\text{ m/s}$), $2\times$, and $4\times$ simulation speed modes.
-- **Subsystem Focus**: Cinematic camera glide and luminous emissive material pulsing for the Pancam Mast, GaAs Solar Arrays, Rocker-Bogie Mobility, IDD Robotic Arm, High-Gain Antenna, and RAD6000 Warm Electronics Box.
-- **Zero-CORS Offline Viewing**: Embedded base64 offline telemetry payload in `model-data.js` ensures seamless rendering when opened directly via `file:///` without local server CORS blocks.
-- **Synthesized Martian Soundscape**: Procedural Web Audio API synthesizer generating thin Martian wind ambience, low-frequency drive rumble, stepper motor servo chirps, RAT rock grinding abrasion, and DSN telemetry packets.
-- **Mission Odyssey Chronology**: 8 milestone traverse selector from Eagle Crater touchdown to Sol 5111 at Perseverance Valley.
+## Workspace Architecture
 
-## Running Locally
+```text
+e:\OPPY/
+├── client/                       # Frontend SPA (React 18 + TS + Vite + R3F)
+│   ├── public/
+│   │   └── models/
+│   │       ├── 24883_MER_static.glb  # 11.9 MB 1:1 Flight Model
+│   │       └── model-data.js         # Base64 offline fallback carrier
+│   ├── src/
+│   │   ├── components/           # 3d/, ui/, story/, hardware/, shared/
+│   │   ├── data/                 # missionPhases.json, subsystems.json
+│   │   ├── hooks/                # useWebAudio.ts (Martian wind & rover sound FX)
+│   │   ├── pages/                # HomePage.tsx, ExperiencePage.tsx, HardwarePage.tsx
+│   │   ├── shaders/              # wheelShader.ts (GLSL 6-wheel rotation)
+│   │   └── stores/               # missionStore.ts, hardwareStore.ts (Zustand)
+│   └── package.json
+│
+├── server/                       # Backend API Service (Node.js + Express + TS)
+│   ├── data/                     # schema.sql & SQLite guestbook database
+│   ├── src/
+│   │   ├── routes/               # /api/phases, /api/hardware, /api/nasa, /api/tributes
+│   │   ├── services/             # nasaService.ts, tributeService.ts
+│   │   └── server.ts
+│   ├── requirements.txt          # Python dependencies (FastAPI, Uvicorn, Requests)
+│   └── package.json
+│
+├── plan-kit/                     # Modular Technical Specification & Prompts
+│   ├── 01-SYSTEM-ARCHITECTURE.md
+│   ├── 02-UI-UX-SPECIFICATION.md
+│   ├── 03-3D-ENGINE-SPECIFICATION.md
+│   ├── 04-BACKEND-API-SPECIFICATION.md
+│   ├── 05-PHASED-EXECUTION-PROMPTS.md
+│   └── reference-landing.txt
+│
+├── legacy/                       # Standalone zero-dependency HTML prototype
+│   ├── index.html                # Standalone HTML viewer
+│   ├── model-data.js             # Offline base64 data
+│   ├── landing.txt               # Text prototype backup
+│   └── workspace-scripts.json    # Legacy scripts
+│
+├── .venv/                        # Python 3.11 virtual environment
+├── .env.example                  # Environment variable template
+├── .gitattributes                # LFS / binary asset flags
+└── .gitignore                    # Git exclusion rules
+```
 
-Open `index.html` directly in any modern web browser via `file:///`, or serve via any local static web server:
+---
 
+## Getting Started
+
+### 1. Frontend Development (`client/`)
 ```powershell
-# Using Python
-python -m http.server 8000
+cd client
+npm install
+npm run dev
+```
+Serves at `http://localhost:5173`.
 
-# Using Node.js
-npx serve .
+### 2. Backend API Service (`server/`)
+```powershell
+cd server
+npm install
+npm run dev
+```
+Serves at `http://localhost:3001` (`/api/health`, `/api/phases`, `/api/hardware`, `/api/tributes`).
+
+### 3. Python Virtual Environment (`.venv`)
+```powershell
+# Activate the virtual environment
+.\.venv\Scripts\activate
+
+# Install requirements
+pip install -r server\requirements.txt
+```
+
+### 4. Standalone Offline Prototype
+To run the pre-bundled zero-dependency HTML prototype directly without build tools:
+```powershell
+python -m http.server 8000
+# Open http://localhost:8000/legacy/index.html
 ```

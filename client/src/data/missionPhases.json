@@ -1,0 +1,211 @@
+[
+  {
+    "id": 1,
+    "slug": "beginning",
+    "phaseNumber": "PHASE // 01",
+    "title": "The Beginning",
+    "period": "2003",
+    "solRange": [0, 0],
+    "odometerKm": 0.0,
+    "headline": "Twin Rovers to Seek Ancient Martian Waters",
+    "narrativeText": "In the early 2000s, NASA initiated the Mars Exploration Rover project to dispatch two identical robotic geologists—Spirit (MER-A) and Opportunity (MER-B)—to opposite sides of the Red Planet. Equipped with cutting-edge multispectral imagers, spectrometers, and a rock abrasion tool, Opportunity launched atop a Delta II Heavy rocket on July 7, 2003, beginning its 456-million-kilometer interplanetary transit toward Meridiani Planum.",
+    "scienceObjectives": [
+      "Search for and characterize a wide variety of rocks and soils that hold clues to past water activity.",
+      "Determine the distribution and composition of minerals, particularly those that form in water.",
+      "Calibrate surface observations with Mars Global Surveyor orbital data.",
+      "Assess whether the ancient Martian environment was ever conducive to life."
+    ],
+    "discoveries": [
+      {
+        "title": "Orbital Hematite Target Identification",
+        "description": "Mars Global Surveyor identified high concentrations of coarse-grained crystalline gray hematite in Meridiani Planum, choosing it as Opportunity's landing target.",
+        "instrument": "Thermal Emission Spectrometer (TES)"
+      }
+    ],
+    "environment": {
+      "modelFile": "env_phase1_space.glb",
+      "atmosphereColor": [10, 12, 16],
+      "dustOpacity": 0.0,
+      "sunIntensity": 3.4
+    },
+    "cameraTarget": {
+      "camPos": [2.6, 1.8, 2.8],
+      "lookAt": [0.0, 0.65, 0.0]
+    }
+  },
+  {
+    "id": 2,
+    "slug": "arrival",
+    "phaseNumber": "PHASE // 02",
+    "title": "Arrival on Mars",
+    "period": "JAN 25, 2004",
+    "solRange": [1, 1],
+    "odometerKm": 0.0,
+    "headline": "The Interplanetary Hole-in-One: Touchdown in Eagle Crater",
+    "narrativeText": "On January 25, 2004, Opportunity slammed into the Martian atmosphere at 19,000 km/h. Decelerating via aeroshell heatshield, supersonic parachute, and retro-rockets, the lander cocooned within giant cushioned airbags and bounced across Meridiani Planum over two dozen times before rolling directly into a 22-meter-wide impact crater. Mission engineers celebrated the landing as an 'interplanetary hole-in-one.'",
+    "scienceObjectives": [
+      "Verify airbag retraction and successful mechanical egress from the petal lander.",
+      "Deploy the Pancam Mast Assembly for full 360-degree stereoscopic terrain survey.",
+      "Inspect exposed bedrock along the crater wall rim."
+    ],
+    "discoveries": [
+      {
+        "title": "First In-Situ Bedrock on Mars",
+        "description": "Opportunity rolled off its lander petals and immediately beheld outcropping bedrock—the first layered sedimentary rock ever photographed on Mars.",
+        "instrument": "Pancam & Navcam"
+      }
+    ],
+    "environment": {
+      "modelFile": "env_phase2_edl.glb",
+      "atmosphereColor": [140, 72, 45],
+      "dustOpacity": 0.08,
+      "sunIntensity": 2.8
+    },
+    "cameraTarget": {
+      "camPos": [2.2, 1.4, 2.5],
+      "lookAt": [0.0, 0.5, 0.0]
+    }
+  },
+  {
+    "id": 3,
+    "slug": "discoveries",
+    "phaseNumber": "PHASE // 03",
+    "title": "The First Discoveries",
+    "period": "2004",
+    "solRange": [1, 90],
+    "odometerKm": 0.8,
+    "headline": "Martian Blueberries & Proof of Acidic Standing Water",
+    "narrativeText": "Within Eagle Crater, Opportunity extended its 5-DOF robotic arm to examine layered bedrock. The Microscopic Imager revealed countless millimeter-scale spherical concretions nicknamed 'blueberries'. Mössbauer and APXS spectrometers confirmed the spheres were pure crystalline hematite embedded within sulfate-rich jarosite salts—definitive geochemical proof that an ancient, shallow, acidic lake once inundated Meridiani Planum.",
+    "scienceObjectives": [
+      "Abrade rock surface layers with the Rock Abrasion Tool (RAT).",
+      "Measure elemental abundances with the Alpha Particle X-Ray Spectrometer (APXS).",
+      "Determine iron mineralogy oxidation states using the Mössbauer Spectrometer."
+    ],
+    "discoveries": [
+      {
+        "title": "Hematite Spherules ('Blueberries')",
+        "description": "Millimeter-sized spherical concretions formed through groundwater percolating through porous sedimentary sulfate rock.",
+        "instrument": "Microscopic Imager & Mössbauer"
+      },
+      {
+        "title": "Jarosite Salt Confirmation",
+        "description": "Hydrated iron-potassium sulfate mineral requiring liquid water to crystallize.",
+        "instrument": "APXS & Mössbauer MIMOS II"
+      }
+    ],
+    "environment": {
+      "modelFile": "env_phase3_eagle_crater.glb",
+      "atmosphereColor": [168, 92, 54],
+      "dustOpacity": 0.12,
+      "sunIntensity": 2.7
+    },
+    "cameraTarget": {
+      "camPos": [1.2, 0.8, 1.6],
+      "lookAt": [0.08, 0.35, 0.55]
+    }
+  },
+  {
+    "id": 4,
+    "slug": "beyond-expectations",
+    "phaseNumber": "PHASE // 04",
+    "title": "Beyond Expectations",
+    "period": "2004–2017",
+    "solRange": [91, 5000],
+    "odometerKm": 45.16,
+    "headline": "A 15-Year Overland Odyssey Across Massive Impact Basins",
+    "narrativeText": "Designed for a 90-sol design lifespan and 1,000 meters of driving, Opportunity defied all projections. Over the next decade and a half, the rover traversed over 45 kilometers of Martian sand dunes and bedrock. It descended into Endurance Crater, circumnavigated Victoria Crater, and conquered Endeavour Crater's rim, discovering gypsum veins, clays formed in neutral pH potable water, and unexpected aeolian dust cleaning events that repeatedly revived its solar power.",
+    "scienceObjectives": [
+      "Traverse long-baseline open terrain between major impact craters.",
+      "Investigate older Noachian-era clay mineral strata on Endeavour's rim.",
+      "Complete the first off-world marathon (42.195 km) in March 2015."
+    ],
+    "discoveries": [
+      {
+        "title": "Homestake Gypsum Mineral Veins",
+        "description": "Pure calcium sulfate veins deposited by water running through underground fractures, indicating a more neutral, habitable aqueous era.",
+        "instrument": "APXS & Microscopic Imager"
+      },
+      {
+        "title": "Off-World Marathon Milestone",
+        "description": "Opportunity completed 42.195 km of extraterrestrial driving on Sol 3968 (March 24, 2015).",
+        "instrument": "Rocker-Bogie Odometer"
+      }
+    ],
+    "environment": {
+      "modelFile": "env_phase4_endurance_rim.glb",
+      "atmosphereColor": [180, 102, 62],
+      "dustOpacity": 0.15,
+      "sunIntensity": 2.6
+    },
+    "cameraTarget": {
+      "camPos": [2.8, 1.9, 3.2],
+      "lookAt": [0.0, 0.65, 0.0]
+    }
+  },
+  {
+    "id": 5,
+    "slug": "final-storm",
+    "phaseNumber": "PHASE // 05",
+    "title": "The Final Storm",
+    "period": "JUN 2018",
+    "solRange": [5111, 5111],
+    "odometerKm": 45.16,
+    "headline": "The Planet-Encircling Dust Tempest of 2018",
+    "narrativeText": "In June 2018, an unprecedented planetary-scale dust storm blanketed Mars. Atmospheric opacity (tau) skyrocketed beyond 10.8, blocking over 99% of incoming solar irradiance. Perched near the rim of Perseverance Valley on Sol 5111, Opportunity's daily energy dropped from 645 watt-hours to a critical 22 watt-hours. The rover entered a low-power fault mode, its clock halted, and its final transmission was relayed to Earth: 'My battery is low and it's getting dark.'",
+    "scienceObjectives": [
+      "Preserve battery state-of-charge for survival heaters.",
+      "Monitor atmospheric opacity and insolation levels.",
+      "Maintain master clock and low-power sleep fault routine."
+    ],
+    "discoveries": [
+      {
+        "title": "Record Atmospheric Dust Opacity",
+        "description": "Atmospheric optical depth (tau) exceeded 10.8, the highest opacity ever recorded from the Martian surface.",
+        "instrument": "Pancam Sun Observations"
+      }
+    ],
+    "environment": {
+      "modelFile": "env_phase5_dust_storm.glb",
+      "atmosphereColor": [68, 32, 20],
+      "dustOpacity": 0.88,
+      "sunIntensity": 0.25
+    },
+    "cameraTarget": {
+      "camPos": [2.4, 1.2, 2.2],
+      "lookAt": [0.0, 0.5, 0.0]
+    }
+  },
+  {
+    "id": 6,
+    "slug": "last-dance",
+    "phaseNumber": "PHASE // 06",
+    "title": "The Last Dance",
+    "period": "FEB 13, 2019",
+    "solRange": [5111, 5352],
+    "odometerKm": 45.16,
+    "headline": "Mission Complete: An Unbroken Legacy on the Red Planet",
+    "narrativeText": "For over eight months, NASA engineers beamed over 1,000 recovery commands via the Deep Space Network to revive the slumbering rover. On February 13, 2019, from NASA's Jet Propulsion Laboratory, mission leaders officially declared Opportunity's mission complete. Designed for 90 sols and 1 kilometer, Opportunity endured 5,352 sols, completed 45.16 kilometers, returned 217,594 raw images, and forever proved that Mars was once a wet, habitable world.",
+    "scienceObjectives": [
+      "Honoring 15 years of continuous scientific exploration.",
+      "Cataloging 217,594 raw photographs and millions of spectrometer data points.",
+      "Establishing foundational engineering for Curiosity and Perseverance."
+    ],
+    "discoveries": [
+      {
+        "title": "Enduring Scientific Heritage",
+        "description": "5,352 sols, 45.16 km driven, 217,594 images, and absolute proof of past liquid water environments on Mars.",
+        "instrument": "MER-B Full Flight Hardware"
+      }
+    ],
+    "environment": {
+      "modelFile": "env_phase6_twilight.glb",
+      "atmosphereColor": [45, 25, 20],
+      "dustOpacity": 0.25,
+      "sunIntensity": 1.2
+    },
+    "cameraTarget": {
+      "camPos": [2.1, 1.1, 2.4],
+      "lookAt": [0.0, 0.65, 0.0]
+    }
+  }
+]

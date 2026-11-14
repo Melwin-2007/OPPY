@@ -1,0 +1,6 @@
+# OPPY'S LAST DANCE — Python Utility & Server Requirements
+fastapi>=0.111.0
+uvicorn>=0.30.0
+requests>=2.32.0
+python-dotenv>=1.0.1
+pydantic>=2.7.0

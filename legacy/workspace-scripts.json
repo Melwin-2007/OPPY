@@ -1,0 +1,19 @@
+{
+  "name": "oppy-last-dance-workspace",
+  "version": "1.0.0",
+  "description": "NASA Opportunity MER-B Interactive 3D Experience & Engineering Explorer",
+  "private": true,
+  "scripts": {
+    "dev": "npm run dev --prefix client",
+    "dev:all": "concurrently \"npm run dev --prefix server\" \"npm run dev --prefix client\"",
+    "dev:client": "npm run dev --prefix client",
+    "dev:server": "npm run dev --prefix server",
+    "build": "npm run build --prefix client && npm run build --prefix server",
+    "build:client": "npm run build --prefix client",
+    "build:server": "npm run build --prefix server",
+    "serve:py": "python -m http.server 8000"
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.2"
+  }
+}

@@ -1,0 +1,33 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    background-color: #101113;
+    color: #f1f1f1;
+    font-family: 'Poppins', sans-serif;
+  }
+}
+
+/* Custom Grayscale Scrollbars */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: #101113;
+}
+::-webkit-scrollbar-thumb {
+  background: #2a2d34;
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #38bdf8;
+}
+
+/* Subtle Vignette Overlay */
+.cinematic-vignette {
+  background: radial-gradient(circle at center, transparent 40%, rgba(16, 17, 19, 0.85) 100%);
+  pointer-events: none;
+}
