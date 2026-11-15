@@ -47,11 +47,8 @@
   <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>
 
-  <!-- Offline Base64 3D Model Telemetry Carrier -->
-  <!-- model-data.js replaced by procedural Three.js MER-B engine -->
-
   <!-- NASA MER-B Mission Experience Simulation Engine -->
-  <script src="legacy/mission-experience.js?v=5"></script>
+  <script src="legacy/mission-experience.js?v=6"></script>
 
   <style>
     /* Prevent any scrolling on landing page */
@@ -65,6 +62,12 @@
       color: #F1F1F1;
       font-family: 'Poppins', sans-serif;
     }
+
+    /* Custom Grayscale Scrollbars for modals */
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: #101113; }
+    ::-webkit-scrollbar-thumb { background: #2a2d34; border-radius: 3px; }
+    ::-webkit-scrollbar-thumb:hover { background: #38bdf8; }
 
     /* Subtle CRT Scanline Satellite Feed Overlay */
     .scanlines {
@@ -87,12 +90,6 @@
       );
     }
 
-    /* Custom Grayscale Scrollbars for modals */
-    ::-webkit-scrollbar { width: 6px; height: 6px; }
-    ::-webkit-scrollbar-track { background: #101113; }
-    ::-webkit-scrollbar-thumb { background: #2a2d34; border-radius: 3px; }
-    ::-webkit-scrollbar-thumb:hover { background: #38bdf8; }
-
     /* 3D Floating Subsystem Callout Labels */
     .hw-label-3d {
       position: absolute;
@@ -100,20 +97,21 @@
       pointer-events: auto;
       cursor: pointer;
       user-select: none;
-      transition: background-color 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease, color 0.15s ease;
+      transition: background-color 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease, color 0.2s ease !important;
       z-index: 20;
+      font-family: 'Poppins', sans-serif;
     }
     .hw-label-3d:hover {
-      background-color: rgba(245, 158, 11, 0.4) !important;
-      border-color: #ffffff !important;
+      background-color: rgba(34, 37, 42, 0.95) !important;
+      border-color: #38bdf8 !important;
       color: #ffffff !important;
-      box-shadow: 0 0 14px rgba(245, 158, 11, 0.75) !important;
+      box-shadow: 0 4px 18px rgba(0, 0, 0, 0.6), 0 0 10px rgba(56, 189, 248, 0.4) !important;
     }
     .hw-label-3d.active {
-      background-color: rgba(245, 158, 11, 0.5) !important;
-      border: 1.5px solid #ffffff !important;
-      color: #ffffff !important;
-      box-shadow: 0 0 18px rgba(245, 158, 11, 0.9) !important;
+      background-color: #ffffff !important;
+      border-color: #ffffff !important;
+      color: #101113 !important;
+      box-shadow: 0 4px 22px rgba(255, 255, 255, 0.45) !important;
       z-index: 30 !important;
     }
   </style>
@@ -163,8 +161,8 @@
         </div>
       </div>
 
-      <!-- Center Navigation Links -->
-      <nav class="hidden lg:flex items-center space-x-8 font-mono text-[11px] tracking-[0.14em] text-oppy-textSecondary uppercase">
+      <!-- Center Navigation Links (Exactly 4 Links - No 3rd Portal) -->
+      <nav class="hidden lg:flex items-center space-x-8 font-sans text-[11px] font-medium tracking-[0.14em] text-oppy-textSecondary uppercase">
         <button onclick="openModal('about-modal')" class="hover:text-white transition-colors">
           ABOUT THE MISSION
         </button>
@@ -180,7 +178,7 @@
       </nav>
 
       <!-- Right Mission Status & Audio Control -->
-      <div class="flex items-center space-x-3 font-mono text-xs">
+      <div class="flex items-center space-x-3 font-sans text-xs">
         <div class="flex items-center space-x-2 px-3 py-1 rounded-full bg-oppy-card border border-oppy-border text-[10px] text-oppy-textSecondary">
           <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
           <span class="tracking-wider">SOL 5111 · COMPLETED</span>
@@ -189,7 +187,7 @@
         <button 
           id="audio-toggle-btn"
           onclick="toggleMartianAudio()" 
-          class="flex items-center space-x-1.5 px-3 py-1 rounded border border-oppy-border bg-oppy-card hover:border-oppy-accent text-[10px] text-oppy-textSecondary hover:text-white transition-all uppercase tracking-wider"
+          class="flex items-center space-x-1.5 px-3 py-1 rounded-full border border-oppy-border bg-oppy-card hover:border-oppy-accent text-[10px] text-oppy-textSecondary hover:text-white transition-all uppercase tracking-wider"
           title="Toggle Martian Atmosphere Synthesizer"
         >
           <svg id="audio-icon" class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -206,7 +204,7 @@
     <main class="flex-1 flex flex-col justify-center items-start px-6 sm:px-16 lg:px-24 max-w-4xl py-12">
       
       <!-- Rover Classification Badge -->
-      <div class="inline-flex items-center space-x-2 px-3 py-1 rounded bg-oppy-card/90 border border-oppy-border/80 text-[10px] font-mono text-oppy-textSecondary uppercase tracking-widest mb-6">
+      <div class="inline-flex items-center space-x-2 px-3 py-1 rounded-full bg-oppy-card/90 border border-oppy-border/80 text-[10px] font-sans text-oppy-textSecondary uppercase tracking-widest mb-6">
         <span class="w-1.5 h-1.5 rounded-full bg-oppy-textSecondary"></span>
         <span>NASA MARS EXPLORATION ROVER · 2004–2018</span>
       </div>
@@ -222,31 +220,31 @@
         Designed to last 90 days. It explored Mars for nearly 15 years. This is the story of the little rover that changed how humanity sees the Red Planet.
       </p>
 
-      <!-- The Exactly Two Primary Options -->
-      <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-4 w-full sm:w-auto font-mono text-xs">
+      <!-- Exactly Two Primary Option Buttons -->
+      <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-4 w-full sm:w-auto font-sans text-xs">
         
         <!-- Button 1: Watch the Experience -->
         <button
           onclick="openExperienceView()"
-          class="px-6 py-3.5 rounded bg-white text-black font-bold tracking-wider uppercase hover:bg-oppy-accent hover:text-black transition-all flex items-center space-x-3.5 shadow-2xl group text-left"
+          class="px-6 py-3.5 rounded-full bg-white text-black font-bold tracking-wider uppercase hover:bg-slate-200 transition-all flex items-center space-x-3.5 shadow-2xl group text-left cursor-pointer"
         >
           <svg class="w-4 h-4 fill-current transition-transform group-hover:scale-110 shrink-0" viewBox="0 0 24 24">
             <polygon points="5 3 19 12 5 21 5 3"></polygon>
           </svg>
-          <span class="leading-tight text-[11px] font-mono">WATCH THE<br /><span class="font-bold text-xs tracking-wider">EXPERIENCE</span></span>
+          <span class="leading-tight text-[11px] font-sans">WATCH THE<br /><span class="font-bold text-xs tracking-wider">EXPERIENCE</span></span>
         </button>
 
         <!-- Button 2: Understand the Hardware -->
         <button
           onclick="openHardwareView()"
-          class="px-6 py-3.5 rounded border border-oppy-border bg-oppy-card/80 backdrop-blur-sm text-white font-bold tracking-wider uppercase hover:border-oppy-accent hover:bg-oppy-surface transition-all flex items-center space-x-3.5 text-left group"
+          class="px-6 py-3.5 rounded-full border border-oppy-border bg-oppy-card/80 backdrop-blur-sm text-white font-bold tracking-wider uppercase hover:border-oppy-accent hover:bg-oppy-surface transition-all flex items-center space-x-3.5 text-left group cursor-pointer"
         >
           <svg class="w-4 h-4 text-oppy-accent shrink-0 transition-transform group-hover:scale-110" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
             <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path>
             <polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline>
             <line x1="12" y1="22.08" x2="12" y2="12"></line>
           </svg>
-          <span class="leading-tight text-[11px] font-mono text-oppy-textSecondary group-hover:text-white">UNDERSTAND THE<br /><span class="font-bold text-xs text-white tracking-wider">HARDWARE</span></span>
+          <span class="leading-tight text-[11px] font-sans text-oppy-textSecondary group-hover:text-white">UNDERSTAND THE<br /><span class="font-bold text-xs text-white tracking-wider">HARDWARE</span></span>
         </button>
 
       </div>
@@ -254,7 +252,7 @@
     </main>
 
     <!-- BOTTOM RIGHT TELEMETRY WATERMARK -->
-    <div class="absolute bottom-5 right-6 sm:right-10 text-[10px] font-mono text-oppy-textMuted tracking-widest uppercase opacity-70 pointer-events-none">
+    <div class="absolute bottom-5 right-6 sm:right-10 text-[10px] font-sans font-medium text-oppy-textMuted tracking-widest uppercase opacity-70 pointer-events-none">
       PERSEVERANCE VALLEY · ELEVATION: -142m · MER-B
     </div>
 
@@ -264,7 +262,7 @@
   <!-- ========================================================================= -->
   <!-- 2. INTERACTIVE 3D HARDWARE EXPLORER OVERLAY (FULL 3D CAD ENGINE)           -->
   <!-- ========================================================================= -->
-    <div id="hardware-overlay" class="fixed inset-0 z-50 bg-oppy-bg flex flex-col hidden opacity-0 transition-opacity duration-300">
+  <div id="hardware-overlay" class="fixed inset-0 z-50 bg-[#101113] flex flex-col hidden opacity-0 transition-opacity duration-300">
     
     <!-- 3D Canvas Box (Full Viewport) -->
     <div class="relative w-full h-full flex-1 overflow-hidden" id="hw-canvas-container">
@@ -273,38 +271,38 @@
       <div class="absolute top-3 left-3 right-3 z-30 flex flex-wrap items-center justify-between gap-2 pointer-events-none">
         
         <!-- Left Title & Subsystem Status Capsule -->
-        <div class="pointer-events-auto bg-[#101113]/90 backdrop-blur-md border border-oppy-border/80 px-3 py-1.5 rounded-full flex items-center gap-2 shadow-xl">
+        <div class="pointer-events-auto bg-[#101113]/90 backdrop-blur-md border border-white/15 px-3.5 py-1.5 rounded-full flex items-center gap-2.5 shadow-xl">
           <span class="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse"></span>
-          <span class="font-mono text-xs font-bold tracking-wider text-white">MER-B 3D CAD HARDWARE EXPLORER</span>
-          <span id="hw-active-badge" class="px-2 py-0.5 rounded bg-amber-500/20 text-[10px] font-mono text-amber-300 border border-amber-400/40">FULL ROVER ASSEMBLY</span>
-          <span id="hw-cam-telemetry" class="hidden md:inline text-oppy-textSecondary text-[11px] font-mono ml-2">AZ: 42° · EL: 22° · RANGE: 3.2m</span>
+          <span class="font-sans text-xs font-semibold tracking-wider text-white uppercase">MER-B 3D CAD HARDWARE EXPLORER</span>
+          <span id="hw-active-badge" class="px-2.5 py-0.5 rounded-full bg-white/10 text-[10px] font-sans font-medium text-white border border-white/20 tracking-wider">FULL ROVER ASSEMBLY</span>
+          <span id="hw-cam-telemetry" class="hidden md:inline text-oppy-textSecondary text-[11px] font-sans font-medium ml-2">AZ: 42° · EL: 22° · RANGE: 3.2m</span>
         </div>
 
         <!-- Right Viewport Tools & Settings -->
-        <div class="pointer-events-auto bg-[#101113]/90 backdrop-blur-md border border-oppy-border/80 px-3 py-1.5 rounded-full flex items-center flex-wrap gap-2 shadow-xl">
+        <div class="pointer-events-auto bg-[#101113]/90 backdrop-blur-md border border-white/15 px-3 py-1.5 rounded-full flex items-center flex-wrap gap-2 shadow-xl">
           <!-- Explode Slider -->
-          <div class="flex items-center space-x-1.5 pr-1 border-r border-oppy-border/60">
-            <span class="text-[9px] uppercase tracking-wider text-oppy-textMuted font-mono">EXPLODE:</span>
+          <div class="flex items-center space-x-1.5 pr-1.5 border-r border-white/10">
+            <span class="text-[10px] uppercase tracking-wider text-oppy-textMuted font-sans font-medium">EXPLODE:</span>
             <input type="range" id="hw-explode-range" min="0" max="100" value="0" class="w-18 sm:w-22 h-1 bg-oppy-border rounded appearance-none cursor-pointer accent-oppy-accent">
-            <span class="text-[10px] font-mono text-white w-7 text-right" id="hw-explode-label">0%</span>
+            <span class="text-[11px] font-sans font-medium text-white w-7 text-right" id="hw-explode-label">0%</span>
           </div>
 
-          <button id="hw-toggle-explode" class="px-2.5 py-1 rounded-full border border-oppy-border bg-oppy-card text-white text-[10px] uppercase font-mono hover:border-oppy-accent transition-colors">
+          <button id="hw-toggle-explode" class="px-3 py-1 rounded-full border border-oppy-border/80 bg-oppy-card/90 text-oppy-textPrimary hover:text-white hover:border-oppy-accent text-[11px] uppercase font-sans font-medium transition-all cursor-pointer">
             EXPLODE PARTS
           </button>
-          <button id="hw-toggle-orbit" class="px-2.5 py-1 rounded-full border border-oppy-border bg-oppy-card text-white text-[10px] uppercase font-mono hover:border-oppy-accent transition-colors">
+          <button id="hw-toggle-orbit" class="px-3 py-1 rounded-full border border-oppy-border/80 bg-oppy-card/90 text-oppy-textPrimary hover:text-white hover:border-oppy-accent text-[11px] uppercase font-sans font-medium transition-all cursor-pointer">
             AUTO-ORBIT: OFF
           </button>
-          <button id="hw-toggle-wireframe" class="px-2.5 py-1 rounded-full border border-oppy-border bg-oppy-card text-white text-[10px] uppercase font-mono hover:border-oppy-accent transition-colors">
+          <button id="hw-toggle-wireframe" class="px-3 py-1 rounded-full border border-oppy-border/80 bg-oppy-card/90 text-oppy-textPrimary hover:text-white hover:border-oppy-accent text-[11px] uppercase font-sans font-medium transition-all cursor-pointer">
             WIREFRAME
           </button>
-          <button id="hw-reset-cam" class="px-2.5 py-1 rounded-full border border-oppy-border bg-oppy-card text-white text-[10px] uppercase font-mono hover:border-oppy-accent transition-colors">
+          <button id="hw-reset-cam" class="px-3 py-1 rounded-full border border-oppy-border/80 bg-oppy-card/90 text-oppy-textPrimary hover:text-white hover:border-oppy-accent text-[11px] uppercase font-sans font-medium transition-all cursor-pointer">
             RESET VIEW
           </button>
-          <button id="hw-toggle-bg" class="px-2.5 py-1 rounded-full border border-oppy-border bg-oppy-card text-white text-[10px] uppercase font-mono hover:border-amber-400 transition-colors" title="Switch between Mars Dark Atmosphere and NASA Studio White">
+          <button id="hw-toggle-bg" class="px-3 py-1 rounded-full border border-oppy-border/80 bg-oppy-card/90 text-oppy-textPrimary hover:text-white hover:border-oppy-accent text-[11px] uppercase font-sans font-medium transition-all cursor-pointer" title="Switch between Mars Dark Atmosphere and NASA Studio White">
             WHITE BG
           </button>
-          <button onclick="closeOverlays()" class="px-3 py-1 rounded-full border border-oppy-border bg-oppy-surface hover:border-red-400 hover:text-red-400 text-white text-[10px] font-mono uppercase transition-colors">
+          <button onclick="closeOverlays()" class="px-3.5 py-1 rounded-full border border-oppy-border/80 bg-oppy-surface hover:border-red-400 hover:text-red-400 text-white text-[11px] font-sans font-medium uppercase transition-colors cursor-pointer">
             ✕ RETURN
           </button>
         </div>
@@ -317,37 +315,37 @@
       <div id="hw-labels-container" class="pointer-events-none absolute inset-0 overflow-hidden z-10"></div>
 
       <!-- Collapsible Engineering & Science Inspection Card (Bottom-Right Floating Drawer) -->
-      <aside id="hw-engineering-card" style="background-color: rgba(16, 17, 19, 0.94); border: 1px solid rgba(255, 255, 255, 0.14); box-shadow: 0 20px 40px rgba(0,0,0,0.5);" class="absolute bottom-16 right-3 w-80 sm:w-92 rounded-xl backdrop-blur-md p-3.5 z-20 transition-all duration-300 pointer-events-auto">
+      <aside id="hw-engineering-card" style="background-color: rgba(16, 17, 19, 0.94); border: 1px solid rgba(255, 255, 255, 0.14); box-shadow: 0 20px 40px rgba(0,0,0,0.6);" class="absolute bottom-16 right-3 w-80 sm:w-92 rounded-2xl backdrop-blur-md p-4 z-20 transition-all duration-300 pointer-events-auto">
         <div class="flex items-start justify-between gap-2">
           <div>
-            <div class="flex items-center gap-1.5">
-              <span id="hw-sub-id" class="px-1.5 py-0.5 rounded bg-amber-500/20 text-[9px] font-mono text-amber-300 border border-amber-500/30">MER-B // FULL SYSTEM</span>
-              <span id="hw-sub-mass" class="text-[9px] font-mono text-gray-400">MASS: 185 kg</span>
+            <div class="flex items-center gap-2">
+              <span id="hw-sub-id" class="px-2.5 py-0.5 rounded-full bg-white/10 text-[9px] font-sans font-semibold text-oppy-accent border border-white/10 uppercase tracking-wider">MER-B // FULL SYSTEM</span>
+              <span id="hw-sub-mass" class="text-[10px] font-sans text-oppy-textSecondary tracking-wider font-medium">MASS: 185 kg</span>
             </div>
-            <h3 id="hw-sub-name" class="font-bold text-xs text-white mt-1 uppercase font-sans tracking-tight">Mars Exploration Rover Opportunity (MER-B)</h3>
+            <h3 id="hw-sub-name" class="font-bold text-sm text-white mt-1.5 uppercase font-sans tracking-wide">Mars Exploration Rover Opportunity (MER-B)</h3>
           </div>
-          <button id="hw-card-toggle" class="px-2 py-0.5 rounded bg-[#22252a] hover:bg-[#34383e] border border-white/10 text-[9px] font-mono text-amber-300 transition cursor-pointer">
+          <button id="hw-card-toggle" class="px-2.5 py-0.5 rounded-full bg-oppy-surface hover:bg-oppy-card border border-white/10 text-[10px] font-sans font-medium text-oppy-textSecondary hover:text-white transition cursor-pointer">
             HIDE
           </button>
         </div>
 
-        <div id="hw-card-body" class="mt-2.5 pt-2 border-t border-white/10 space-y-2 text-xs">
-          <div class="grid grid-cols-2 gap-1.5 bg-[#18191c]/90 border border-white/10 rounded p-1.5 font-mono text-[9.5px]">
+        <div id="hw-card-body" class="mt-3 pt-2.5 border-t border-white/10 space-y-2.5 text-xs font-sans">
+          <div class="grid grid-cols-2 gap-2 bg-oppy-card/90 border border-oppy-border/70 rounded-lg p-2.5 font-sans text-[10px]">
             <div>
-              <span class="text-gray-400 block">SPEC 1:</span>
-              <span id="hw-sub-volt" class="text-amber-300 font-semibold">1.5m × 2.3m × 1.6m</span>
+              <span class="text-oppy-textMuted font-medium block uppercase tracking-wider text-[9px]">SPEC 1:</span>
+              <span id="hw-sub-volt" class="text-white font-semibold text-[11px]">1.5m × 2.3m × 1.6m</span>
             </div>
             <div>
-              <span class="text-gray-400 block">SPEC 2:</span>
-              <span id="hw-sub-spec" class="text-sky-300 font-semibold">Actual: 5,111 Sols</span>
+              <span class="text-oppy-textMuted font-medium block uppercase tracking-wider text-[9px]">SPEC 2:</span>
+              <span id="hw-sub-spec" class="text-oppy-accent font-semibold text-[11px]">Actual: 5,111 Sols</span>
             </div>
           </div>
-          <p id="hw-sub-desc" class="text-gray-200 text-[11px] leading-relaxed font-sans">
+          <p id="hw-sub-desc" class="text-oppy-textSecondary text-[11px] leading-relaxed font-sans">
             Launched July 7, 2003 and landed January 25, 2004 inside Eagle Crater at Meridiani Planum. Opportunity operated 55 times longer than its 90-sol design life, traversing 45.16 km across six major Martian geological epochs.
           </p>
-          <div class="pt-2 border-t border-white/10 bg-[#22252a]/60 p-2 rounded">
-            <div class="text-[9px] text-amber-400 uppercase font-bold mb-0.5 font-mono">ENGINEERING TO DISCOVERY LINK</div>
-            <p id="hw-sub-link" class="text-[10.5px] text-gray-300 leading-snug font-sans">
+          <div class="pt-2 border-t border-oppy-border/50 bg-oppy-card/50 p-2.5 rounded-lg">
+            <div class="text-[9px] text-oppy-accent uppercase font-bold tracking-wider mb-1 font-sans">ENGINEERING TO DISCOVERY LINK</div>
+            <p id="hw-sub-link" class="text-[11px] text-oppy-textSecondary leading-relaxed font-sans">
               Discovered hematite spherules ('blueberries') proving ancient standing liquid water, surveyed Victoria Crater, and confirmed neutral clay minerals at Endeavour Crater.
             </p>
           </div>
@@ -356,58 +354,59 @@
 
       <!-- Bottom 8-Subsystem Quick-Access Floating Pill Bar -->
       <div class="absolute bottom-3 left-3 right-3 flex items-center justify-center z-20 pointer-events-none">
-        <div class="pointer-events-auto bg-[#101113]/90 backdrop-blur-md border border-oppy-border/80 px-2 py-1.5 rounded-full flex items-center gap-1.5 overflow-x-auto max-w-full shadow-2xl">
-          <button data-sys="all" class="hw-sub-btn active px-2.5 py-1 rounded-full text-[10px] font-mono border border-amber-400 bg-amber-500/25 text-white font-semibold transition shrink-0">ALL SYSTEMS</button>
-          <button data-sys="arm" class="hw-sub-btn px-2.5 py-1 rounded-full text-[10px] font-mono border border-oppy-border bg-oppy-card text-oppy-textSecondary hover:border-amber-400/60 hover:text-white transition shrink-0">1. Robotic Arm &amp; RAT</button>
-          <button data-sys="suspension" class="hw-sub-btn px-2.5 py-1 rounded-full text-[10px] font-mono border border-oppy-border bg-oppy-card text-oppy-textSecondary hover:border-amber-400/60 hover:text-white transition shrink-0">2. Rocker-Bogie &amp; 6 Wheels</button>
-          <button data-sys="solar" class="hw-sub-btn px-2.5 py-1 rounded-full text-[10px] font-mono border border-oppy-border bg-oppy-card text-oppy-textSecondary hover:border-amber-400/60 hover:text-white transition shrink-0">3. GaAs Solar Wings</button>
-          <button data-sys="mast" class="hw-sub-btn px-2.5 py-1 rounded-full text-[10px] font-mono border border-oppy-border bg-oppy-card text-oppy-textSecondary hover:border-amber-400/60 hover:text-white transition shrink-0">4. Pancam Mast</button>
-          <button data-sys="web" class="hw-sub-btn px-2.5 py-1 rounded-full text-[10px] font-mono border border-oppy-border bg-oppy-card text-oppy-textSecondary hover:border-amber-400/60 hover:text-white transition shrink-0">5. WEB &amp; RAD6000 CPU</button>
-          <button data-sys="antennas" class="hw-sub-btn px-2.5 py-1 rounded-full text-[10px] font-mono border border-oppy-border bg-oppy-card text-oppy-textSecondary hover:border-amber-400/60 hover:text-white transition shrink-0">6. HGA &amp; UHF Antennas</button>
-          <button data-sys="battery" class="hw-sub-btn px-2.5 py-1 rounded-full text-[10px] font-mono border border-oppy-border bg-oppy-card text-oppy-textSecondary hover:border-amber-400/60 hover:text-white transition shrink-0">7. Li-Ion Battery Pack</button>
+        <div class="pointer-events-auto bg-[#101113]/90 backdrop-blur-md border border-white/15 px-2.5 py-1.5 rounded-full flex items-center gap-1.5 overflow-x-auto max-w-full shadow-2xl">
+          <button data-sys="all" class="hw-sub-btn active px-3.5 py-1 rounded-full text-[11px] font-sans border border-white bg-white text-black font-semibold shadow-md transition shrink-0 cursor-pointer">ALL SYSTEMS</button>
+          <button data-sys="arm" class="hw-sub-btn px-3.5 py-1 rounded-full text-[11px] font-sans border border-oppy-border bg-oppy-card text-oppy-textSecondary hover:border-oppy-borderLight hover:text-white transition shrink-0 cursor-pointer">1. Robotic Arm &amp; RAT</button>
+          <button data-sys="suspension" class="hw-sub-btn px-3.5 py-1 rounded-full text-[11px] font-sans border border-oppy-border bg-oppy-card text-oppy-textSecondary hover:border-oppy-borderLight hover:text-white transition shrink-0 cursor-pointer">2. Rocker-Bogie &amp; 6 Wheels</button>
+          <button data-sys="solar" class="hw-sub-btn px-3.5 py-1 rounded-full text-[11px] font-sans border border-oppy-border bg-oppy-card text-oppy-textSecondary hover:border-oppy-borderLight hover:text-white transition shrink-0 cursor-pointer">3. GaAs Solar Wings</button>
+          <button data-sys="mast" class="hw-sub-btn px-3.5 py-1 rounded-full text-[11px] font-sans border border-oppy-border bg-oppy-card text-oppy-textSecondary hover:border-oppy-borderLight hover:text-white transition shrink-0 cursor-pointer">4. Pancam Mast</button>
+          <button data-sys="web" class="hw-sub-btn px-3.5 py-1 rounded-full text-[11px] font-sans border border-oppy-border bg-oppy-card text-oppy-textSecondary hover:border-oppy-borderLight hover:text-white transition shrink-0 cursor-pointer">5. WEB &amp; RAD6000 CPU</button>
+          <button data-sys="antennas" class="hw-sub-btn px-3.5 py-1 rounded-full text-[11px] font-sans border border-oppy-border bg-oppy-card text-oppy-textSecondary hover:border-oppy-borderLight hover:text-white transition shrink-0 cursor-pointer">6. HGA &amp; UHF Antennas</button>
+          <button data-sys="battery" class="hw-sub-btn px-3.5 py-1 rounded-full text-[11px] font-sans border border-oppy-border bg-oppy-card text-oppy-textSecondary hover:border-oppy-borderLight hover:text-white transition shrink-0 cursor-pointer">7. Li-Ion Battery Pack</button>
         </div>
       </div>
 
     </div>
   </div>
 
+
   <!-- ========================================================================= -->
   <!-- 3. INTERACTIVE MARS ODYSSEY MISSION EXPERIENCE OVERLAY                   -->
   <!-- ========================================================================= -->
-  <div id="experience-overlay" class="fixed inset-0 z-50 bg-[#070606] flex flex-col hidden opacity-0 transition-opacity duration-300 select-none">
+  <div id="experience-overlay" class="fixed inset-0 z-50 bg-[#101113] flex flex-col hidden opacity-0 transition-opacity duration-300 select-none">
     
     <!-- Experience Top Telemetry Bar -->
-    <div class="px-4 sm:px-6 py-2.5 border-b border-oppy-border/60 bg-[#0e0b0a]/95 backdrop-blur-md flex flex-wrap items-center justify-between gap-3 text-xs font-mono z-30">
+    <div class="px-4 sm:px-6 py-2.5 border-b border-oppy-border/60 bg-[#101113]/95 backdrop-blur-md flex flex-wrap items-center justify-between gap-3 text-xs font-sans z-30">
       
       <!-- Brand & Current Historical Act -->
       <div class="flex items-center space-x-3">
-        <span class="w-2 h-2 rounded-full bg-amber-400 animate-ping"></span>
-        <span class="font-bold tracking-wider text-white text-[11px] sm:text-xs">OPPY'S LAST DANCE // MARS SURFACE JOURNEY</span>
-        <span id="hudActBadge" class="text-[10px] px-2.5 py-0.5 rounded bg-oppy-surface text-amber-300 border border-amber-500/30">
+        <span class="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse"></span>
+        <span class="font-bold tracking-wider text-white text-[11px] sm:text-xs font-sans uppercase">OPPY'S LAST DANCE // MARS SURFACE JOURNEY</span>
+        <span id="hudActBadge" class="text-[10px] font-sans font-semibold tracking-wider px-3 py-0.5 rounded-full bg-white/10 text-white border border-white/20 uppercase">
           ACT I · EAGLE CRATER
         </span>
       </div>
 
       <!-- Real-Time Mission Telemetry -->
-      <div class="flex items-center space-x-4 sm:space-x-6 text-[11px]">
+      <div class="flex items-center space-x-4 sm:space-x-6 text-[11px] font-sans">
         <div class="flex items-center gap-1.5">
-          <span class="text-oppy-textMuted text-[9px] uppercase">SOL:</span>
-          <span id="hudSol" class="text-sky-400 font-bold">SOL 1</span>
+          <span class="text-oppy-textMuted text-[10px] uppercase font-medium tracking-wider">SOL:</span>
+          <span id="hudSol" class="text-white font-bold font-sans text-xs">SOL 1</span>
         </div>
         <div class="flex items-center gap-1.5">
-          <span class="text-oppy-textMuted text-[9px] uppercase">ODOMETER:</span>
-          <span id="hudOdometer" class="text-amber-400 font-bold">0.00 km</span>
+          <span class="text-oppy-textMuted text-[10px] uppercase font-medium tracking-wider">ODOMETER:</span>
+          <span id="hudOdometer" class="text-white font-bold font-sans text-xs">0.00 km</span>
         </div>
         <div class="flex items-center gap-1.5 hidden md:flex">
-          <span class="text-oppy-textMuted text-[9px] uppercase">SOLAR:</span>
-          <span id="hudSolar" class="text-emerald-400 font-bold">900 Wh</span>
-          <div class="w-10 h-1.5 bg-oppy-surface rounded overflow-hidden">
+          <span class="text-oppy-textMuted text-[10px] uppercase font-medium tracking-wider">SOLAR:</span>
+          <span id="hudSolar" class="text-oppy-accent font-bold font-sans text-xs">900 Wh</span>
+          <div class="w-12 h-1.5 bg-oppy-surface rounded-full overflow-hidden">
             <div id="hudSolarBar" class="h-full bg-emerald-400 w-full transition-all duration-150"></div>
           </div>
         </div>
         <div class="flex items-center gap-1.5 hidden lg:flex">
-          <span id="hudTau" class="text-amber-300 font-bold">τ = 0.50</span>
-          <span id="hudTauState" class="text-[8px] text-emerald-400 uppercase font-semibold">CLEAR</span>
+          <span id="hudTau" class="text-white font-bold font-sans text-xs">τ = 0.50</span>
+          <span id="hudTauState" class="text-[9px] text-emerald-400 uppercase font-semibold font-sans tracking-wider">CLEAR</span>
         </div>
       </div>
 
@@ -415,16 +414,16 @@
       <div class="flex items-center space-x-2.5">
         <button 
           id="btnAudioToggle" 
-          class="px-2.5 py-1 rounded border border-oppy-border bg-oppy-surface hover:border-oppy-accent text-white text-[10px] uppercase transition-colors"
+          class="px-3 py-1 rounded-full border border-oppy-border/80 bg-oppy-card/90 hover:border-oppy-accent text-oppy-textSecondary hover:text-white text-[11px] font-sans uppercase transition-colors cursor-pointer"
           title="Toggle Procedural Audio Soundscape"
         >
           🔊 SFX: ON
         </button>
         <button 
           onclick="closeOverlays()" 
-          class="px-3 py-1 rounded border border-oppy-border bg-oppy-surface hover:border-red-400 hover:text-red-400 text-white text-[11px] uppercase transition-colors"
+          class="px-3.5 py-1 rounded-full border border-oppy-border/80 bg-oppy-surface hover:border-red-400 hover:text-red-400 text-white text-[11px] font-sans font-medium uppercase transition-colors cursor-pointer"
         >
-          ✕ RETURN TO LANDING
+          ✕ RETURN
         </button>
       </div>
 
@@ -441,17 +440,17 @@
 
       <!-- Minimal Translucent Top Ribbon -->
       <div class="pointer-events-none absolute top-3 left-4 right-4 flex items-center justify-between z-20">
-        <div class="px-3 py-1 rounded-full bg-black/60 backdrop-blur-md border border-amber-500/20 flex items-center gap-2">
-          <span class="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse"></span>
-          <span id="cinemaChapterHeader" class="font-mono text-[10px] uppercase text-amber-300 tracking-wider">
+        <div class="px-3.5 py-1.5 rounded-full bg-[#101113]/90 backdrop-blur-md border border-white/15 flex items-center gap-2.5 shadow-xl">
+          <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+          <span id="cinemaChapterHeader" class="font-sans text-[11px] uppercase text-white font-semibold tracking-wider">
             ACT I // THE INTERPLANETARY HOLE-IN-ONE (EAGLE CRATER)
           </span>
-          <span id="cinemaYearBadge" class="px-1.5 py-0.2 rounded bg-black/60 text-[9px] font-mono text-slate-300">
+          <span id="cinemaYearBadge" class="px-2 py-0.5 rounded-full bg-white/10 text-[9px] font-sans font-medium text-oppy-textSecondary border border-white/10">
             JAN 2004
           </span>
         </div>
         <div class="flex items-center gap-2">
-          <span id="cinemaDriveModeBadge" class="px-2.5 py-1 rounded-full bg-black/60 border border-emerald-500/30 text-[9px] font-mono text-emerald-300">
+          <span id="cinemaDriveModeBadge" class="px-3 py-1 rounded-full bg-[#101113]/90 backdrop-blur-md border border-white/15 text-[10px] font-sans font-semibold text-emerald-400 tracking-wide shadow-xl">
             ▶ FWD DRIVE
           </span>
           <span id="active2DHardwareText" class="hidden"></span>
@@ -459,24 +458,24 @@
       </div>
 
       <!-- Sol 5111 Pancam Sky Noise PiP Frame (Triggered during Act VI) -->
-      <div id="pancamStaticPip" class="hidden absolute top-14 right-4 w-32 h-32 bg-black border border-red-500/80 rounded-lg overflow-hidden shadow-2xl z-20 flex flex-col">
-        <div class="bg-red-950/90 px-2 py-0.5 text-[8px] font-mono text-red-200 flex justify-between items-center">
+      <div id="pancamStaticPip" class="hidden absolute top-14 right-4 w-32 h-32 bg-black border border-red-500/80 rounded-lg overflow-hidden shadow-2xl z-20 flex flex-col font-sans">
+        <div class="bg-red-950/90 px-2 py-0.5 text-[8.5px] font-sans font-medium text-red-200 flex justify-between items-center">
           <span>PANCAM SKY TAU</span>
-          <span class="animate-pulse">SOL 5111</span>
+          <span class="animate-pulse font-semibold">SOL 5111</span>
         </div>
         <canvas id="staticNoiseCanvas" width="120" height="90" class="w-full flex-1 block"></canvas>
-        <div class="bg-black/95 px-1 py-0.5 text-[7.5px] font-mono text-slate-400 text-center">
+        <div class="bg-black/95 px-1 py-0.5 text-[8px] font-sans text-slate-400 text-center">
           TAU &gt; 10.8 · PITCH BLACK
         </div>
       </div>
 
       <!-- Floating Subtitle & Science Telemetry Box (Compact, Bottom Center) -->
       <div class="pointer-events-none absolute bottom-16 left-4 right-4 flex flex-col items-center z-20">
-        <div class="max-w-xl w-full text-center px-4 py-1.5 rounded-lg bg-black/65 backdrop-blur-md border border-amber-500/20 shadow-xl">
-          <p id="movieSubtitleText" class="text-[11px] sm:text-xs font-medium text-amber-100 leading-snug font-sans drop-shadow">
+        <div class="max-w-2xl w-full text-center px-5 py-3 rounded-2xl bg-[#101113]/90 backdrop-blur-md border border-white/15 shadow-2xl space-y-1">
+          <p id="movieSubtitleText" class="text-xs sm:text-[13px] font-normal text-white leading-relaxed font-sans drop-shadow">
             “Designed for just 90 sols and 1 kilometer. Inside Eagle Crater, Oppy reaches out its robotic arm and discovers hematite ‘blueberries’—proving ancient liquid water once soaked Mars.”
           </p>
-          <div id="movieScienceNote" class="mt-0.5 text-[8.5px] font-mono text-sky-300/90 uppercase tracking-wider">
+          <div id="movieScienceNote" class="text-[10px] font-sans text-oppy-accent uppercase font-medium tracking-wider">
             [SCIENCE TELEMETRY]: Mössbauer MIMOS II & APXS confirm jarosite + gray crystalline hematite concretions
           </div>
         </div>
@@ -486,32 +485,32 @@
       <div class="absolute bottom-3 left-4 right-4 flex flex-wrap items-center justify-between gap-2 z-20 pointer-events-auto">
         
         <!-- Left: Drive Controls -->
-        <div class="px-2 py-1 rounded-full bg-black/75 backdrop-blur-md border border-oppy-border flex items-center gap-1 shadow-2xl">
+        <div class="px-2.5 py-1.5 rounded-full bg-[#101113]/90 backdrop-blur-md border border-white/15 flex items-center gap-1.5 shadow-2xl">
           <button 
             id="btnDriveBack"
-            class="px-2.5 py-1 rounded-full bg-black/60 hover:bg-slate-800 active:bg-amber-500/30 text-[10px] font-mono text-slate-200 flex items-center gap-1 transition"
+            class="px-3 py-1.5 rounded-full bg-oppy-card border border-oppy-border/80 hover:border-oppy-borderLight text-[11px] font-sans font-medium text-oppy-textSecondary hover:text-white flex items-center gap-1.5 transition cursor-pointer"
             title="Hold A or Left Arrow to reverse"
           >
-            <span>◀</span> <span class="hidden sm:inline">REVERSE</span> <kbd class="px-1 bg-slate-800 rounded text-amber-400 text-[9px]">[A]</kbd>
+            <span>◀</span> <span class="hidden sm:inline">REVERSE</span> <kbd class="px-1.5 bg-oppy-surface rounded text-oppy-textSecondary text-[9px] font-sans">[A]</kbd>
           </button>
           <button 
             id="btnDriveFwd"
-            class="px-3 py-1 rounded-full bg-amber-500/30 hover:bg-amber-500/50 active:bg-amber-500/70 border border-amber-400/60 text-[10px] font-mono font-bold text-amber-100 flex items-center gap-1 transition shadow-lg"
+            class="px-4 py-1.5 rounded-full bg-white hover:bg-slate-200 active:bg-slate-300 text-black text-[11px] font-sans font-bold flex items-center gap-1.5 transition shadow-xl cursor-pointer"
             title="Hold D or Right Arrow to drive forward"
           >
-            <span>DRIVE MARS</span> <kbd class="px-1 bg-amber-950/90 rounded text-amber-300 text-[9px]">[D]</kbd> <span>▶</span>
+            <span>DRIVE MARS</span> <kbd class="px-1.5 bg-black/15 rounded text-black text-[9px] font-sans font-semibold">[D]</kbd> <span>▶</span>
           </button>
           <button 
             id="btnAutoCruise"
-            class="px-2 py-1 rounded-full bg-black/60 hover:bg-slate-800 text-[9px] font-mono text-slate-300 transition"
+            class="px-3 py-1.5 rounded-full bg-oppy-card border border-oppy-border/80 text-[10px] font-sans font-medium text-oppy-textSecondary hover:text-white transition cursor-pointer"
           >
             AUTO-DRIVE: OFF
           </button>
         </div>
 
         <!-- Center: Mission Traverse Scrubber -->
-        <div class="flex items-center gap-2 bg-black/75 backdrop-blur-md border border-oppy-border px-3 py-1.5 rounded-full flex-1 max-w-xs sm:max-w-md shadow-2xl">
-          <span class="text-[9px] font-mono text-oppy-textMuted shrink-0">TRAVERSE:</span>
+        <div class="flex items-center gap-2.5 bg-[#101113]/90 backdrop-blur-md border border-white/15 px-4 py-1.5 rounded-full flex-1 max-w-xs sm:max-w-md shadow-2xl">
+          <span class="text-[10px] font-sans font-medium text-oppy-textMuted uppercase tracking-wider shrink-0">TRAVERSE:</span>
           <input 
             id="missionScrubber" 
             type="range" 
@@ -519,24 +518,24 @@
             max="45.16" 
             step="0.02" 
             value="0"
-            class="w-full h-1 bg-oppy-border rounded appearance-none cursor-pointer accent-amber-400"
+            class="w-full h-1 bg-oppy-border rounded appearance-none cursor-pointer accent-oppy-accent"
             title="Scrub across Opportunity's 45.16 km traverse"
           />
-          <span id="scrubberPct" class="text-[9px] font-mono text-amber-300 w-8 text-right shrink-0">0%</span>
+          <span id="scrubberPct" class="text-[10px] font-sans font-semibold text-white w-8 text-right shrink-0">0%</span>
         </div>
 
         <!-- Right: Science Instrument & Atmospheric Controls -->
-        <div class="px-2 py-1 rounded-full bg-black/75 backdrop-blur-md border border-oppy-border flex items-center gap-1 shadow-2xl">
+        <div class="px-2.5 py-1.5 rounded-full bg-[#101113]/90 backdrop-blur-md border border-white/15 flex items-center gap-1.5 shadow-2xl">
           <button 
             id="btnDeployInstrument"
-            class="px-2.5 py-1 rounded-full bg-sky-500/20 hover:bg-sky-500/35 border border-sky-400/40 text-[9.5px] font-mono text-sky-200 transition flex items-center gap-1"
+            class="px-3 py-1.5 rounded-full bg-oppy-card border border-oppy-border/80 hover:border-oppy-accent text-[11px] font-sans font-medium text-white transition flex items-center gap-1.5 shadow-lg cursor-pointer"
             title="Deploy IDD Arm & RAT Diamond Grinder"
           >
-            <span>⚡ DEPLOY RAT</span> <kbd class="px-1 bg-slate-900 rounded text-sky-300 text-[8.5px]">[E]</kbd>
+            <span>⚡ DEPLOY RAT</span> <kbd class="px-1.5 bg-oppy-surface rounded text-oppy-accent text-[9px] font-sans font-medium">[E]</kbd>
           </button>
           <button 
             id="btnTriggerWindGust"
-            class="px-2.5 py-1 rounded-full bg-emerald-500/15 hover:bg-emerald-500/30 border border-emerald-500/35 text-[9.5px] font-mono text-emerald-300 transition hidden sm:inline-flex items-center gap-1"
+            class="px-3 py-1.5 rounded-full bg-oppy-card border border-oppy-border/80 hover:border-emerald-400 text-[11px] font-sans font-medium text-white transition hidden sm:inline-flex items-center gap-1.5 shadow-lg cursor-pointer"
             title="Trigger Martian Dust Devil Cleaning Event"
           >
             <span>💨 WIND GUST</span>
@@ -547,8 +546,8 @@
 
       <!-- Climax & Finale Modal Overlay (Triggered at 45.16 km) -->
       <div id="finaleOverlay" class="hidden absolute inset-0 bg-black/90 backdrop-blur-md z-30 flex flex-col items-center justify-center p-6 text-center transition-opacity duration-700">
-        <div class="max-w-lg w-full bg-oppy-card border border-amber-500/40 rounded-2xl p-6 shadow-2xl space-y-4">
-          <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-red-950/80 border border-red-500/50 text-red-300 font-mono text-[10px]">
+        <div class="max-w-lg w-full bg-[#101113]/95 border border-white/15 rounded-2xl p-6 shadow-2xl space-y-4 backdrop-blur-md">
+          <div class="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-red-950/80 border border-red-500/50 text-red-300 font-sans text-[10px] font-medium tracking-wider">
             <span class="w-2 h-2 rounded-full bg-red-500 animate-ping"></span>
             <span>SOL 5111 — FINAL TELEMETRY TRANSMITTED (JUNE 10, 2018)</span>
           </div>
@@ -557,18 +556,18 @@
             “My battery is low and it’s getting dark.”
           </div>
 
-          <p class="text-xs text-oppy-textSecondary leading-relaxed">
+          <p class="text-xs text-oppy-textSecondary leading-relaxed font-sans">
             Engineered for 90 sols and 1,000 meters. Opportunity explored Mars for 5,352 sols (15 years) and traversed 45.16 kilometers—becoming the longest-running off-world mission in human history.
           </p>
 
           <div class="flex items-center justify-center gap-3 pt-2">
-            <button id="btnReplayMission" class="px-4 py-2 rounded-md bg-amber-500/30 hover:bg-amber-500/50 border border-amber-400 text-amber-200 text-xs font-mono font-bold">
+            <button id="btnReplayMission" class="px-5 py-2.5 rounded-full bg-white text-black hover:bg-slate-200 font-sans font-bold text-xs shadow-xl transition cursor-pointer">
               ↺ REPLAY MISSION
             </button>
-            <button id="btnPlayFinalSong" class="px-4 py-2 rounded-md bg-sky-500/30 hover:bg-sky-500/50 border border-sky-400 text-sky-200 text-xs font-mono font-bold">
+            <button id="btnPlayFinalSong" class="px-5 py-2.5 rounded-full bg-oppy-surface border border-oppy-border hover:border-oppy-accent text-white font-sans font-bold text-xs shadow-xl transition cursor-pointer">
               ♪ PLAY FAREWELL CHORD
             </button>
-            <button id="btnDismissFinale" class="px-4 py-2 rounded-md border border-oppy-border bg-oppy-surface hover:bg-oppy-card text-white text-xs font-mono">
+            <button id="btnDismissFinale" class="px-4 py-2 rounded-full border border-oppy-border bg-oppy-surface hover:bg-oppy-card text-oppy-textSecondary hover:text-white text-xs font-sans transition cursor-pointer">
               CONTINUE
             </button>
           </div>
@@ -586,41 +585,38 @@
 
   <!-- About Modal -->
   <div id="about-modal" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 hidden opacity-0 transition-opacity duration-200">
-    <div class="bg-oppy-card border border-oppy-border max-w-lg w-full rounded-lg p-6 text-xs text-oppy-textSecondary font-sans shadow-2xl">
+    <div class="bg-oppy-card border border-oppy-border max-w-lg w-full rounded-2xl p-6 text-xs text-oppy-textSecondary font-sans shadow-2xl">
       <div class="flex justify-between items-center pb-3 border-b border-oppy-border/60 mb-4">
-        <span class="font-bold text-white font-mono text-xs uppercase tracking-wider">ABOUT THE OPPORTUNITY MISSION</span>
-        <button onclick="closeModal('about-modal')" class="text-oppy-textMuted hover:text-white font-mono">✕ CLOSE</button>
+        <span class="font-bold text-white font-sans text-xs uppercase tracking-wider">ABOUT THE OPPORTUNITY MISSION</span>
+        <button onclick="closeModal('about-modal')" class="text-oppy-textMuted hover:text-white font-sans text-xs transition cursor-pointer">✕ CLOSE</button>
       </div>
       <p class="mb-3 leading-relaxed">
         Opportunity (MER-B) was a robotic rover active on Mars from 2004 to 2018. Launched on July 7, 2003, as part of NASA's Mars Exploration Rover program, it touched down in Meridiani Planum on January 25, 2004.
       </p>
       <p class="mb-3 leading-relaxed">
-        Engineered for an operational baseline of 90 Martian sols (about 92.5 Earth days), Opportunity survived for 5,352 sols (14 years, 138 days), traversing 45.16 kilometers (28.06 miles).
+        Designed for a 90-sol mission, Opportunity operated for 5,111 sols (over 14 years), traveling 45.16 kilometers—making it the longest-running off-world mission in human history.
       </p>
-      <div class="p-3 bg-oppy-surface rounded border border-oppy-border/60 font-mono text-[11px] space-y-1 text-oppy-textMuted">
-        <div>• LAUNCH: July 7, 2003 (Cape Canaveral SLC-17B)</div>
-        <div>• LANDING: January 25, 2004 (Eagle Crater, Meridiani)</div>
-        <div>• FINAL CONTACT: June 10, 2018 (Perseverance Valley)</div>
-        <div>• TOTAL DISTANCE: 45.16 km (Off-world record)</div>
-      </div>
+      <p class="leading-relaxed">
+        Key discoveries included hematite concretions ("blueberries") proving ancient liquid water, the exploration of Victoria and Endeavour craters, and evidence of habitable ancient environments.
+      </p>
     </div>
   </div>
 
   <!-- Farewell Modal -->
   <div id="farewell-modal" class="fixed inset-0 z-50 bg-black/85 backdrop-blur-sm flex items-center justify-center p-4 hidden opacity-0 transition-opacity duration-200">
-    <div class="bg-oppy-card border border-oppy-border max-w-lg w-full rounded-lg p-6 text-xs text-oppy-textSecondary font-sans shadow-2xl text-center">
+    <div class="bg-oppy-card border border-oppy-border max-w-lg w-full rounded-2xl p-6 text-xs text-oppy-textSecondary font-sans shadow-2xl text-center">
       <div class="flex justify-between items-center pb-3 border-b border-oppy-border/60 mb-4">
-        <span class="font-bold text-white font-mono text-xs uppercase tracking-wider">THE FAREWELL · SOL 5111</span>
-        <button onclick="closeModal('farewell-modal')" class="text-oppy-textMuted hover:text-white font-mono">✕ CLOSE</button>
+        <span class="font-bold text-white font-sans text-xs uppercase tracking-wider">THE FAREWELL · SOL 5111</span>
+        <button onclick="closeModal('farewell-modal')" class="text-oppy-textMuted hover:text-white font-sans text-xs transition cursor-pointer">✕ CLOSE</button>
       </div>
       <div class="text-2xl text-white font-serif italic mb-4">
         “My battery is low and it’s getting dark.”
       </div>
-      <p class="mb-4 leading-relaxed text-oppy-textSecondary">
-        On June 10, 2018, as a global dust storm enveloped Mars and blocked out the sun, Opportunity transmitted its final engineering telemetry package from Perseverance Valley on the rim of Endeavour Crater.
+      <p class="mb-3 leading-relaxed">
+        On June 10, 2018 (Sol 5111), a catastrophic planet-encircling dust storm blotted out the Martian sky above Perseverance Valley. Opportunity transmitted its final telemetry packet, reporting atmospheric tau &gt; 10.8 and battery reserves dropping below survival thresholds.
       </p>
       <p class="leading-relaxed text-oppy-textMuted text-[11px]">
-        After over 1,000 recovery signals sent by NASA's Deep Space Network went unanswered, the mission was officially declared complete on February 13, 2019. Opportunity sleeps forever beneath the red sands, its scientific legacy immortal.
+        Over the following eight months, NASA engineers sent over a thousand recovery commands. On February 13, 2019, from NASA JPL, the mission was officially declared complete. Rest well, Oppy.
       </p>
     </div>
   </div>
@@ -630,108 +626,7 @@
   <!-- 5. APPLICATION LOGIC & 3D HARDWARE CONTROLLER SCRIPT                      -->
   <!-- ========================================================================= -->
   <script>
-    // Mission Phases Data for The Journey
-    const STORY_PHASES = [
-      {
-        num: "PHASE // 01",
-        period: "2003",
-        title: "The Beginning",
-        headline: "Twin Rovers to Seek Ancient Martian Waters",
-        body: "NASA dispatched two identical robotic geologists—Spirit and Opportunity—to search for evidence of liquid water. Launched atop a Delta II rocket on July 7, 2003.",
-        discTitle: "Targeting Gray Crystalline Hematite",
-        discDesc: "Mars Global Surveyor orbital data identified abundant hematite in Meridiani Planum, marking it as the prime landing zone."
-      },
-      {
-        num: "PHASE // 02",
-        period: "JAN 25, 2004",
-        title: "Arrival on Mars",
-        headline: "The Interplanetary Hole-in-One: Touchdown in Eagle Crater",
-        body: "Opportunity entered the Martian atmosphere at 19,000 km/h, bouncing across Meridiani Planum cocooned in airbags directly into a 22-meter impact crater.",
-        discTitle: "First In-Situ Bedrock on Mars",
-        discDesc: "Opportunity rolled off its lander petals and beheld layered sedimentary rock—the first ever photographed on Mars."
-      },
-      {
-        num: "PHASE // 03",
-        period: "2004",
-        title: "The First Discoveries",
-        headline: "Martian Blueberries & Proof of Acidic Standing Water",
-        body: "Within Eagle Crater, Opportunity extended its robotic arm to bedrock. The Microscopic Imager revealed hematite spherules nicknamed 'blueberries' formed in shallow acidic water.",
-        discTitle: "Jarosite Salt & Hematite Concretions",
-        discDesc: "APXS and Mössbauer spectrometers confirmed jarosite—indisputable proof of an ancient aqueous environment."
-      },
-      {
-        num: "PHASE // 04",
-        period: "2004–2017",
-        title: "Beyond Expectations",
-        headline: "A 15-Year Overland Odyssey Across Massive Basins",
-        body: "Designed for 90 sols and 1,000 meters, Opportunity drove 45 kilometers across Endurance, Victoria, and Endeavour craters, surviving severe sand traps and mechanical hurdles.",
-        discTitle: "Homestake Gypsum Vein & Martian Marathon",
-        discDesc: "Discovered calcium sulfate veins formed by neutral water, and completed the first off-world marathon (42.195 km) in 2015."
-      },
-      {
-        num: "PHASE // 05",
-        period: "JUN 2018",
-        title: "The Final Storm",
-        headline: "The Planet-Encircling Dust Tempest of 2018",
-        body: "In June 2018, a catastrophic global dust storm darkened the sky, dropping solar power to a critical 22 watt-hours. Opportunity relayed its final telemetry from Perseverance Valley.",
-        discTitle: "Record Optical Depth (tau > 10.8)",
-        discDesc: "Atmospheric dust blocked 99% of incoming solar irradiance, halting master clocks and forcing survival sleep mode."
-      },
-      {
-        num: "PHASE // 06",
-        period: "FEB 13, 2019",
-        title: "The Last Dance",
-        headline: "Mission Complete: An Unbroken Legacy on the Red Planet",
-        body: "On February 13, 2019, NASA officially declared the mission complete. 5,352 sols, 45.16 km, and 217,594 raw photographs proved Mars was once wet and habitable.",
-        discTitle: "Enduring Scientific Heritage",
-        discDesc: "The longest-running planetary surface mission in human history laid the technological foundation for Curiosity and Perseverance."
-      }
-    ];
-
-    let currentStoryIndex = 0;
-
-    function renderStoryPhase() {
-      const p = STORY_PHASES[currentStoryIndex];
-      document.getElementById('exp-phase-badge').textContent = `PHASE 0${currentStoryIndex + 1} / 06`;
-      document.getElementById('exp-phase-num').textContent = p.num;
-      document.getElementById('exp-phase-period').textContent = p.period;
-      document.getElementById('exp-phase-title').textContent = p.title;
-      document.getElementById('exp-phase-headline').textContent = p.headline;
-      document.getElementById('exp-phase-body').textContent = p.body;
-      document.getElementById('exp-phase-disc-title').textContent = p.discTitle;
-      document.getElementById('exp-phase-disc-desc').textContent = p.discDesc;
-
-      const container = document.getElementById('exp-nodes-container');
-      container.innerHTML = '';
-      STORY_PHASES.forEach((_, idx) => {
-        const btn = document.createElement('button');
-        btn.onclick = () => { currentStoryIndex = idx; renderStoryPhase(); };
-        btn.className = `w-3 h-3 rounded-full border transition-all ${
-          idx === currentStoryIndex 
-            ? 'border-oppy-accent bg-oppy-accent scale-125' 
-            : idx < currentStoryIndex 
-            ? 'border-oppy-textSecondary bg-oppy-textMuted' 
-            : 'border-oppy-border bg-oppy-surface hover:border-oppy-borderLight'
-        }`;
-        container.appendChild(btn);
-      });
-    }
-
-    function nextStoryPhase() {
-      if (currentStoryIndex < STORY_PHASES.length - 1) {
-        currentStoryIndex++;
-        renderStoryPhase();
-      }
-    }
-
-    function prevStoryPhase() {
-      if (currentStoryIndex > 0) {
-        currentStoryIndex--;
-        renderStoryPhase();
-      }
-    }
-
-    // Modal & Overlay Transitions
+    // Modal transitions
     function openModal(id) {
       const el = document.getElementById(id);
       if (!el) return;
@@ -748,6 +643,7 @@
 
     let overlayCloseTimer = null;
 
+    // Open 2D Mars Surface Experience
     function openExperienceView() {
       if (overlayCloseTimer) {
         clearTimeout(overlayCloseTimer);
@@ -762,8 +658,9 @@
       const el = document.getElementById('experience-overlay');
       if (!el) return;
       el.classList.remove('hidden');
+      el.classList.remove('opacity-0');
+      el.style.opacity = '1';
       requestAnimationFrame(() => {
-        el.classList.remove('opacity-0');
         if (window.startMissionExperience) {
           try {
             window.startMissionExperience();
@@ -774,6 +671,7 @@
       });
     }
 
+    // Open 3D Hardware Explorer
     function openHardwareView() {
       if (overlayCloseTimer) {
         clearTimeout(overlayCloseTimer);
@@ -791,8 +689,9 @@
       const el = document.getElementById('hardware-overlay');
       if (!el) return;
       el.classList.remove('hidden');
+      el.classList.remove('opacity-0');
+      el.style.opacity = '1';
       requestAnimationFrame(() => {
-        el.classList.remove('opacity-0');
         if (!window.__hw3dInitialized) {
           init3DHardwareViewer();
           window.__hw3dInitialized = true;
@@ -800,6 +699,7 @@
       });
     }
 
+    // Close overlays & return to landing page
     function closeOverlays() {
       if (overlayCloseTimer) {
         clearTimeout(overlayCloseTimer);
@@ -882,129 +782,212 @@
         audioCtx.resume();
       }
 
-      const text = document.getElementById('audio-text');
-      const icon = document.getElementById('audio-icon');
+      isAudioPlaying = !isAudioPlaying;
+      const targetGain = isAudioPlaying ? 0.38 : 0.0001;
+      masterGain.gain.setTargetAtTime(targetGain, audioCtx.currentTime, 0.4);
 
-      if (isAudioPlaying) {
-        masterGain.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + 0.8);
-        isAudioPlaying = false;
-        if (text) text.textContent = 'AUDIO: MUTE';
-      } else {
-        masterGain.gain.exponentialRampToValueAtTime(0.35, audioCtx.currentTime + 1.2);
-        isAudioPlaying = true;
-        if (text) text.textContent = 'AUDIO: ACTIVE';
+      const btn = document.getElementById('audio-toggle-btn');
+      const text = document.getElementById('audio-text');
+      if (btn && text) {
+        if (isAudioPlaying) {
+          btn.classList.add('border-oppy-accent', 'text-white');
+          text.textContent = 'AUDIO: LIVE';
+        } else {
+          btn.classList.remove('border-oppy-accent', 'text-white');
+          text.textContent = 'AUDIO: MUTE';
+        }
       }
     }
+
+    // Check deep links (e.g. ?view=hardware or ?view=experience)
+    window.addEventListener('DOMContentLoaded', () => {
+      if (location.hash === '#hardware' || location.search.includes('view=hardware')) {
+        openHardwareView();
+        const params = new URLSearchParams(location.search);
+        const sys = params.get('sys');
+        if (sys) {
+          setTimeout(() => {
+            if (window.__hwSelectSubsystem) window.__hwSelectSubsystem(sys, true);
+          }, 400);
+        }
+      } else if (location.hash === '#experience' || location.search.includes('view=experience')) {
+        openExperienceView();
+      }
+    });
 
     // =========================================================================
     // 3D THREE.JS HARDWARE VIEWER IMPLEMENTATION
     // =========================================================================
     function init3DHardwareViewer() {
-  const container = document.getElementById('hw-canvas-container');
-  const canvas = document.getElementById('hw-canvas');
-  if (!canvas || !container) return;
+      const container = document.getElementById('hw-canvas-container');
+      const canvas = document.getElementById('hw-canvas');
+      if (!canvas || !container) return;
 
-  const labelsContainer = document.getElementById('hw-labels-container');
-  if (labelsContainer) labelsContainer.innerHTML = '';
+      const labelsContainer = document.getElementById('hw-labels-container');
+      if (labelsContainer) labelsContainer.innerHTML = '';
 
-  const scene = new THREE.Scene();
-  // Default mode: Sleek Mars Black Background (0x101113), with 1-click toggle to White Studio Mode
-  let isStudioBg = false;
-  scene.background = new THREE.Color(0x101113);
-  scene.fog = new THREE.FogExp2(0x101113, 0.008);
+      const scene = new THREE.Scene();
+      // Default: Mars Black Background (0x101113), 1-click toggle to Studio White
+      let isStudioBg = false;
+      scene.background = new THREE.Color(0x101113);
+      scene.fog = new THREE.FogExp2(0x101113, 0.008);
 
-  const clock = new THREE.Clock();
+      const clock = new THREE.Clock();
 
-  const camera = new THREE.PerspectiveCamera(38, container.clientWidth / Math.max(container.clientHeight, 1), 0.05, 100);
-  const defaultCamPos = new THREE.Vector3(2.65, 1.35, 2.85);
-  const defaultCamTarget = new THREE.Vector3(0.0, 0.16, 0.0);
-  camera.position.copy(defaultCamPos);
+      const camera = new THREE.PerspectiveCamera(38, container.clientWidth / Math.max(container.clientHeight, 1), 0.05, 100);
+      const defaultCamPos = new THREE.Vector3(2.65, 1.35, 2.85);
+      const defaultCamTarget = new THREE.Vector3(0.0, 0.16, 0.0);
+      camera.position.copy(defaultCamPos);
 
-  const renderer = new THREE.WebGLRenderer({ canvas: canvas, antialias: true, powerPreference: 'high-performance' });
-  renderer.setSize(container.clientWidth, container.clientHeight);
-  renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
-  renderer.toneMapping = THREE.ACESFilmicToneMapping;
-  // Lowered exposure slightly for rich contrast and deep metallic/surface definition
-  renderer.toneMappingExposure = 0.95;
-  renderer.shadowMap.enabled = true;
-  renderer.shadowMap.type = THREE.PCFSoftShadowMap;
-  renderer.outputEncoding = THREE.sRGBEncoding;
+      const renderer = new THREE.WebGLRenderer({ canvas: canvas, antialias: true, powerPreference: 'high-performance' });
+      renderer.setSize(container.clientWidth, container.clientHeight);
+      renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+      renderer.toneMapping = THREE.ACESFilmicToneMapping;
+      // Exposure calibrated for rich definition
+      renderer.toneMappingExposure = 0.95;
+      renderer.shadowMap.enabled = true;
+      renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+      renderer.outputEncoding = THREE.sRGBEncoding;
 
-  const controls = new THREE.OrbitControls(camera, renderer.domElement);
-  controls.enableDamping = true;
-  controls.dampingFactor = 0.06;
-  controls.maxPolarAngle = Math.PI / 2 - 0.02;
-  controls.minDistance = 0.8;
-  controls.maxDistance = 14.0;
-  controls.target.copy(defaultCamTarget);
+      const controls = new THREE.OrbitControls(camera, renderer.domElement);
+      controls.enableDamping = true;
+      controls.dampingFactor = 0.06;
+      controls.maxPolarAngle = Math.PI / 2 - 0.02;
+      controls.minDistance = 0.8;
+      controls.maxDistance = 14.0;
+      controls.target.copy(defaultCamTarget);
 
-  // =========================================================================
-  // MULTI-POINT BALANCED LIGHTING RIG (RICH CONTRAST & SURFACE DEFINITION)
-  // =========================================================================
-  const ambLight = new THREE.AmbientLight(0xffffff, 0.40);
-  scene.add(ambLight);
+      // Studio & Atmospheric Lighting
+      const hemiLight = new THREE.HemisphereLight(0xffeedd, 0x4a3a2a, 0.82);
+      scene.add(hemiLight);
 
-  const hemiLight = new THREE.HemisphereLight(0xffeedd, 0x4a3a2a, 0.82);
-  scene.add(hemiLight);
+      const keyLight = new THREE.DirectionalLight(0xfffaee, 1.45);
+      keyLight.position.set(5.5, 9.0, 6.0);
+      keyLight.castShadow = true;
+      keyLight.shadow.mapSize.width = 2048;
+      keyLight.shadow.mapSize.height = 2048;
+      keyLight.shadow.camera.near = 0.5;
+      keyLight.shadow.camera.far = 25;
+      keyLight.shadow.camera.left = -3;
+      keyLight.shadow.camera.right = 3;
+      keyLight.shadow.camera.top = 3;
+      keyLight.shadow.camera.bottom = -3;
+      keyLight.shadow.bias = -0.0003;
+      scene.add(keyLight);
 
-  // Key Light (Sunlight from Front-Right Top, balanced to preserve texture details)
-  const keyLight = new THREE.DirectionalLight(0xfffaee, 1.45);
-  keyLight.position.set(3.5, 7.5, 4.0);
-  keyLight.castShadow = true;
-  keyLight.shadow.mapSize.width = 2048;
-  keyLight.shadow.mapSize.height = 2048;
-  keyLight.shadow.camera.near = 1.0;
-  keyLight.shadow.camera.far = 18.0;
-  const dCam = 2.4;
-  keyLight.shadow.camera.left = -dCam;
-  keyLight.shadow.camera.right = dCam;
-  keyLight.shadow.camera.top = dCam;
-  keyLight.shadow.camera.bottom = -dCam;
-  keyLight.shadow.bias = -0.0005;
-  scene.add(keyLight);
+      const fillLight = new THREE.DirectionalLight(0xa5c4e8, 0.70);
+      fillLight.position.set(-6.0, 4.0, -5.0);
+      scene.add(fillLight);
 
-  // Fill Light (Front-Left)
-  const fillLight = new THREE.DirectionalLight(0xdce7f8, 0.70);
-  fillLight.position.set(-5.0, 4.0, 3.5);
-  scene.add(fillLight);
+      const underBounce = new THREE.DirectionalLight(0xd4af37, 0.65);
+      underBounce.position.set(0.0, -4.0, 0.0);
+      scene.add(underBounce);
 
-  // Back Rim Light (Rear-Top)
-  const rimLight = new THREE.DirectionalLight(0xffeedd, 0.85);
-  rimLight.position.set(-3.5, 6.0, -5.0);
-  scene.add(rimLight);
+      const ambLight = new THREE.AmbientLight(0xffffff, 0.40);
+      scene.add(ambLight);
 
-  // Undercarriage Bounce Light (Highlights cleats, wheel spiral flexures from underneath)
-  const underBounce = new THREE.DirectionalLight(0xd4be9c, 0.65);
-  underBounce.position.set(0.0, -4.5, 1.5);
-  scene.add(underBounce);
+      // Ground Reference Grid - positioned at y = -0.435 so wheels rest on top
+      const grid = new THREE.GridHelper(10, 24, 0x38bdf8, 0x3e434b);
+      grid.position.y = -0.435;
+      scene.add(grid);
 
-  // Front Eye-Level Soft Fill
-  const frontFill = new THREE.DirectionalLight(0xffffff, 0.50);
-  frontFill.position.set(0.0, 2.0, 5.0);
-  scene.add(frontFill);
+      // Shadow catcher plane aligned with ground
+      const shadowPlaneGeo = new THREE.PlaneGeometry(10, 10);
+      const shadowPlaneMat = new THREE.ShadowMaterial({ opacity: 0.14, transparent: true });
+      const shadowPlane = new THREE.Mesh(shadowPlaneGeo, shadowPlaneMat);
+      shadowPlane.rotation.x = -Math.PI / 2;
+      shadowPlane.position.y = -0.438;
+      shadowPlane.receiveShadow = true;
+      scene.add(shadowPlane);
 
-  // Ground Grid: Positioned at y = -0.435 to stick EXACTLY to the base of the wheels!
-  const grid = new THREE.GridHelper(6, 18, 0x3e434b, 0x22252a);
-  grid.position.y = -0.435;
-  scene.add(grid);
+      // 7 EXACT SUBSYSTEMS DATABASE & DETAILS
+      const SUBSYSTEM_DATA = {
+        all: {
+          code: 'MER-B // FULL SYSTEM',
+          name: 'Mars Exploration Rover Opportunity (MER-B)',
+          shortName: 'FULL ROVER ASSEMBLY',
+          mass: '185 kg (Dry)',
+          spec1: '1.5m Height · 2.3m Width · 1.6m Length',
+          spec2: 'Planned: 90 Sols · Actual: 5,111 Sols (55× Life)',
+          desc: 'Launched July 7, 2003 and landed January 25, 2004 inside Eagle Crater at Meridiani Planum. Opportunity operated 55 times longer than designed, traversing 45.16 km across six major Martian geological epochs.',
+          link: 'Discovered hematite spherules ("blueberries") proving ancient standing acidic water, surveyed Victoria Crater, and confirmed neutral clay minerals at Endeavour Crater.'
+        },
+        arm: {
+          code: 'SUBSYSTEM 01 // IDD-RAT',
+          name: '5-DOF Robotic Arm (IDD) & Instrument Turret',
+          shortName: '1. Robotic Arm & RAT',
+          mass: '~14.5 kg',
+          spec1: '5 Azimuth/Elevation Joints · 4-Tool Turret',
+          spec2: 'RAT + Microscopic Imager + MB + APXS',
+          desc: 'The Instrument Deployment Device (IDD) holds a rotating turret with the diamond-toothed Rock Abrasion Tool (RAT), Microscopic Imager (MI), Mössbauer Spectrometer, and Alpha Particle X-Ray Spectrometer (APXS).',
+          link: 'Ground 4.5 mm into Eagle Crater outcrops on Sol 30, proving ancient liquid water via hematite "blueberries" and jarosite sulfate.'
+        },
+        suspension: {
+          code: 'SUBSYSTEM 02 // MOBILITY',
+          name: 'Rocker-Bogie Suspension & 6 Cleated Wheels',
+          shortName: '2. Rocker-Bogie & 6 Wheels',
+          mass: '~35.0 kg',
+          spec1: '6 × 25 cm Machined Aluminum Wheels',
+          spec2: 'Max Tilt: 32° · Perforated Titanium Struts',
+          desc: 'Springless perforated box-beam Rocker-Bogie linkage connected through a central differential bar keeps all six cleated aluminum wheels planted over boulders larger than the wheel diameter while inner spiral flexures absorb shock.',
+          link: 'Escaped axle-deep sand at Purgatory Dune (Sol 446–484) and drove over 25 km backward after the right-front steering actuator jammed.'
+        },
+        solar: {
+          code: 'SUBSYSTEM 03 // POWER ARRAY',
+          name: 'Winged Gallium Arsenide Solar Arrays',
+          shortName: '3. GaAs Solar Wings',
+          mass: '~19.8 kg',
+          spec1: 'Triple-Junction GaInP/GaAs/Ge Cells',
+          spec2: 'Peak: 140 W (900 Wh/sol) · Survival: ~100 Wh',
+          desc: 'Deployable 7-facet winged solar array table covered in triple-junction photovoltaic cells, complete with the MarsDial calibration sundial on the rear deck corner.',
+          link: 'Survived the 2007 global dust storm (128 Wh low point) thanks to serendipitous Martian wind "Cleaning Events" that repeatedly swept dust off the panels.'
+        },
+        mast: {
+          code: 'SUBSYSTEM 04 // PMA MAST',
+          name: 'Pancam & Mini-TES Mast Assembly (PMA)',
+          shortName: '4. Pancam Mast',
+          mass: '~7.2 kg',
+          spec1: '1.5 m Elevation · 360° Azimuth / ±90° Pitch',
+          spec2: 'Stereo Pancam + Navcams + Mini-TES IR',
+          desc: 'The Pancam Mast Assembly (PMA) acts as the rover’s human-height eyes, housing twin multispectral Panoramic Cameras (Pancam), wide-angle Navigation Cameras, and the Miniature Thermal Emission Spectrometer (Mini-TES) periscope.',
+          link: 'Surveyed the Homestake gypsum vein and ancient smectite clay minerals at Endeavour Crater, confirming neutral, drinkable ancient water.'
+        },
+        web: {
+          code: 'SUBSYSTEM 05 // AVIONICS & WEB',
+          name: 'Warm Electronics Box (WEB) & RAD6000 Computer',
+          shortName: '5. WEB & RAD6000 CPU',
+          mass: '~24.0 kg',
+          spec1: '20 MHz BAE RAD6000 CPU · 128 MB DRAM',
+          spec2: '256 MB Flash + 8 × Pu-238 RHU Heaters',
+          desc: 'Insulated with crinkled gold Kapton foil and aerogel walls, the WEB protects the radiation-hardened RAD6000 flight computer and 8 Plutonium-238 Radioisotope Heater Units (1 Watt thermal each) against −105°C nights.',
+          link: 'When cosmic rays wore out Bank 7 Flash memory in 2014, JPL reprogrammed the RAD6000 on Sol 4027 to operate in volatile RAM-Only Mode.'
+        },
+        antennas: {
+          code: 'SUBSYSTEM 06 // TELECOM',
+          name: 'High-Gain (HGA) & UHF Low-Gain Antennas',
+          shortName: '6. HGA & UHF Antennas',
+          mass: '~5.5 kg',
+          spec1: '0.28m Steerable X-Band Dish + UHF Whip',
+          spec2: 'Direct-to-Earth (DTE) + Mars Odyssey Relay',
+          desc: 'Features a parabolic X-band High-Gain Antenna (HGA) for direct transmission to NASA Deep Space Network dishes, plus a UHF antenna that uploaded daily discoveries via orbiters.',
+          link: 'Transmitted 217,594 raw science images and first in-situ confirmation of ancient Martian surface water back to Earth.'
+        },
+        battery: {
+          code: 'SUBSYSTEM 07 // ENERGY STORAGE',
+          name: 'Dual 8-Ah Lithium-Ion Battery Pack',
+          shortName: '7. Li-Ion Battery Pack',
+          mass: '~7.1 kg',
+          spec1: 'Dual 8-Ah Packs · 28–32 VDC Bus',
+          spec2: '16 Cylindrical Sony Li-Ion Cells in Kapton',
+          desc: 'Two 8-ampere-hour lithium-ion batteries sealed within the forward thermal bay power nighttime survival heaters and peak daytime motor loads.',
+          link: 'Endured over 5,000 thermal freeze-thaw cycles on Mars before finally losing recharge capability during the June 2018 global dust storm.'
+        }
+      };
 
-  // Soft Shadow Catcher Floor Plane: Positioned at y = -0.438 immediately under the wheels
-  const shadowPlaneGeo = new THREE.PlaneGeometry(10, 10);
-  const shadowPlaneMat = new THREE.ShadowMaterial({ opacity: 0.14, transparent: true });
-  const shadowPlane = new THREE.Mesh(shadowPlaneGeo, shadowPlaneMat);
-  shadowPlane.rotation.x = -Math.PI / 2;
-  shadowPlane.position.y = -0.438;
-  shadowPlane.receiveShadow = true;
-  scene.add(shadowPlane);
-
-  // =========================================================================
-  // HIGH-FIDELITY PROCEDURAL THREE.JS ROVER RECONSTRUCTION
-  // =========================================================================
-            // PROCEDURAL HIGH-RES PBR TEXTURE GENERATORS (MATCHING THE 8 NASA IMAGES)
-            // =========================================================================
-
-            // 1. Top Solar Array Wafer & Circuit Harness Texture (Matches Top-Down View image_1d9b25.jpg)
-            function createSolarTopTexture() {
+      // =========================================================================
+      // PROCEDURAL HIGH-ACCURACY MER-B ROVER 3D GEOMETRY BUILDER
+      // =========================================================================
+function createSolarTopTexture() {
                 const c = document.createElement('canvas');
                 c.width = 1024;
                 c.height = 1024;
@@ -1394,47 +1377,47 @@
             const subsystems3D = {};
 
             function registerSubsystem(key, label, shortName, homePos, explodeVec, camOffset) {
-        const group = new THREE.Group();
-        group.name = key;
-        group.position.copy(homePos);
-        roverRoot.add(group);
+                const group = new THREE.Group();
+                group.name = key;
+                group.position.copy(homePos);
+                roverRoot.add(group);
 
-        const lineGeo = new THREE.BufferGeometry().setFromPoints([homePos.clone(), homePos.clone()]);
-        const lineMat = new THREE.LineDashedMaterial({
-          color: 0xd97706,
-          dashSize: 0.07,
-          gapSize: 0.04,
-          transparent: true,
-          opacity: 0.0
-        });
-        const leaderLine = new THREE.Line(lineGeo, lineMat);
-        leaderLine.computeLineDistances();
-        roverRoot.add(leaderLine);
+                const lineGeo = new THREE.BufferGeometry().setFromPoints([homePos.clone(), homePos.clone()]);
+                const lineMat = new THREE.LineDashedMaterial({
+                    color: 0x38bdf8,
+                    dashSize: 0.07,
+                    gapSize: 0.04,
+                    transparent: true,
+                    opacity: 0.0
+                });
+                const leaderLine = new THREE.Line(lineGeo, lineMat);
+                leaderLine.computeLineDistances();
+                roverRoot.add(leaderLine);
 
-        const badge = document.createElement('button');
-        badge.type = 'button';
-        badge.className = 'hw-label-3d px-2.5 py-1 rounded-full bg-black/85 border border-amber-400/80 text-[10px] font-mono text-amber-200 shadow-lg whitespace-nowrap flex items-center gap-1.5 cursor-pointer';
-        badge.innerHTML = `<span class="w-1.5 h-1.5 rounded-full bg-amber-400"></span><span>${shortName}</span>`;
-        badge.addEventListener('click', (e) => {
-          e.stopPropagation();
-          selectSubsystem(key, true);
-        });
-        if (labelsContainer) labelsContainer.appendChild(badge);
+                const badge = document.createElement('button');
+                badge.type = 'button';
+                badge.className = 'hw-label-3d px-3 py-1 rounded-full bg-[#101113]/90 backdrop-blur-md border border-white/20 text-[11px] font-sans font-medium text-white shadow-xl whitespace-nowrap flex items-center gap-2 cursor-pointer transition-colors';
+                badge.innerHTML = `<span class="w-1.5 h-1.5 rounded-full bg-oppy-accent"></span><span>${shortName}</span>`;
+                badge.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    selectSubsystem(key, true);
+                });
+                if (labelsContainer) labelsContainer.appendChild(badge);
 
-        subsystems3D[key] = {
-          key,
-          label,
-          shortName,
-          group,
-          homePos: homePos.clone(),
-          explodeVec: explodeVec.clone(),
-          camOffset: camOffset.clone(),
-          leaderLine,
-          badge,
-          animRefs: {}
-        };
-        return subsystems3D[key];
-      }
+                subsystems3D[key] = {
+                    key,
+                    label,
+                    shortName,
+                    group,
+                    homePos: homePos.clone(),
+                    explodeVec: explodeVec.clone(),
+                    camOffset: camOffset.clone(),
+                    leaderLine,
+                    badge,
+                    animRefs: {}
+                };
+                return subsystems3D[key];
+            }
 
             // Helper to build a custom-shaped dual-sided Solar Wing Panel from 2D polygon vertices [(x, z), ...]
             // Top surface gets `matSolarTop`, Bottom surface gets `matSolarUnder`, Beveled Edges get `matPanelEdge`!
@@ -2187,542 +2170,427 @@
                 }
             }
 
-            // =========================================================================
+            
 
+      // =========================================================================
+      // SUBSYSTEM SELECTION, GHOSTING & CAMERA FRAMING
+      // =========================================================================
+      let selectedSubsystemKey = 'all';
+      const camTargetPos = defaultCamPos.clone();
+      const camTargetLook = defaultCamTarget.clone();
+      let cameraAnimating = false;
 
-  // Safely ensure each mesh has its own independent material instance (handling arrays & single materials)
-  Object.values(subsystems3D).forEach((sub) => {
-    sub.group.traverse((child) => {
-      if (child.isMesh && child.material) {
-        if (Array.isArray(child.material)) {
-          child.material = child.material.map((m) => {
-            const cl = m.clone();
-            cl.transparent = false;
-            cl.opacity = 1.0;
-            return cl;
+      function applyGhosting(selectedKey) {
+        Object.values(subsystems3D).forEach((sub) => {
+          const isSelected = (selectedKey === 'all' || sub.key === selectedKey);
+          sub.group.traverse((child) => {
+            if (child.isMesh && child.material) {
+              const mats = Array.isArray(child.material) ? child.material : [child.material];
+              mats.forEach((m) => {
+                m.transparent = !isSelected;
+                m.opacity = isSelected ? 1.0 : 0.28;
+                m.needsUpdate = true;
+              });
+            }
           });
-        } else {
-          child.material = child.material.clone();
-          child.material.transparent = false;
-          child.material.opacity = 1.0;
+        });
+      }
+
+      function selectSubsystem(key, moveCam = true) {
+        selectedSubsystemKey = key;
+        const item = SUBSYSTEM_DATA[key] || SUBSYSTEM_DATA.all;
+
+        // Highlight bottom pill bar button
+        document.querySelectorAll('.hw-sub-btn').forEach((btn) => {
+          if (btn.getAttribute('data-sys') === key) {
+            btn.className = 'hw-sub-btn active px-3.5 py-1 rounded-full text-[11px] font-sans border border-white bg-white text-black font-semibold shadow-md transition shrink-0 cursor-pointer';
+          } else {
+            btn.className = 'hw-sub-btn px-3.5 py-1 rounded-full text-[11px] font-sans border border-oppy-border bg-oppy-card text-oppy-textSecondary hover:border-oppy-borderLight hover:text-white transition shrink-0 cursor-pointer';
+          }
+        });
+
+        // Update Top Active Subsystem Capsule
+        const badgeEl = document.getElementById('hw-active-badge');
+        if (badgeEl) {
+          badgeEl.textContent = key === 'all' ? 'FULL ROVER ASSEMBLY' : item.shortName.toUpperCase();
+        }
+
+        // Highlight 3D label badges
+        Object.keys(subsystems3D).forEach((k) => {
+          const b = subsystems3D[k].badge;
+          if (k === key) {
+            b.className = 'hw-label-3d active px-3 py-1 rounded-full bg-white border border-white text-[11px] font-sans font-semibold text-[#101113] shadow-2xl whitespace-nowrap flex items-center gap-2 cursor-pointer z-30 transition-colors';
+            b.innerHTML = `<span class="w-1.5 h-1.5 rounded-full bg-oppy-accent"></span><span>${subsystems3D[k].shortName}</span>`;
+          } else {
+            b.className = 'hw-label-3d px-3 py-1 rounded-full bg-[#101113]/90 backdrop-blur-md border border-white/20 text-[11px] font-sans font-medium text-oppy-textSecondary hover:text-white hover:border-oppy-accent shadow-xl whitespace-nowrap flex items-center gap-2 cursor-pointer z-20 transition-colors';
+            b.innerHTML = `<span class="w-1.5 h-1.5 rounded-full bg-oppy-accent"></span><span>${subsystems3D[k].shortName}</span>`;
+          }
+        });
+
+        // Update details card
+        const idEl = document.getElementById('hw-sub-id');
+        const massEl = document.getElementById('hw-sub-mass');
+        const nameEl = document.getElementById('hw-sub-name');
+        const descEl = document.getElementById('hw-sub-desc');
+        const voltEl = document.getElementById('hw-sub-volt');
+        const specEl = document.getElementById('hw-sub-spec');
+        const linkEl = document.getElementById('hw-sub-link');
+
+        if (idEl) idEl.textContent = item.code;
+        if (massEl) massEl.textContent = item.mass.startsWith('MASS:') ? item.mass : `MASS: ${item.mass}`;
+        if (nameEl) nameEl.textContent = item.name;
+        if (descEl) descEl.textContent = item.desc;
+        if (voltEl) voltEl.textContent = item.spec1;
+        if (specEl) specEl.textContent = item.spec2;
+        if (linkEl) linkEl.textContent = item.link;
+
+        applyGhosting(key);
+
+        if (moveCam) {
+          if (key === 'all') {
+            camTargetLook.copy(defaultCamTarget);
+            camTargetPos.copy(defaultCamPos);
+          } else if (subsystems3D[key]) {
+            const sub = subsystems3D[key];
+            const focusWorld = sub.homePos.clone().add(sub.explodeVec.clone().multiplyScalar(currentExplodeFactor * 0.85));
+            focusWorld.applyAxisAngle(new THREE.Vector3(0, 1, 0), roverRoot.rotation.y);
+            camTargetLook.copy(focusWorld);
+            camTargetPos.copy(focusWorld).add(sub.camOffset);
+          }
+          cameraAnimating = true;
         }
       }
-    });
-  });
 
-  // =========================================================================
-  // 7 SUBSYSTEMS METADATA DATABASE
-  // =========================================================================
-  const SUBSYSTEM_DATA = {
-    all: {
-      code: 'MER-B // FULL SYSTEM',
-      name: 'Mars Exploration Rover Opportunity (MER-B)',
-      shortName: 'FULL ROVER ASSEMBLY',
-      mass: '185 kg (Dry)',
-      spec1: '1.5m Height · 2.3m Width · 1.6m Length',
-      spec2: 'Planned: 90 Sols · Actual: 5,111 Sols (55× Life)',
-      desc: 'Launched July 7, 2003 and landed January 25, 2004 inside Eagle Crater at Meridiani Planum. Opportunity operated 55 times longer than designed, traversing 45.16 km across six major Martian geological epochs.',
-      link: 'Discovered hematite spherules ("blueberries") proving ancient standing acidic water, surveyed Victoria Crater, and confirmed neutral clay minerals at Endeavour Crater.'
-    },
-    arm: {
-      code: 'SUBSYSTEM 01 // IDD-RAT',
-      name: '5-DOF Robotic Arm (IDD) & Instrument Turret',
-      shortName: '1. Robotic Arm & RAT',
-      mass: '~14.5 kg',
-      spec1: '5 Azimuth/Elevation Joints · 4-Tool Turret',
-      spec2: 'RAT + Microscopic Imager + MB + APXS',
-      desc: 'The Instrument Deployment Device (IDD) holds a rotating turret with the diamond-toothed Rock Abrasion Tool (RAT), Microscopic Imager (MI), Mössbauer Spectrometer, and Alpha Particle X-Ray Spectrometer (APXS).',
-      link: 'Ground 4.5 mm into Eagle Crater outcrops on Sol 30, proving ancient liquid water via hematite "blueberries" and jarosite sulfate.'
-    },
-    suspension: {
-      code: 'SUBSYSTEM 02 // MOBILITY',
-      name: 'Rocker-Bogie Suspension & 6 Cleated Wheels',
-      shortName: '2. Rocker-Bogie & Wheels',
-      mass: '~35.0 kg',
-      spec1: '6 × 25 cm Machined Aluminum Wheels',
-      spec2: 'Max Tilt: 32° · Perforated Titanium Struts',
-      desc: 'Springless perforated box-beam Rocker-Bogie linkage connected through a central differential bar keeps all six cleated aluminum wheels planted over boulders larger than the wheel diameter while inner spiral flexures absorb shock.',
-      link: 'Escaped axle-deep sand at Purgatory Dune (Sol 446–484) and drove over 25 km backward after the right-front steering actuator jammed.'
-    },
-    solar: {
-      code: 'SUBSYSTEM 03 // POWER ARRAY',
-      name: 'Winged Gallium Arsenide Solar Arrays',
-      shortName: '3. GaAs Solar Wings',
-      mass: '~19.8 kg',
-      spec1: 'Triple-Junction GaInP/GaAs/Ge Cells',
-      spec2: 'Peak: 140 W (900 Wh/sol) · Survival: ~100 Wh',
-      desc: 'Deployable 7-facet winged solar array table covered in triple-junction photovoltaic cells, complete with the MarsDial calibration sundial on the rear deck corner.',
-      link: 'Survived the 2007 global dust storm (128 Wh low point) thanks to serendipitous Martian wind "Cleaning Events" that repeatedly swept dust off the panels.'
-    },
-    mast: {
-      code: 'SUBSYSTEM 04 // PMA MAST',
-      name: 'Pancam & Mini-TES Mast Assembly (PMA)',
-      shortName: '4. Pancam & Mini-TES Mast',
-      mass: '~7.2 kg',
-      spec1: '1.5 m Elevation · 360° Azimuth / ±90° Pitch',
-      spec2: 'Stereo Pancam + Navcams + Mini-TES IR',
-      desc: 'The Pancam Mast Assembly (PMA) acts as the rover’s human-height eyes, housing twin multispectral Panoramic Cameras (Pancam), wide-angle Navigation Cameras, and the Miniature Thermal Emission Spectrometer (Mini-TES) periscope.',
-      link: 'Surveyed the Homestake gypsum vein and ancient smectite clay minerals at Endeavour Crater, confirming neutral, drinkable ancient water.'
-    },
-    web: {
-      code: 'SUBSYSTEM 05 // AVIONICS & WEB',
-      name: 'Warm Electronics Box (WEB) & RAD6000 Computer',
-      shortName: '5. WEB & RAD6000 CPU',
-      mass: '~24.0 kg',
-      spec1: '20 MHz BAE RAD6000 CPU · 128 MB DRAM',
-      spec2: '256 MB Flash + 8 × Pu-238 RHU Heaters',
-      desc: 'Insulated with crinkled gold Kapton foil and aerogel walls, the WEB protects the radiation-hardened RAD6000 flight computer and 8 Plutonium-238 Radioisotope Heater Units (1 Watt thermal each) against −105°C nights.',
-      link: 'When cosmic rays wore out Bank 7 Flash memory in 2014, JPL reprogrammed the RAD6000 on Sol 4027 to operate in volatile RAM-Only Mode.'
-    },
-    antennas: {
-      code: 'SUBSYSTEM 06 // TELECOM',
-      name: 'High-Gain (HGA) & UHF Low-Gain Antennas',
-      shortName: '6. HGA & UHF Antennas',
-      mass: '~4.8 kg',
-      spec1: 'Steerable X-Band Dish + UHF Monopole',
-      spec2: 'DSN Direct-to-Earth + Odyssey/MRO Relay',
-      desc: 'The 2-axis gimbaled High-Gain Antenna beams X-Band telemetry directly to Earth’s Deep Space Network dishes, while the omnidirectional UHF antenna on its lattice riser relays daily science through Mars Odyssey and MRO.',
-      link: 'Transmitted every day’s volatile RAM science before sunset in Act V, and received over 1,000 recovery commands plus "I’ll Be Seeing You" in 2019.'
-    },
-    battery: {
-      code: 'SUBSYSTEM 07 // ENERGY STORAGE',
-      name: 'Lithium-Ion Rechargeable Battery Pack',
-      shortName: '7. Li-Ion Battery Pack',
-      mass: '~14.2 kg',
-      spec1: 'Dual 8-Cell Yardney Li-Ion (2 × 8 Ah)',
-      spec2: '32V Bus · >5,000 Martian Sol Cycles',
-      desc: 'Two rechargeable lithium-ion battery packs mounted inside the forward Warm Electronics Box store daytime solar power to keep survival heaters and the mission clock alive through freezing Martian nights.',
-      link: 'Endured over 5,000 charge-discharge cycles—10× any prior space battery—before the June 10, 2018 storm (τ > 10.8) drained solar input to 22 Wh.'
-    }
-  };
+      window.__hwSelectSubsystem = selectSubsystem;
 
-  // Subsystem Selection & Camera Focus
-  let selectedSubsystemKey = 'all';
-  let cameraAnimating = false;
-  const camTargetPos = defaultCamPos.clone();
-  const camTargetLook = defaultCamTarget.clone();
-
-  function applyGhosting(selectedKey) {
-    if (selectedKey === 'all') {
-      roverRoot.traverse((child) => {
-        if (child.isMesh && child.material) {
-          const mats = Array.isArray(child.material) ? child.material : [child.material];
-          mats.forEach((m) => {
-            m.transparent = false;
-            m.opacity = 1.0;
-            m.needsUpdate = true;
-          });
-        }
+      // Subsystem button click listeners
+      document.querySelectorAll('.hw-sub-btn').forEach((btn) => {
+        btn.addEventListener('click', () => {
+          const sys = btn.getAttribute('data-sys');
+          if (sys) selectSubsystem(sys, true);
+        });
       });
-      return;
-    }
 
-    Object.values(subsystems3D).forEach((sub) => {
-      const isSelected = (sub.key === selectedKey);
-      sub.group.traverse((child) => {
-        if (child.isMesh && child.material) {
-          const mats = Array.isArray(child.material) ? child.material : [child.material];
-          mats.forEach((m) => {
-            m.transparent = !isSelected;
-            m.opacity = isSelected ? 1.0 : 0.28;
-            m.needsUpdate = true;
-          });
-        }
-      });
-    });
-  }
+      // =========================================================================
+      // EXPLODE MECHANISM & TOOLBAR CONTROLS
+      // =========================================================================
+      let currentExplodeFactor = 0.0;
+      let targetExplodeFactor = 0.0;
+      const slider = document.getElementById('hw-explode-range');
+      const label = document.getElementById('hw-explode-label');
+      const btnToggleExplode = document.getElementById('hw-toggle-explode');
+      const btnToggleOrbit = document.getElementById('hw-toggle-orbit');
+      const btnToggleWireframe = document.getElementById('hw-toggle-wireframe');
+      const btnResetCam = document.getElementById('hw-reset-cam');
+      const btnToggleBg = document.getElementById('hw-toggle-bg');
+      const btnCardToggle = document.getElementById('hw-card-toggle');
+      const cardBody = document.getElementById('hw-card-body');
 
-  function selectSubsystem(key, moveCam = true) {
-    selectedSubsystemKey = key;
-    const item = SUBSYSTEM_DATA[key] || SUBSYSTEM_DATA.all;
+      function applyExplode(factor) {
+        currentExplodeFactor = factor;
+        Object.values(subsystems3D).forEach((sub) => {
+          const targetPos = sub.homePos.clone().addScaledVector(sub.explodeVec, factor);
+          sub.group.position.copy(targetPos);
 
-    // Highlight bottom pill bar button
-    document.querySelectorAll('.hw-sub-btn').forEach((btn) => {
-      if (btn.getAttribute('data-sys') === key) {
-        btn.className = 'hw-sub-btn active px-2.5 py-1 rounded-full text-[10px] font-mono border border-amber-400 bg-amber-500/25 text-white font-semibold transition shrink-0';
-      } else {
-        btn.className = 'hw-sub-btn px-2.5 py-1 rounded-full text-[10px] font-mono border border-oppy-border bg-oppy-card text-oppy-textSecondary hover:border-amber-400/60 hover:text-white transition shrink-0';
+          const positions = sub.leaderLine.geometry.attributes.position.array;
+          positions[0] = sub.homePos.x;
+          positions[1] = sub.homePos.y;
+          positions[2] = sub.homePos.z;
+          positions[3] = sub.group.position.x;
+          positions[4] = sub.group.position.y;
+          positions[5] = sub.group.position.z;
+          sub.leaderLine.geometry.attributes.position.needsUpdate = true;
+          sub.leaderLine.computeLineDistances();
+          sub.leaderLine.material.opacity = factor > 0.05 ? Math.min(0.85, factor) : 0.0;
+        });
+
+        shadowPlane.material.opacity = Math.max(0, (isStudioBg ? 0.22 : 0.14) * (1 - factor * 1.5));
       }
-    });
 
-    // Update Top Active Subsystem Capsule
-    const badgeEl = document.getElementById('hw-active-badge');
-    if (badgeEl) {
-      badgeEl.textContent = key === 'all' ? 'FULL ROVER ASSEMBLY' : item.shortName.toUpperCase();
-    }
-
-    // Highlight 3D label badge (WITHOUT scale transform to prevent glitching)
-    Object.keys(subsystems3D).forEach((k) => {
-      const b = subsystems3D[k].badge;
-      if (k === key) {
-        b.className = 'hw-label-3d active px-2.5 py-1 rounded-full bg-amber-500/40 border border-white text-[10px] font-mono text-white shadow-xl whitespace-nowrap flex items-center gap-1.5 cursor-pointer z-30';
-      } else {
-        b.className = 'hw-label-3d px-2.5 py-1 rounded-full bg-black/85 border border-amber-400/80 text-[10px] font-mono text-amber-200 hover:bg-amber-500/30 hover:border-white shadow-lg whitespace-nowrap flex items-center gap-1.5 cursor-pointer z-20';
+      if (slider) {
+        slider.addEventListener('input', (e) => {
+          const val = parseFloat(e.target.value) / 100;
+          targetExplodeFactor = val;
+          applyExplode(val);
+          if (label) label.textContent = `${Math.round(val * 100)}%`;
+          if (btnToggleExplode) {
+            btnToggleExplode.textContent = val > 0.4 ? 'COLLAPSE PARTS' : 'EXPLODE PARTS';
+          }
+        });
       }
-    });
 
-    // Update details card
-    const idEl = document.getElementById('hw-sub-id');
-    const massEl = document.getElementById('hw-sub-mass');
-    const nameEl = document.getElementById('hw-sub-name');
-    const descEl = document.getElementById('hw-sub-desc');
-    const voltEl = document.getElementById('hw-sub-volt');
-    const specEl = document.getElementById('hw-sub-spec');
-    const linkEl = document.getElementById('hw-sub-link');
-
-    if (idEl) idEl.textContent = item.code;
-    if (massEl) massEl.textContent = item.mass.startsWith('MASS:') ? item.mass : `MASS: ${item.mass}`;
-    if (nameEl) nameEl.textContent = item.name;
-    if (descEl) descEl.textContent = item.desc;
-    if (voltEl) voltEl.textContent = item.spec1;
-    if (specEl) specEl.textContent = item.spec2;
-    if (linkEl) linkEl.textContent = item.link;
-
-    applyGhosting(key);
-
-    if (moveCam) {
-      if (key === 'all') {
-        camTargetLook.copy(defaultCamTarget);
-        camTargetPos.copy(defaultCamPos);
-      } else if (subsystems3D[key]) {
-        const sub = subsystems3D[key];
-        const focusWorld = sub.homePos.clone().add(sub.explodeVec.clone().multiplyScalar(currentExplodeFactor * 0.85));
-        focusWorld.applyAxisAngle(new THREE.Vector3(0, 1, 0), roverRoot.rotation.y);
-        camTargetLook.copy(focusWorld);
-        camTargetPos.copy(focusWorld).add(sub.camOffset);
-      }
-      cameraAnimating = true;
-    }
-  }
-
-  // Subsystem button click listeners
-  document.querySelectorAll('.hw-sub-btn').forEach((btn) => {
-    btn.addEventListener('click', () => {
-      const sys = btn.getAttribute('data-sys');
-      if (sys) selectSubsystem(sys, true);
-    });
-  });
-
-  // =========================================================================
-  // EXPLODE MECHANISM & TOOLBAR CONTROLS
-  // =========================================================================
-  let currentExplodeFactor = 0.0;
-  let targetExplodeFactor = 0.0;
-  const slider = document.getElementById('hw-explode-range');
-  const label = document.getElementById('hw-explode-label');
-  const btnToggleExplode = document.getElementById('hw-toggle-explode');
-  const btnToggleOrbit = document.getElementById('hw-toggle-orbit');
-  const btnToggleWireframe = document.getElementById('hw-toggle-wireframe');
-  const btnResetCam = document.getElementById('hw-reset-cam');
-  const btnToggleBg = document.getElementById('hw-toggle-bg');
-  const btnCardToggle = document.getElementById('hw-card-toggle');
-  const cardBody = document.getElementById('hw-card-body');
-
-  function applyExplode(factor) {
-    currentExplodeFactor = factor;
-    Object.values(subsystems3D).forEach((sub) => {
-      const targetPos = sub.homePos.clone().addScaledVector(sub.explodeVec, factor);
-      sub.group.position.copy(targetPos);
-
-      const positions = sub.leaderLine.geometry.attributes.position.array;
-      positions[0] = sub.homePos.x;
-      positions[1] = sub.homePos.y;
-      positions[2] = sub.homePos.z;
-      positions[3] = sub.group.position.x;
-      positions[4] = sub.group.position.y;
-      positions[5] = sub.group.position.z;
-      sub.leaderLine.geometry.attributes.position.needsUpdate = true;
-      sub.leaderLine.computeLineDistances();
-      sub.leaderLine.material.opacity = factor > 0.05 ? Math.min(0.85, factor) : 0.0;
-    });
-
-    // Ground shadow plane fades out during explosion so it doesn't obstruct lower parts
-    shadowPlane.material.opacity = Math.max(0, (isStudioBg ? 0.22 : 0.15) * (1 - factor * 1.5));
-  }
-
-  if (slider) {
-    slider.addEventListener('input', (e) => {
-      const val = parseFloat(e.target.value) / 100;
-      targetExplodeFactor = val;
-      applyExplode(val);
-      if (label) label.textContent = `${Math.round(val * 100)}%`;
       if (btnToggleExplode) {
-        btnToggleExplode.textContent = val > 0.4 ? 'COLLAPSE PARTS' : 'EXPLODE PARTS';
+        btnToggleExplode.addEventListener('click', () => {
+          targetExplodeFactor = targetExplodeFactor > 0.4 ? 0.0 : 1.0;
+          btnToggleExplode.textContent = targetExplodeFactor > 0.4 ? 'COLLAPSE PARTS' : 'EXPLODE PARTS';
+          if (targetExplodeFactor > 0.4) {
+            btnToggleExplode.classList.add('border-oppy-accent', 'text-oppy-accent');
+          } else {
+            btnToggleExplode.classList.remove('border-oppy-accent', 'text-oppy-accent');
+          }
+        });
       }
-    });
-  }
 
-  if (btnToggleExplode) {
-    btnToggleExplode.addEventListener('click', () => {
-      targetExplodeFactor = targetExplodeFactor > 0.4 ? 0.0 : 1.0;
-      btnToggleExplode.textContent = targetExplodeFactor > 0.4 ? 'COLLAPSE PARTS' : 'EXPLODE PARTS';
-      if (targetExplodeFactor > 0.4) {
-        btnToggleExplode.classList.add('border-oppy-accent', 'text-amber-400');
-      } else {
-        btnToggleExplode.classList.remove('border-oppy-accent', 'text-amber-400');
+      // Auto-Orbit toggle
+      let isAutoOrbit = false;
+      if (btnToggleOrbit) {
+        btnToggleOrbit.addEventListener('click', () => {
+          isAutoOrbit = !isAutoOrbit;
+          controls.autoRotate = isAutoOrbit;
+          controls.autoRotateSpeed = 2.0;
+          cameraAnimating = false;
+          btnToggleOrbit.textContent = isAutoOrbit ? 'AUTO-ORBIT: ON' : 'AUTO-ORBIT: OFF';
+          if (isAutoOrbit) {
+            btnToggleOrbit.classList.add('border-oppy-accent', 'text-oppy-accent');
+          } else {
+            btnToggleOrbit.classList.remove('border-oppy-accent', 'text-oppy-accent');
+          }
+        });
       }
-    });
-  }
 
-  // Auto-Orbit toggle
-  let isAutoOrbit = false;
-  if (btnToggleOrbit) {
-    btnToggleOrbit.addEventListener('click', () => {
-      isAutoOrbit = !isAutoOrbit;
-      controls.autoRotate = isAutoOrbit;
-      controls.autoRotateSpeed = 2.0;
-      btnToggleOrbit.textContent = isAutoOrbit ? 'AUTO-ORBIT: ON' : 'AUTO-ORBIT: OFF';
-      if (isAutoOrbit) {
-        btnToggleOrbit.classList.add('border-oppy-accent', 'text-amber-400');
-      } else {
-        btnToggleOrbit.classList.remove('border-oppy-accent', 'text-amber-400');
+      // Wireframe toggle
+      let isWireframe = false;
+      if (btnToggleWireframe) {
+        btnToggleWireframe.addEventListener('click', () => {
+          isWireframe = !isWireframe;
+          roverRoot.traverse((child) => {
+            if (child.isMesh && child.material) {
+              const mats = Array.isArray(child.material) ? child.material : [child.material];
+              mats.forEach((m) => { m.wireframe = isWireframe; });
+            }
+          });
+          btnToggleWireframe.textContent = isWireframe ? 'SHADED' : 'WIREFRAME';
+          if (isWireframe) {
+            btnToggleWireframe.classList.add('border-oppy-accent', 'text-oppy-accent');
+          } else {
+            btnToggleWireframe.classList.remove('border-oppy-accent', 'text-oppy-accent');
+          }
+        });
       }
-    });
-  }
 
-  // Wireframe toggle
-  let isWireframe = false;
-  if (btnToggleWireframe) {
-    btnToggleWireframe.addEventListener('click', () => {
-      isWireframe = !isWireframe;
-      roverRoot.traverse((child) => {
-        if (child.isMesh && child.material) {
-          const mats = Array.isArray(child.material) ? child.material : [child.material];
-          mats.forEach((m) => { m.wireframe = isWireframe; });
+      // Reset Camera View
+      if (btnResetCam) {
+        btnResetCam.addEventListener('click', () => {
+          camTargetLook.copy(defaultCamTarget);
+          camTargetPos.copy(defaultCamPos);
+          cameraAnimating = true;
+          selectSubsystem('all', false);
+        });
+      }
+
+      // Background Mode Toggle (Default: Black Mars Mode, Optional: White Studio Mode)
+      function updateBgMode(studio) {
+        isStudioBg = studio;
+        if (isStudioBg) {
+          scene.background = new THREE.Color(0xe6e6e6);
+          scene.fog = null;
+          hemiLight.color.setHex(0xffffff);
+          hemiLight.groundColor.setHex(0xb8b2a6);
+          hemiLight.intensity = 0.75;
+          keyLight.intensity = 1.15;
+          keyLight.color.setHex(0xfffcf5);
+          fillLight.intensity = 0.55;
+          underBounce.intensity = 0.45;
+          ambLight.intensity = 0.45;
+          shadowPlane.material.opacity = 0.18;
+          grid.material.color.setHex(0xbbbbbb);
+          if (btnToggleBg) {
+            btnToggleBg.textContent = 'BLACK BG';
+            btnToggleBg.className = 'px-3 py-1 rounded-full border border-slate-400 bg-slate-200 text-slate-900 font-semibold text-[11px] uppercase font-sans hover:bg-white transition-all cursor-pointer';
+          }
+        } else {
+          scene.background = new THREE.Color(0x101113);
+          scene.fog = new THREE.FogExp2(0x101113, 0.008);
+          hemiLight.color.setHex(0xffeedd);
+          hemiLight.groundColor.setHex(0x4a3a2a);
+          hemiLight.intensity = 0.82;
+          keyLight.intensity = 1.45;
+          keyLight.color.setHex(0xfffaee);
+          fillLight.intensity = 0.70;
+          underBounce.intensity = 0.65;
+          ambLight.intensity = 0.40;
+          shadowPlane.material.opacity = 0.14;
+          grid.material.color.setHex(0x3e434b);
+          if (btnToggleBg) {
+            btnToggleBg.textContent = 'WHITE BG';
+            btnToggleBg.className = 'px-3 py-1 rounded-full border border-oppy-border/80 bg-oppy-card/90 text-oppy-textPrimary text-[11px] uppercase font-sans font-medium hover:border-oppy-accent hover:text-white transition-all cursor-pointer';
+          }
+        }
+      }
+
+      if (btnToggleBg) {
+        btnToggleBg.addEventListener('click', () => updateBgMode(!isStudioBg));
+      }
+
+      // Card Hide/Show Collapse Toggle
+      let cardExpanded = true;
+      if (btnCardToggle && cardBody) {
+        btnCardToggle.addEventListener('click', () => {
+          cardExpanded = !cardExpanded;
+          if (cardExpanded) {
+            cardBody.classList.remove('hidden');
+            btnCardToggle.textContent = 'HIDE';
+          } else {
+            cardBody.classList.add('hidden');
+            btnCardToggle.textContent = 'INFO';
+          }
+        });
+      }
+
+      // Raycasting on 3D rover mesh click
+      const raycaster = new THREE.Raycaster();
+      const pointerDownPos = new THREE.Vector2();
+
+      renderer.domElement.addEventListener('pointerdown', (e) => {
+        pointerDownPos.set(e.clientX, e.clientY);
+        cameraAnimating = false;
+      });
+
+      renderer.domElement.addEventListener('pointerup', (e) => {
+        const dist = Math.hypot(e.clientX - pointerDownPos.x, e.clientY - pointerDownPos.y);
+        if (dist > 6) return;
+
+        const rect = renderer.domElement.getBoundingClientRect();
+        const mouse = new THREE.Vector2(
+          ((e.clientX - rect.left) / rect.width) * 2 - 1,
+          -((e.clientY - rect.top) / rect.height) * 2 + 1
+        );
+
+        raycaster.setFromCamera(mouse, camera);
+        const intersects = raycaster.intersectObjects(roverRoot.children, true);
+        if (intersects.length > 0) {
+          let obj = intersects[0].object;
+          while (obj && !subsystems3D[obj.name]) {
+            obj = obj.parent;
+          }
+          if (obj && subsystems3D[obj.name]) {
+            selectSubsystem(obj.name, true);
+          }
         }
       });
-      btnToggleWireframe.textContent = isWireframe ? 'SHADED' : 'WIREFRAME';
-      if (isWireframe) {
-        btnToggleWireframe.classList.add('border-oppy-accent', 'text-amber-400');
-      } else {
-        btnToggleWireframe.classList.remove('border-oppy-accent', 'text-amber-400');
-      }
-    });
-  }
 
-  // Reset Camera View
-  if (btnResetCam) {
-    btnResetCam.addEventListener('click', () => {
-      camTargetLook.copy(defaultCamTarget);
-      camTargetPos.copy(defaultCamPos);
-      cameraAnimating = true;
+      // Default select ALL SYSTEMS on load
       selectSubsystem('all', false);
-    });
-  }
 
-  // Background Mode Toggle (Default: Black Mars Mode, Optional: White Studio Mode)
-  function updateBgMode(studio) {
-    isStudioBg = studio;
-    if (isStudioBg) {
-      scene.background = new THREE.Color(0xe6e6e6);
-      scene.fog = null;
-      hemiLight.color.setHex(0xffffff);
-      hemiLight.groundColor.setHex(0xb8b2a6);
-      hemiLight.intensity = 0.75;
-      keyLight.intensity = 1.15;
-      keyLight.color.setHex(0xfffcf5);
-      fillLight.intensity = 0.55;
-      underBounce.intensity = 0.45;
-      ambLight.intensity = 0.45;
-      shadowPlane.material.opacity = 0.18;
-      grid.material.color.setHex(0xbbbbbb);
-      if (btnToggleBg) {
-        btnToggleBg.textContent = 'BLACK BG';
-        btnToggleBg.className = 'px-2.5 py-1 rounded-full border border-slate-400 bg-slate-200 text-slate-900 font-semibold text-[10px] uppercase font-mono hover:bg-white transition-colors';
+      // =========================================================================
+      // ANIMATION & RENDER LOOP
+      // =========================================================================
+      function animate() {
+        requestAnimationFrame(animate);
+        const dt = Math.min(clock.getDelta(), 0.08);
+        const timeSec = clock.getElapsedTime();
+
+        // Smooth Explode Animation Lerp
+        if (Math.abs(currentExplodeFactor - targetExplodeFactor) > 0.002) {
+          currentExplodeFactor += (targetExplodeFactor - currentExplodeFactor) * Math.min(1, dt * 7.5);
+          applyExplode(currentExplodeFactor);
+          if (slider) slider.value = Math.round(currentExplodeFactor * 100);
+          if (label) label.textContent = `${Math.round(currentExplodeFactor * 100)}%`;
+        }
+
+        // Smooth Camera Framing Lerp
+        if (cameraAnimating) {
+          controls.target.lerp(camTargetLook, Math.min(1, dt * 5.0));
+          camera.position.lerp(camTargetPos, Math.min(1, dt * 5.0));
+          if (camera.position.distanceTo(camTargetPos) < 0.02 && controls.target.distanceTo(camTargetLook) < 0.02) {
+            cameraAnimating = false;
+          }
+        }
+
+        controls.update();
+
+        // Working Mechanical Rover Animations
+        if (subMast && subMast.animRefs && subMast.animRefs.camHead) {
+          const mastActive = (selectedSubsystemKey === 'mast');
+          subMast.animRefs.camHead.rotation.y = Math.sin(timeSec * (mastActive ? 1.8 : 0.55)) * 0.48;
+          subMast.animRefs.camHead.rotation.z = Math.sin(timeSec * 1.1) * 0.08;
+        }
+
+        if (subArm && subArm.animRefs && subArm.animRefs.upperArmGroup) {
+          const armActive = (selectedSubsystemKey === 'arm');
+          const armSwing = armActive ? Math.sin(timeSec * 2.0) * 0.25 + 0.45 : 0.0;
+          subArm.animRefs.upperArmGroup.rotation.z = -armSwing * 0.6;
+          subArm.animRefs.forearmGroup.rotation.z = armSwing * 1.1;
+          subArm.animRefs.turretGroup.rotation.x += dt * (armActive ? 5.5 : 0.4);
+        }
+
+        if (subSolar && subSolar.animRefs && subSolar.animRefs.leftWingPivot) {
+          const wingActive = (selectedSubsystemKey === 'solar');
+          const wingBreath = wingActive ? Math.sin(timeSec * 2.0) * 0.12 : Math.sin(timeSec * 0.8) * 0.015;
+          subSolar.animRefs.leftWingPivot.rotation.x = wingBreath;
+          subSolar.animRefs.rightWingPivot.rotation.x = -wingBreath;
+        }
+
+        if (subSuspension && subSuspension.animRefs && subSuspension.animRefs.wheelMeshes) {
+          const suspActive = (selectedSubsystemKey === 'suspension');
+          const wheelSpeed = suspActive ? 2.5 : 0.5;
+          const wheelRot = timeSec * wheelSpeed;
+          subSuspension.animRefs.wheelMeshes.forEach((wm) => {
+            wm.rotation.z = -wheelRot;
+          });
+          subSuspension.animRefs.bogieGroups.forEach((bg, idx) => {
+            bg.rotation.z = Math.sin(timeSec * 2.2 + idx * Math.PI) * (suspActive ? 0.16 : 0.03);
+          });
+        }
+
+        if (subWeb && subWeb.animRefs && subWeb.animRefs.avionicsRack) {
+          const targetLift = (selectedSubsystemKey === 'web' || currentExplodeFactor > 0.25) ? 0.32 : 0.02;
+          subWeb.animRefs.avionicsRack.position.y += (targetLift - subWeb.animRefs.avionicsRack.position.y) * Math.min(1, dt * 6);
+        }
+
+        if (subAntennas && subAntennas.animRefs && subAntennas.animRefs.dishHead) {
+          subAntennas.animRefs.dishHead.rotation.y = Math.sin(timeSec * 1.4) * 0.42;
+          subAntennas.animRefs.dishHead.rotation.x = Math.cos(timeSec * 0.9) * 0.15;
+        }
+
+        // Update Floating 3D Subsystem Labels
+        const width = container.clientWidth;
+        const height = container.clientHeight;
+
+        Object.values(subsystems3D).forEach((sub) => {
+          const worldAnchor = sub.group.position.clone().add(new THREE.Vector3(0, 0.20, 0));
+          worldAnchor.applyMatrix4(roverRoot.matrixWorld);
+          worldAnchor.project(camera);
+
+          const isIsolated = (selectedSubsystemKey !== 'all' && sub.key === selectedSubsystemKey);
+          const showBadge = (currentExplodeFactor > 0.10 || isIsolated) && worldAnchor.z < 1.0;
+
+          if (showBadge) {
+            sub.badge.style.display = 'flex';
+            sub.badge.style.opacity = isIsolated ? '1' : '0.9';
+            sub.badge.style.pointerEvents = 'auto';
+            const sx = (worldAnchor.x * 0.5 + 0.5) * width;
+            const sy = (-worldAnchor.y * 0.5 + 0.5) * height;
+            sub.badge.style.left = `${sx}px`;
+            sub.badge.style.top = `${sy}px`;
+          } else {
+            sub.badge.style.display = 'none';
+            sub.badge.style.opacity = '0';
+            sub.badge.style.pointerEvents = 'none';
+          }
+        });
+
+        // Update Live HUD Cam Telemetry
+        const camTel = document.getElementById('hw-cam-telemetry');
+        if (camTel) {
+          const r = camera.position.distanceTo(controls.target);
+          const dx = camera.position.x - controls.target.x;
+          const dz = camera.position.z - controls.target.z;
+          const az = Math.round((Math.atan2(dx, dz) * 180 / Math.PI + 360) % 360);
+          const el = Math.round((Math.asin((camera.position.y - controls.target.y) / Math.max(r, 0.001)) * 180 / Math.PI));
+          camTel.textContent = `AZ: ${az}° · EL: ${el}° · RANGE: ${r.toFixed(1)}m`;
+        }
+
+        renderer.render(scene, camera);
       }
-    } else {
-      scene.background = new THREE.Color(0x101113);
-      scene.fog = new THREE.FogExp2(0x101113, 0.008);
-      hemiLight.color.setHex(0xffeedd);
-      hemiLight.groundColor.setHex(0x4a3a2a);
-      hemiLight.intensity = 0.82;
-      keyLight.intensity = 1.45;
-      keyLight.color.setHex(0xfffaee);
-      fillLight.intensity = 0.70;
-      underBounce.intensity = 0.65;
-      ambLight.intensity = 0.40;
-      shadowPlane.material.opacity = 0.14;
-      grid.material.color.setHex(0x3e434b);
-      if (btnToggleBg) {
-        btnToggleBg.textContent = 'WHITE BG';
-        btnToggleBg.className = 'px-2.5 py-1 rounded-full border border-oppy-border bg-oppy-card text-white text-[10px] uppercase font-mono hover:border-amber-400 transition-colors';
-      }
-    }
-  }
+      animate();
 
-  if (btnToggleBg) {
-    btnToggleBg.addEventListener('click', () => updateBgMode(!isStudioBg));
-  }
-
-  // Card Hide/Show Collapse Toggle
-  let cardExpanded = true;
-  if (btnCardToggle && cardBody) {
-    btnCardToggle.addEventListener('click', () => {
-      cardExpanded = !cardExpanded;
-      if (cardExpanded) {
-        cardBody.classList.remove('hidden');
-        btnCardToggle.textContent = 'HIDE';
-      } else {
-        cardBody.classList.add('hidden');
-        btnCardToggle.textContent = 'INFO';
-      }
-    });
-  }
-
-  // Raycasting on 3D rover mesh click
-  const raycaster = new THREE.Raycaster();
-  const pointerDownPos = new THREE.Vector2();
-
-  renderer.domElement.addEventListener('pointerdown', (e) => {
-    pointerDownPos.set(e.clientX, e.clientY);
-    cameraAnimating = false;
-  });
-
-  renderer.domElement.addEventListener('pointerup', (e) => {
-    const dist = Math.hypot(e.clientX - pointerDownPos.x, e.clientY - pointerDownPos.y);
-    if (dist > 6) return;
-
-    const rect = renderer.domElement.getBoundingClientRect();
-    const mouse = new THREE.Vector2(
-      ((e.clientX - rect.left) / rect.width) * 2 - 1,
-      -((e.clientY - rect.top) / rect.height) * 2 + 1
-    );
-
-    raycaster.setFromCamera(mouse, camera);
-    const intersects = raycaster.intersectObjects(roverRoot.children, true);
-    if (intersects.length > 0) {
-      let obj = intersects[0].object;
-      while (obj && !subsystems3D[obj.name]) {
-        obj = obj.parent;
-      }
-      if (obj && subsystems3D[obj.name]) {
-        selectSubsystem(obj.name, true);
-      }
-    }
-  });
-
-  // Default select ALL SYSTEMS on load so rover is 100% solid, fully lit and opaque!
-  selectSubsystem('all', false);
-
-  // =========================================================================
-  // ANIMATION & RENDER LOOP
-  // =========================================================================
-  function animate() {
-    requestAnimationFrame(animate);
-    const dt = Math.min(clock.getDelta(), 0.08);
-    const timeSec = clock.getElapsedTime();
-
-    // Smooth Explode Animation Lerp
-    if (Math.abs(currentExplodeFactor - targetExplodeFactor) > 0.002) {
-      currentExplodeFactor += (targetExplodeFactor - currentExplodeFactor) * Math.min(1, dt * 7.5);
-      applyExplode(currentExplodeFactor);
-      if (slider) slider.value = Math.round(currentExplodeFactor * 100);
-      if (label) label.textContent = `${Math.round(currentExplodeFactor * 100)}%`;
-    }
-
-    // Smooth Camera Framing Lerp
-    if (cameraAnimating) {
-      controls.target.lerp(camTargetLook, Math.min(1, dt * 5.0));
-      camera.position.lerp(camTargetPos, Math.min(1, dt * 5.0));
-      if (camera.position.distanceTo(camTargetPos) < 0.02 && controls.target.distanceTo(camTargetLook) < 0.02) {
-        cameraAnimating = false;
-      }
-    }
-
-    controls.update();
-
-    // Working Mechanical Rover Animations
-    if (subMast && subMast.animRefs && subMast.animRefs.camHead) {
-      const mastActive = (selectedSubsystemKey === 'mast');
-      subMast.animRefs.camHead.rotation.y = Math.sin(timeSec * (mastActive ? 1.8 : 0.55)) * 0.48;
-      subMast.animRefs.camHead.rotation.z = Math.sin(timeSec * 1.1) * 0.08;
-    }
-
-    if (subArm && subArm.animRefs && subArm.animRefs.upperArmGroup) {
-      const armActive = (selectedSubsystemKey === 'arm');
-      const armSwing = armActive ? Math.sin(timeSec * 2.0) * 0.25 + 0.45 : 0.0;
-      subArm.animRefs.upperArmGroup.rotation.z = -armSwing * 0.6;
-      subArm.animRefs.forearmGroup.rotation.z = armSwing * 1.1;
-      subArm.animRefs.turretGroup.rotation.x += dt * (armActive ? 5.5 : 0.4);
-    }
-
-    if (subSolar && subSolar.animRefs && subSolar.animRefs.leftWingPivot) {
-      const wingActive = (selectedSubsystemKey === 'solar');
-      const wingBreath = wingActive ? Math.sin(timeSec * 2.0) * 0.12 : Math.sin(timeSec * 0.8) * 0.015;
-      subSolar.animRefs.leftWingPivot.rotation.x = wingBreath;
-      subSolar.animRefs.rightWingPivot.rotation.x = -wingBreath;
-    }
-
-    if (subSuspension && subSuspension.animRefs && subSuspension.animRefs.wheelMeshes) {
-      const suspActive = (selectedSubsystemKey === 'suspension');
-      const wheelSpeed = suspActive ? 2.5 : 0.5;
-      const wheelRot = timeSec * wheelSpeed;
-      subSuspension.animRefs.wheelMeshes.forEach((wm) => {
-        wm.rotation.z = -wheelRot;
-      });
-      subSuspension.animRefs.bogieGroups.forEach((bg, idx) => {
-        bg.rotation.z = Math.sin(timeSec * 2.2 + idx * Math.PI) * (suspActive ? 0.16 : 0.03);
+      window.addEventListener('resize', () => {
+        camera.aspect = container.clientWidth / Math.max(container.clientHeight, 1);
+        camera.updateProjectionMatrix();
+        renderer.setSize(container.clientWidth, container.clientHeight);
       });
     }
-
-    if (subWeb && subWeb.animRefs && subWeb.animRefs.avionicsRack) {
-      const targetLift = (selectedSubsystemKey === 'web' || currentExplodeFactor > 0.25) ? 0.32 : 0.02;
-      subWeb.animRefs.avionicsRack.position.y += (targetLift - subWeb.animRefs.avionicsRack.position.y) * Math.min(1, dt * 6);
-    }
-
-    if (subAntennas && subAntennas.animRefs && subAntennas.animRefs.dishHead) {
-      subAntennas.animRefs.dishHead.rotation.y = Math.sin(timeSec * 1.4) * 0.42;
-      subAntennas.animRefs.dishHead.rotation.x = Math.cos(timeSec * 0.9) * 0.15;
-    }
-
-    // Update Floating 3D Subsystem Labels
-    const width = container.clientWidth;
-    const height = container.clientHeight;
-
-    Object.values(subsystems3D).forEach((sub) => {
-      const worldAnchor = sub.group.position.clone().add(new THREE.Vector3(0, 0.20, 0));
-      worldAnchor.applyMatrix4(roverRoot.matrixWorld);
-      worldAnchor.project(camera);
-
-      const isIsolated = (selectedSubsystemKey !== 'all' && sub.key === selectedSubsystemKey);
-      const showBadge = (currentExplodeFactor > 0.10 || isIsolated) && worldAnchor.z < 1.0;
-
-      if (showBadge) {
-        sub.badge.style.display = 'flex';
-        sub.badge.style.opacity = isIsolated ? '1' : '0.9';
-        sub.badge.style.pointerEvents = 'auto';
-        const sx = (worldAnchor.x * 0.5 + 0.5) * width;
-        const sy = (-worldAnchor.y * 0.5 + 0.5) * height;
-        sub.badge.style.left = `${sx}px`;
-        sub.badge.style.top = `${sy}px`;
-      } else {
-        sub.badge.style.display = 'none';
-        sub.badge.style.opacity = '0';
-        sub.badge.style.pointerEvents = 'none';
-      }
-    });
-
-    // Update Live HUD Cam Telemetry
-    const camTel = document.getElementById('hw-cam-telemetry');
-    if (camTel) {
-      const r = camera.position.distanceTo(controls.target);
-      const dx = camera.position.x - controls.target.x;
-      const dz = camera.position.z - controls.target.z;
-      const az = Math.round((Math.atan2(dx, dz) * 180 / Math.PI + 360) % 360);
-      const el = Math.round((Math.asin((camera.position.y - controls.target.y) / Math.max(r, 0.001)) * 180 / Math.PI));
-      camTel.textContent = `AZ: ${az}° · EL: ${el}° · RANGE: ${r.toFixed(1)}m`;
-    }
-
-    renderer.render(scene, camera);
-  }
-  animate();
-
-  window.addEventListener('resize', () => {
-    camera.aspect = container.clientWidth / Math.max(container.clientHeight, 1);
-    camera.updateProjectionMatrix();
-    renderer.setSize(container.clientWidth, container.clientHeight);
-  });
-}
   </script>
 
 </body>

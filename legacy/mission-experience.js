@@ -579,13 +579,13 @@
             function setHealthPillStyle(container, dot, statusLevel) {
                 if (!container || !dot) return;
                 if (statusLevel === 'ok') {
-                    container.className = 'px-2 py-0.5 rounded bg-emerald-950/60 border border-emerald-500/40 text-emerald-300 flex items-center gap-1';
+                    container.className = 'px-2.5 py-0.5 rounded-full bg-emerald-950/60 border border-emerald-500/40 text-emerald-300 flex items-center gap-1.5 font-sans text-[10px]';
                     dot.className = 'w-1.5 h-1.5 rounded-full bg-emerald-400';
                 } else if (statusLevel === 'warn') {
-                    container.className = 'px-2 py-0.5 rounded bg-amber-950/60 border border-amber-500/40 text-amber-300 flex items-center gap-1';
+                    container.className = 'px-2.5 py-0.5 rounded-full bg-amber-950/60 border border-amber-500/40 text-amber-300 flex items-center gap-1.5 font-sans text-[10px]';
                     dot.className = 'w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse';
                 } else {
-                    container.className = 'px-2 py-0.5 rounded bg-red-950/70 border border-red-500/50 text-red-300 flex items-center gap-1';
+                    container.className = 'px-2.5 py-0.5 rounded-full bg-red-950/70 border border-red-500/50 text-red-300 flex items-center gap-1.5 font-sans text-[10px]';
                     dot.className = 'w-1.5 h-1.5 rounded-full bg-red-500 animate-ping';
                 }
             }
@@ -612,13 +612,13 @@
                 if (dom.hudTauState) {
                     if (state.tau < 1.5) {
                         dom.hudTauState.textContent = 'CLEAR';
-                        dom.hudTauState.className = 'text-[8px] font-mono-tech text-emerald-400';
+                        dom.hudTauState.className = 'text-[9px] font-sans font-semibold tracking-wider text-emerald-400';
                     } else if (state.tau < 4.5) {
                         dom.hudTauState.textContent = 'HAZY';
-                        dom.hudTauState.className = 'text-[8px] font-mono-tech text-amber-400';
+                        dom.hudTauState.className = 'text-[9px] font-sans font-semibold tracking-wider text-amber-400';
                     } else {
                         dom.hudTauState.textContent = 'STORM!';
-                        dom.hudTauState.className = 'text-[8px] font-mono-tech text-red-400 font-bold animate-pulse';
+                        dom.hudTauState.className = 'text-[9px] font-sans font-bold tracking-wider text-red-400 animate-pulse';
                     }
                 }
 
@@ -628,13 +628,13 @@
                 if (dom.cinemaDriveModeBadge) {
                     if (Math.abs(state.velocityKmPerSec) < 0.01) {
                         dom.cinemaDriveModeBadge.textContent = '■ PARKED / STANDBY';
-                        dom.cinemaDriveModeBadge.className = 'px-2 py-0.5 rounded-full text-[9px] font-mono-tech text-slate-400';
+                        dom.cinemaDriveModeBadge.className = 'px-3 py-1 rounded-full text-[10px] font-sans font-medium text-oppy-textSecondary border border-white/10 bg-[#101113]/90 shadow-lg';
                     } else if (state.drivingBackward) {
                         dom.cinemaDriveModeBadge.textContent = '◀ REV DRIVE';
-                        dom.cinemaDriveModeBadge.className = 'px-2 py-0.5 rounded-full text-[9px] font-mono-tech text-sky-400 font-semibold';
+                        dom.cinemaDriveModeBadge.className = 'px-3 py-1 rounded-full text-[10px] font-sans font-semibold text-oppy-accent border border-oppy-accent/30 bg-[#101113]/90 shadow-lg';
                     } else {
                         dom.cinemaDriveModeBadge.textContent = '▶ FWD DRIVE';
-                        dom.cinemaDriveModeBadge.className = 'px-2 py-0.5 rounded-full text-[9px] font-mono-tech text-emerald-400 font-semibold';
+                        dom.cinemaDriveModeBadge.className = 'px-3 py-1 rounded-full text-[10px] font-sans font-semibold text-emerald-400 border border-emerald-500/30 bg-[#101113]/90 shadow-lg';
                     }
                 }
 
@@ -960,43 +960,56 @@
                 const pinTopY = groundY - 122 * dpr;
                 ctx.save();
 
+                const accentColor = colorHex === '#f59e0b' || colorHex === '#fbbf24' ? '#38bdf8' : colorHex;
+
                 // Vertical laser leader line to ground
                 const lineGrad = ctx.createLinearGradient(screenX, pinTopY, screenX, groundY);
-                lineGrad.addColorStop(0, colorHex);
-                lineGrad.addColorStop(1, 'rgba(255,255,255,0.05)');
+                lineGrad.addColorStop(0, accentColor);
+                lineGrad.addColorStop(1, 'rgba(56, 189, 248, 0.05)');
                 ctx.strokeStyle = lineGrad;
                 ctx.lineWidth = 1.5 * dpr;
                 ctx.setLineDash([4 * dpr, 4 * dpr]);
                 ctx.beginPath();
-                ctx.moveTo(screenX, pinTopY + 12 * dpr);
+                ctx.moveTo(screenX, pinTopY + 14 * dpr);
                 ctx.lineTo(screenX, groundY - 6 * dpr);
                 ctx.stroke();
                 ctx.setLineDash([]);
 
                 // Ground target ring
-                ctx.strokeStyle = colorHex;
+                ctx.strokeStyle = accentColor;
+                ctx.lineWidth = 1.2 * dpr;
                 ctx.beginPath();
                 ctx.ellipse(screenX, groundY - 4 * dpr, 14 * dpr, 4 * dpr, 0, 0, Math.PI * 2);
                 ctx.stroke();
 
-                // Floating pill badge high in the sky
-                ctx.font = `bold ${9.5 * dpr}px "JetBrains Mono", monospace`;
-                const textW = Math.max(ctx.measureText(labelText).width, ctx.measureText(subText).width) + 20 * dpr;
-                const boxH = 28 * dpr;
-                ctx.fillStyle = 'rgba(10, 8, 7, 0.82)';
-                ctx.strokeStyle = colorHex;
+                // Floating pill badge high in the sky (matching Home Screen sleek pill aesthetic)
+                ctx.font = `600 ${10.5 * dpr}px 'Poppins', sans-serif`;
+                const textW = Math.max(ctx.measureText(labelText).width, ctx.measureText(subText).width) + 26 * dpr;
+                const boxH = 32 * dpr;
+                ctx.fillStyle = 'rgba(16, 17, 19, 0.92)';
+                ctx.strokeStyle = 'rgba(255, 255, 255, 0.18)';
                 ctx.lineWidth = 1.2 * dpr;
                 ctx.beginPath();
-                ctx.roundRect(screenX - textW * 0.5, pinTopY - boxH * 0.5, textW, boxH, 6 * dpr);
+                ctx.roundRect(screenX - textW * 0.5, pinTopY - boxH * 0.5, textW, boxH, 16 * dpr);
                 ctx.fill();
                 ctx.stroke();
 
-                ctx.fillStyle = colorHex;
+                // Dot accent inside badge
+                ctx.fillStyle = accentColor;
+                ctx.beginPath();
+                ctx.arc(screenX - textW * 0.5 + 12 * dpr, pinTopY - 2 * dpr, 2.5 * dpr, 0, Math.PI * 2);
+                ctx.fill();
+
+                // Title in pure white Poppins
+                ctx.fillStyle = '#FFFFFF';
                 ctx.textAlign = 'center';
-                ctx.fillText(labelText, screenX, pinTopY - 2 * dpr);
-                ctx.fillStyle = '#cbd5e1';
-                ctx.font = `${8 * dpr}px "JetBrains Mono", monospace`;
-                ctx.fillText(subText, screenX, pinTopY + 9 * dpr);
+                ctx.font = `600 ${10 * dpr}px 'Poppins', sans-serif`;
+                ctx.fillText(labelText, screenX + 4 * dpr, pinTopY - 2 * dpr);
+
+                // Subtitle in soft sleek secondary gray
+                ctx.fillStyle = '#A1A5AA';
+                ctx.font = `400 ${8.5 * dpr}px 'Poppins', sans-serif`;
+                ctx.fillText(subText, screenX, pinTopY + 10 * dpr);
 
                 ctx.restore();
             }
@@ -1910,8 +1923,8 @@
         state.autoCruise = !state.autoCruise;
         btnAuto.textContent = state.autoCruise ? 'AUTO-DRIVE: ON ▶' : 'AUTO-DRIVE: OFF';
         btnAuto.className = state.autoCruise
-          ? 'px-2 py-1 rounded-full bg-emerald-500/30 border border-emerald-400 text-[9px] font-mono text-emerald-200 font-semibold transition'
-          : 'px-2 py-1 rounded-full bg-black/60 hover:bg-slate-800 text-[9px] font-mono text-slate-300 transition';
+          ? 'px-3 py-1.5 rounded-full bg-emerald-500/25 border border-emerald-400 text-[10px] font-sans text-emerald-300 font-semibold transition'
+          : 'px-3 py-1.5 rounded-full bg-oppy-card border border-oppy-border/80 text-[10px] font-sans font-medium text-oppy-textSecondary hover:text-white transition';
       });
     }
 
