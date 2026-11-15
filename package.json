@@ -1,0 +1,22 @@
+{
+  "name": "oppy-last-dance",
+  "version": "1.0.0",
+  "description": "NASA Opportunity (MER-B) Interactive 2D & 3D Web Experience",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js",
+    "build": "echo \"Build completed\""
+  },
+  "keywords": [
+    "nasa",
+    "mars",
+    "rover",
+    "opportunity",
+    "threejs",
+    "simulation"
+  ],
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}

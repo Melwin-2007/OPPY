@@ -1,0 +1,22 @@
+# yaml-language-server: $schema=https://render.com/schema/render.yaml.json
+services:
+  - type: web
+    name: oppy-mars-rover
+    runtime: static
+    plan: free
+    buildCommand: echo "Deploying static assets"
+    staticPublishPath: .
+    routes:
+      - type: rewrite
+        source: /*
+        destination: /index.html
+    headers:
+      - path: /*
+        name: Access-Control-Allow-Origin
+        value: "*"
+      - path: /legacy/*
+        name: Cache-Control
+        value: public, max-age=31536000, immutable
+      - path: /*.glb
+        name: Content-Type
+        value: model/gltf-binary
