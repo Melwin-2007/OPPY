@@ -48,7 +48,7 @@
   <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>
 
   <!-- NASA MER-B Mission Experience Simulation Engine -->
-  <script src="legacy/mission-experience.js?v=7"></script>
+  <script src="legacy/mission-experience.js?v=11"></script>
 
   <style>
     /* Prevent any scrolling on landing page */
@@ -373,7 +373,7 @@
   <!-- ========================================================================= -->
   <!-- 3. INTERACTIVE MARS ODYSSEY MISSION EXPERIENCE OVERLAY                   -->
   <!-- ========================================================================= -->
-  <div id="experience-overlay" class="fixed inset-0 z-50 bg-[#101113] flex flex-col hidden opacity-0 transition-opacity duration-300 select-none">
+  <div id="experience-overlay" class="fixed inset-0 z-50 bg-[#070606] flex flex-col hidden opacity-0 transition-opacity duration-300 select-none">
     
     <!-- Minimal Floating Exit & Audio in Top-Right -->
     <div class="absolute top-4 right-4 flex items-center space-x-2 z-30">
@@ -382,7 +382,7 @@
         class="px-3 py-1 rounded-full border border-white/20 bg-black/60 hover:border-white/40 backdrop-blur-md text-white text-[11px] font-sans uppercase transition-colors cursor-pointer shadow-lg"
         title="Toggle Audio"
       >
-        🔊 SFX
+        🔊 SFX: ON
       </button>
       <button 
         onclick="closeOverlays()" 
@@ -400,48 +400,66 @@
       <canvas id="storyCanvas" class="w-full h-full block cursor-pointer"></canvas>
 
       <!-- Subtle Parallax Film Grain Overlay -->
-      <div id="filmGrainOverlay" class="pointer-events-none absolute inset-0 film-grain opacity-25 z-10"></div>
+      <div id="filmGrainOverlay" class="pointer-events-none absolute inset-0 film-grain opacity-20 z-10"></div>
 
-      <!-- Sol 5111 Pancam Sky Noise PiP Frame (Triggered during Act VI) -->
-      <div id="pancamStaticPip" class="hidden absolute top-14 right-4 w-32 h-32 bg-black border border-red-500/80 rounded-lg overflow-hidden shadow-2xl z-20 flex flex-col font-sans">
-        <div class="bg-red-950/90 px-2 py-0.5 text-[8.5px] font-sans font-medium text-red-200 flex justify-between items-center">
-          <span>PANCAM SKY TAU</span>
-          <span class="animate-pulse font-semibold">SOL 5111</span>
-        </div>
-        <canvas id="staticNoiseCanvas" width="120" height="90" class="w-full flex-1 block"></canvas>
-        <div class="bg-black/95 px-1 py-0.5 text-[8px] font-sans text-slate-400 text-center">
-          TAU &gt; 10.8 · PITCH BLACK
+      <!-- Amnesia Cosmic Radiation Glitch / Scanline Overlay (Phase 4) -->
+      <div id="amnesiaGlitchOverlay" class="pointer-events-none absolute inset-0 bg-white/10 mix-blend-overlay opacity-0 transition-opacity duration-150 z-20"></div>
+
+      <!-- Minimal Control Text Prompt: Simple, unobtrusive prompt appearing when action needed -->
+      <div class="pointer-events-none absolute bottom-24 sm:bottom-28 left-0 right-0 flex justify-center z-20 px-4">
+        <div 
+          id="controlPromptBox" 
+          class="opacity-0 translate-y-1 transition-all duration-300 px-4 py-1.5 rounded-full bg-black/70 border border-white/20 backdrop-blur-md shadow-2xl"
+        >
+          <span id="controlPromptText" class="font-sans font-medium text-xs sm:text-sm text-amber-300 tracking-wider"></span>
         </div>
       </div>
 
-      <!-- Climax & Finale Modal Overlay (Triggered at 45.16 km) -->
-      <div id="finaleOverlay" class="hidden absolute inset-0 bg-black/90 backdrop-blur-md z-30 flex flex-col items-center justify-center p-6 text-center transition-opacity duration-700">
-        <div class="max-w-lg w-full bg-[#101113]/95 border border-white/15 rounded-2xl p-6 shadow-2xl space-y-4 backdrop-blur-md">
-          <div class="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-red-950/80 border border-red-500/50 text-red-300 font-sans text-[10px] font-medium tracking-wider">
-            <span class="w-2 h-2 rounded-full bg-red-500 animate-ping"></span>
-            <span>SOL 5111 — FINAL TELEMETRY TRANSMITTED (JUNE 10, 2018)</span>
-          </div>
+      <!-- Cinematic Story Text: Movie-style narrative subtitles fading in/out at bottom-center -->
+      <div class="pointer-events-none absolute bottom-8 sm:bottom-10 left-0 right-0 flex justify-center z-20 px-4">
+        <div 
+          id="cinematicSubtitleBox" 
+          class="opacity-0 translate-y-2 transition-all duration-500 max-w-2xl w-full text-center px-5 py-2.5 rounded-2xl bg-black/60 border border-white/10 backdrop-blur-md shadow-2xl"
+        >
+          <p id="cinematicSubtitleText" class="font-serif italic text-xs sm:text-sm md:text-base text-slate-100 leading-relaxed drop-shadow-md"></p>
+        </div>
+      </div>
 
-          <div class="text-xl sm:text-2xl font-serif italic text-white my-3">
-            “My battery is low and it’s getting dark.”
-          </div>
-
-          <p class="text-xs text-oppy-textSecondary leading-relaxed font-sans">
-            Engineered for 90 sols and 1,000 meters. Opportunity explored Mars for 5,352 sols (15 years) and traversed 45.16 kilometers—becoming the longest-running off-world mission in human history.
-          </p>
-
-          <div class="flex items-center justify-center gap-3 pt-2">
-            <button id="btnReplayMission" class="px-5 py-2.5 rounded-full bg-white text-black hover:bg-slate-200 font-sans font-bold text-xs shadow-xl transition cursor-pointer">
-              ↺ REPLAY MISSION
-            </button>
-            <button id="btnPlayFinalSong" class="px-5 py-2.5 rounded-full bg-oppy-surface border border-oppy-border hover:border-oppy-accent text-white font-sans font-bold text-xs shadow-xl transition cursor-pointer">
-              ♪ PLAY FAREWELL CHORD
-            </button>
-            <button id="btnDismissFinale" class="px-4 py-2 rounded-full border border-oppy-border bg-oppy-surface hover:bg-oppy-card text-oppy-textSecondary hover:text-white text-xs font-sans transition cursor-pointer">
-              CONTINUE
-            </button>
+      <!-- Fullscreen Pitch Black Memorial Sequence (Phase 5 Climax) -->
+      <div 
+        id="finalBlackoutScreen" 
+        class="opacity-0 pointer-events-none transition-opacity duration-1000 fixed inset-0 bg-black z-40 flex flex-col items-center justify-center p-6 text-center select-none"
+      >
+        <!-- The Famous Quote -->
+        <div 
+          id="finalQuoteBox" 
+          class="opacity-0 scale-95 transition-all duration-1000 max-w-xl mb-8"
+        >
+          <div class="font-serif italic text-2xl sm:text-3xl md:text-4xl text-white font-medium tracking-wide drop-shadow-2xl">
+            “My battery is low and it's getting dark.”
           </div>
         </div>
+
+        <!-- Memorial Tribute Text -->
+        <div 
+          id="finalMemorialText" 
+          class="opacity-0 transition-opacity duration-1000 max-w-lg mb-8"
+        >
+          <p class="font-sans text-xs sm:text-sm text-slate-300 leading-relaxed font-light">
+            For eight months, Earth called out into the silence more than a thousand times. On February 13, 2019, NASA beamed one last song across the stars—<span class="text-amber-300 font-normal">“I’ll Be Seeing You”</span>—and let her rest.
+          </p>
+          <div class="mt-4 font-sans text-[11px] sm:text-xs text-oppy-textMuted uppercase tracking-widest">
+            90 Days Planned &bull; 14 Years Survived
+          </div>
+        </div>
+
+        <!-- Action / Replay Button -->
+        <button 
+          id="finalActionBtn" 
+          class="opacity-0 transition-opacity duration-700 px-6 py-2.5 rounded-full bg-white text-black hover:bg-slate-200 font-sans font-bold text-xs tracking-wider uppercase shadow-2xl cursor-pointer pointer-events-auto"
+        >
+          ↺ REPLAY JOURNEY
+        </button>
       </div>
 
     </div>
