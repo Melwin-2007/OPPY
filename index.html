@@ -48,7 +48,7 @@
   <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>
 
   <!-- NASA MER-B Mission Experience Simulation Engine -->
-  <script src="legacy/mission-experience.js?v=6"></script>
+  <script src="legacy/mission-experience.js?v=7"></script>
 
   <style>
     /* Prevent any scrolling on landing page */
@@ -375,65 +375,29 @@
   <!-- ========================================================================= -->
   <div id="experience-overlay" class="fixed inset-0 z-50 bg-[#101113] flex flex-col hidden opacity-0 transition-opacity duration-300 select-none">
     
-    <!-- Experience Top Telemetry Bar -->
-    <div class="px-4 sm:px-6 py-2.5 border-b border-oppy-border/60 bg-[#101113]/95 backdrop-blur-md flex flex-wrap items-center justify-between gap-3 text-xs font-sans z-30">
-      
-      <!-- Brand & Current Historical Act -->
-      <div class="flex items-center space-x-3">
-        <span class="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse"></span>
-        <span class="font-bold tracking-wider text-white text-[11px] sm:text-xs font-sans uppercase">OPPY'S LAST DANCE // MARS SURFACE JOURNEY</span>
-        <span id="hudActBadge" class="text-[10px] font-sans font-semibold tracking-wider px-3 py-0.5 rounded-full bg-white/10 text-white border border-white/20 uppercase">
-          ACT I · EAGLE CRATER
-        </span>
-      </div>
-
-      <!-- Real-Time Mission Telemetry -->
-      <div class="flex items-center space-x-4 sm:space-x-6 text-[11px] font-sans">
-        <div class="flex items-center gap-1.5">
-          <span class="text-oppy-textMuted text-[10px] uppercase font-medium tracking-wider">SOL:</span>
-          <span id="hudSol" class="text-white font-bold font-sans text-xs">SOL 1</span>
-        </div>
-        <div class="flex items-center gap-1.5">
-          <span class="text-oppy-textMuted text-[10px] uppercase font-medium tracking-wider">ODOMETER:</span>
-          <span id="hudOdometer" class="text-white font-bold font-sans text-xs">0.00 km</span>
-        </div>
-        <div class="flex items-center gap-1.5 hidden md:flex">
-          <span class="text-oppy-textMuted text-[10px] uppercase font-medium tracking-wider">SOLAR:</span>
-          <span id="hudSolar" class="text-oppy-accent font-bold font-sans text-xs">900 Wh</span>
-          <div class="w-12 h-1.5 bg-oppy-surface rounded-full overflow-hidden">
-            <div id="hudSolarBar" class="h-full bg-emerald-400 w-full transition-all duration-150"></div>
-          </div>
-        </div>
-        <div class="flex items-center gap-1.5 hidden lg:flex">
-          <span id="hudTau" class="text-white font-bold font-sans text-xs">τ = 0.50</span>
-          <span id="hudTauState" class="text-[9px] text-emerald-400 uppercase font-semibold font-sans tracking-wider">CLEAR</span>
-        </div>
-      </div>
-
-      <!-- Audio Control & Return Button -->
-      <div class="flex items-center space-x-2.5">
-        <button 
-          id="btnAudioToggle" 
-          class="px-3 py-1 rounded-full border border-oppy-border/80 bg-oppy-card/90 hover:border-oppy-accent text-oppy-textSecondary hover:text-white text-[11px] font-sans uppercase transition-colors cursor-pointer"
-          title="Toggle Procedural Audio Soundscape"
-        >
-          🔊 SFX: ON
-        </button>
-        <button 
-          onclick="closeOverlays()" 
-          class="px-3.5 py-1 rounded-full border border-oppy-border/80 bg-oppy-surface hover:border-red-400 hover:text-red-400 text-white text-[11px] font-sans font-medium uppercase transition-colors cursor-pointer"
-        >
-          ✕ RETURN
-        </button>
-      </div>
-
+    <!-- Minimal Floating Exit & Audio in Top-Right -->
+    <div class="absolute top-4 right-4 flex items-center space-x-2 z-30">
+      <button 
+        id="btnAudioToggle" 
+        class="px-3 py-1 rounded-full border border-white/20 bg-black/60 hover:border-white/40 backdrop-blur-md text-white text-[11px] font-sans uppercase transition-colors cursor-pointer shadow-lg"
+        title="Toggle Audio"
+      >
+        🔊 SFX
+      </button>
+      <button 
+        onclick="closeOverlays()" 
+        class="px-3.5 py-1 rounded-full border border-white/20 bg-black/60 hover:bg-white/20 hover:border-white/40 backdrop-blur-md text-white text-[11px] font-sans font-medium uppercase transition-colors cursor-pointer shadow-lg"
+        title="Return to Landing (or press Esc)"
+      >
+        ✕ RETURN
+      </button>
     </div>
 
     <!-- Main Fullscreen Interactive Simulation Viewport -->
     <div class="relative flex-1 w-full h-full overflow-hidden bg-[#070606]">
       
       <!-- HTML5 High-Performance 2.5D Canvas -->
-      <canvas id="storyCanvas" class="w-full h-full block cursor-grab active:cursor-grabbing"></canvas>
+      <canvas id="storyCanvas" class="w-full h-full block cursor-pointer"></canvas>
 
       <!-- Subtle Parallax Film Grain Overlay -->
       <div id="filmGrainOverlay" class="pointer-events-none absolute inset-0 film-grain opacity-25 z-10"></div>
@@ -448,69 +412,6 @@
         <div class="bg-black/95 px-1 py-0.5 text-[8px] font-sans text-slate-400 text-center">
           TAU &gt; 10.8 · PITCH BLACK
         </div>
-      </div>
-
-      <!-- Sleek Floating Control Bar -->
-      <div class="absolute bottom-3 left-4 right-4 flex flex-wrap items-center justify-between gap-2 z-20 pointer-events-auto">
-        
-        <!-- Left: Drive Controls -->
-        <div class="px-2.5 py-1.5 rounded-full bg-[#101113]/90 backdrop-blur-md border border-white/15 flex items-center gap-1.5 shadow-2xl">
-          <button 
-            id="btnDriveBack"
-            class="px-3 py-1.5 rounded-full bg-oppy-card border border-oppy-border/80 hover:border-oppy-borderLight text-[11px] font-sans font-medium text-oppy-textSecondary hover:text-white flex items-center gap-1.5 transition cursor-pointer"
-            title="Hold A or Left Arrow to reverse"
-          >
-            <span>◀</span> <span class="hidden sm:inline">REVERSE</span> <kbd class="px-1.5 bg-oppy-surface rounded text-oppy-textSecondary text-[9px] font-sans">[A]</kbd>
-          </button>
-          <button 
-            id="btnDriveFwd"
-            class="px-4 py-1.5 rounded-full bg-white hover:bg-slate-200 active:bg-slate-300 text-black text-[11px] font-sans font-bold flex items-center gap-1.5 transition shadow-xl cursor-pointer"
-            title="Hold D or Right Arrow to drive forward"
-          >
-            <span>DRIVE MARS</span> <kbd class="px-1.5 bg-black/15 rounded text-black text-[9px] font-sans font-semibold">[D]</kbd> <span>▶</span>
-          </button>
-          <button 
-            id="btnAutoCruise"
-            class="px-3 py-1.5 rounded-full bg-oppy-card border border-oppy-border/80 text-[10px] font-sans font-medium text-oppy-textSecondary hover:text-white transition cursor-pointer"
-          >
-            AUTO-DRIVE: OFF
-          </button>
-        </div>
-
-        <!-- Center: Mission Traverse Scrubber -->
-        <div class="flex items-center gap-2.5 bg-[#101113]/90 backdrop-blur-md border border-white/15 px-4 py-1.5 rounded-full flex-1 max-w-xs sm:max-w-md shadow-2xl">
-          <span class="text-[10px] font-sans font-medium text-oppy-textMuted uppercase tracking-wider shrink-0">TRAVERSE:</span>
-          <input 
-            id="missionScrubber" 
-            type="range" 
-            min="0" 
-            max="45.16" 
-            step="0.02" 
-            value="0"
-            class="w-full h-1 bg-oppy-border rounded appearance-none cursor-pointer accent-oppy-accent"
-            title="Scrub across Opportunity's 45.16 km traverse"
-          />
-          <span id="scrubberPct" class="text-[10px] font-sans font-semibold text-white w-8 text-right shrink-0">0%</span>
-        </div>
-
-        <!-- Right: Science Instrument & Atmospheric Controls -->
-        <div class="px-2.5 py-1.5 rounded-full bg-[#101113]/90 backdrop-blur-md border border-white/15 flex items-center gap-1.5 shadow-2xl">
-          <button 
-            id="btnDeployInstrument"
-            class="px-3 py-1.5 rounded-full bg-oppy-card border border-oppy-border/80 hover:border-oppy-accent text-[11px] font-sans font-medium text-white transition flex items-center gap-1.5 shadow-lg cursor-pointer"
-            title="Deploy IDD Arm & RAT Diamond Grinder"
-          >
-            <span>⚡ DEPLOY RAT</span> <kbd class="px-1.5 bg-oppy-surface rounded text-oppy-accent text-[9px] font-sans font-medium">[E]</kbd>
-          </button>
-          <button 
-            id="btnTriggerWindGust"
-            class="px-3 py-1.5 rounded-full bg-oppy-card border border-oppy-border/80 hover:border-emerald-400 text-[11px] font-sans font-medium text-white transition hidden sm:inline-flex items-center gap-1.5 shadow-lg cursor-pointer"
-            title="Trigger Martian Dust Devil Cleaning Event"
-          >
-            <span>💨 WIND GUST</span>
-          </button>
-        </div>
-
       </div>
 
       <!-- Climax & Finale Modal Overlay (Triggered at 45.16 km) -->

@@ -1834,30 +1834,64 @@
       if (!window.__experienceActive) return;
       audioEngine.init();
       const key = e.key.toLowerCase();
-      if (key === 'd' || e.key === 'ArrowRight') {
+      if (key === 'd' || key === 'w' || e.key === 'ArrowRight' || e.key === 'ArrowUp') {
         state.keys.right = true;
+        state.keys.left = false;
         state.autoCruise = false;
-        const btn = document.getElementById('btnAutoCruise');
-        if (btn) btn.textContent = 'AUTO-DRIVE: OFF';
-      } else if (key === 'a' || e.key === 'ArrowLeft') {
+      } else if (key === 'a' || key === 's' || e.key === 'ArrowLeft' || e.key === 'ArrowDown') {
         state.keys.left = true;
+        state.keys.right = false;
         state.autoCruise = false;
-        const btn = document.getElementById('btnAutoCruise');
-        if (btn) btn.textContent = 'AUTO-DRIVE: OFF';
       } else if (key === 'e' || e.key === ' ') {
         triggerScienceAction();
+      } else if (e.key === 'Escape') {
+        if (typeof window.closeOverlays === 'function') {
+          window.closeOverlays();
+        }
       }
     });
 
     window.addEventListener('keyup', (e) => {
       if (!window.__experienceActive) return;
       const key = e.key.toLowerCase();
-      if (key === 'd' || e.key === 'ArrowRight') {
+      if (key === 'd' || key === 'w' || e.key === 'ArrowRight' || e.key === 'ArrowUp') {
         state.keys.right = false;
-      } else if (key === 'a' || e.key === 'ArrowLeft') {
+      } else if (key === 'a' || key === 's' || e.key === 'ArrowLeft' || e.key === 'ArrowDown') {
         state.keys.left = false;
       }
     });
+
+    if (storyCanvas) {
+      const handleCanvasPointer = (e, isDown) => {
+        if (!window.__experienceActive) return;
+        if (!isDown) {
+          state.keys.right = false;
+          state.keys.left = false;
+          return;
+        }
+        audioEngine.init();
+        const rect = storyCanvas.getBoundingClientRect();
+        const clientX = (e.touches && e.touches[0]) ? e.touches[0].clientX : e.clientX;
+        const relX = clientX - rect.left;
+        if (relX > rect.width * 0.5) {
+          state.keys.right = true;
+          state.keys.left = false;
+        } else {
+          state.keys.left = true;
+          state.keys.right = false;
+        }
+      };
+
+      storyCanvas.addEventListener('mousedown', (e) => handleCanvasPointer(e, true));
+      storyCanvas.addEventListener('mousemove', (e) => {
+        if (e.buttons === 1) handleCanvasPointer(e, true);
+      });
+      window.addEventListener('mouseup', (e) => handleCanvasPointer(e, false));
+
+      storyCanvas.addEventListener('touchstart', (e) => handleCanvasPointer(e, true), { passive: true });
+      storyCanvas.addEventListener('touchmove', (e) => handleCanvasPointer(e, true), { passive: true });
+      window.addEventListener('touchend', (e) => handleCanvasPointer(e, false));
+    }
 
     bindHoldButton('btnDriveFwd', 'right');
     bindHoldButton('btnDriveBack', 'left');
