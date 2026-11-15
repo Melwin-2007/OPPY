@@ -83,7 +83,7 @@
     let x = 0;
     DEF.forEach((p, pi) => p.forEach((s) => {
       const st = Object.assign({ ph: pi + 1 }, s);
-      st.min = s.min || Math.max(4, 2 + s.say.length / 32);
+      st.min = s.min || Math.max(4.5, 2.5 + s.say.length / 20);
       st.x0 = x;
       const d = s.stay ? 0 : (s.d != null ? s.d : st.min * SPEED * 0.8 * (s.sp || 1) * (s.dm || 1));
       st.to = x + d; x = st.to; STEPS.push(st);
@@ -106,27 +106,92 @@
     return BASE + h;
   }
 
-  // ---------- audio ----------
+  // ---------- audio (light BGM + atmospheric wind + motor SFX) ----------
   const audio = {
-    ctx: null, muted: false, ok: false,
+    ctx: null, muted: false, ok: false, duckLevel: 1.0,
     init() {
-      if (this.ok) { if (this.ctx.state === 'suspended') this.ctx.resume().catch(() => {}); return; }
+      if (this.ok) { if (this.ctx && this.ctx.state === 'suspended') this.ctx.resume().catch(() => {}); return; }
       try {
         const A = window.AudioContext || window.webkitAudioContext; if (!A) return;
         const x = this.ctx = new A(), n = x.sampleRate * 2, buf = x.createBuffer(1, n, x.sampleRate), o = buf.getChannelData(0);
         let b0 = 0, b1 = 0, b2 = 0;
         for (let i = 0; i < n; i++) { const w = Math.random() * 2 - 1; b0 = 0.99 * b0 + w * 0.06; b1 = 0.96 * b1 + w * 0.2; b2 = 0.7 * b2 + w * 0.5; o[i] = (b0 + b1 + b2) * 0.1; }
-        this.master = x.createGain(); this.master.gain.value = this.muted ? 0 : 1; this.master.connect(x.destination);
+        
+        // Master gain
+        this.master = x.createGain(); 
+        this.master.gain.value = this.muted ? 0 : 1; 
+        this.master.connect(x.destination);
+
+        // Ducking gain: ducks background sounds smoothly when narrator speaks
+        this.duckGain = x.createGain();
+        this.duckGain.gain.value = 1.0;
+        this.duckGain.connect(this.master);
+
+        // Martian wind
         const src = x.createBufferSource(); src.buffer = buf; src.loop = true;
         this.wf = x.createBiquadFilter(); this.wf.type = 'bandpass'; this.wf.frequency.value = 240; this.wf.Q.value = 1.4;
-        this.wg = x.createGain(); this.wg.gain.value = 0.04; src.connect(this.wf); this.wf.connect(this.wg); this.wg.connect(this.master); src.start();
+        this.wg = x.createGain(); this.wg.gain.value = 0.035; 
+        src.connect(this.wf); this.wf.connect(this.wg); this.wg.connect(this.duckGain); src.start();
+
+        // Driving DC servo motor
         this.so = x.createOscillator(); this.so.type = 'sawtooth'; this.so.frequency.value = 60;
         const sf = x.createBiquadFilter(); sf.type = 'lowpass'; sf.frequency.value = 220;
-        this.sg = x.createGain(); this.sg.gain.value = 0; this.so.connect(sf); sf.connect(this.sg); this.sg.connect(this.master); this.so.start();
+        this.sg = x.createGain(); this.sg.gain.value = 0; 
+        this.so.connect(sf); sf.connect(this.sg); this.sg.connect(this.duckGain); this.so.start();
+
+        // Light BGM Pad: gentle, warm celestial synth pad (peaceful storytelling ambience)
+        this.bgmGain = x.createGain();
+        this.bgmGain.gain.value = 0.026;
+
+        const padFilter = x.createBiquadFilter();
+        padFilter.type = 'lowpass';
+        padFilter.frequency.value = 360;
+        padFilter.Q.value = 1.0;
+
+        const padLfo = x.createOscillator();
+        padLfo.frequency.value = 0.07; // 14-second peaceful breathing cycle
+        const padLfoGain = x.createGain();
+        padLfoGain.gain.value = 55;
+        padLfo.connect(padLfoGain);
+        padLfoGain.connect(padFilter.frequency);
+        padLfo.start();
+
+        const chordFreqs = [146.83, 220.00, 185.00];
+        chordFreqs.forEach((freq) => {
+          const osc = x.createOscillator();
+          osc.type = 'sine';
+          osc.frequency.value = freq;
+          const noteGain = x.createGain();
+          noteGain.gain.value = 0.33;
+          osc.connect(noteGain);
+          noteGain.connect(padFilter);
+          osc.start();
+        });
+
+        padFilter.connect(this.bgmGain);
+        this.bgmGain.connect(this.duckGain);
+
         this.ok = true;
       } catch (e) {}
     },
-    setMuted(m) { this.muted = !!m; if (this.ok) this.master.gain.setValueAtTime(m ? 0 : 1, this.ctx.currentTime); },
+    duck(level) {
+      if (!this.ok || !this.ctx || !this.duckGain) return;
+      this.duckLevel = level || 0.35;
+      const t = this.ctx.currentTime;
+      this.duckGain.gain.cancelScheduledValues(t);
+      this.duckGain.gain.setTargetAtTime(this.duckLevel, t, 0.2);
+    },
+    unduck() {
+      if (!this.ok || !this.ctx || !this.duckGain) return;
+      this.duckLevel = 1.0;
+      const t = this.ctx.currentTime;
+      this.duckGain.gain.cancelScheduledValues(t);
+      this.duckGain.gain.setTargetAtTime(1.0, t, 0.6);
+    },
+    setMuted(m) { 
+      this.muted = !!m; 
+      if (this.ok && this.ctx) this.master.gain.setValueAtTime(m ? 0 : 1, this.ctx.currentTime); 
+    },
     update() {
       if (!this.ok || !S) return; const t = this.ctx.currentTime, st = S.E.hz;
       this.wg.gain.setTargetAtTime(0.035 + st * 0.14 + (S.gustOn ? 0.1 : 0), t, 0.2);
@@ -134,6 +199,182 @@
       const sp = Math.abs(S.v) + (S.trapped ? 70 : 0) + (S.drillOn ? 90 : 0);
       this.sg.gain.setTargetAtTime(sp > 4 ? Math.min(0.06, 0.015 + sp * 0.0002) : 0, t, 0.08);
       this.so.frequency.setTargetAtTime(52 + Math.min(150, sp * 0.5) + (S.drillOn ? 120 : 0), t, 0.08);
+    }
+  };
+
+  // ---------- female elegant narrator engine (cinematic storytelling) ----------
+  const narrator = {
+    enabled: true,
+    speaking: false,
+    currentId: null,
+    currentUtterance: null,
+    voice: null,
+    heartbeat: null,
+
+    init() {
+      if (typeof window === 'undefined' || !window.speechSynthesis) return;
+      this.pickVoice();
+      if (window.speechSynthesis.onvoiceschanged !== undefined) {
+        window.speechSynthesis.onvoiceschanged = () => this.pickVoice();
+      }
+      if (!this.heartbeat) {
+        this.heartbeat = setInterval(() => {
+          if (this.speaking && window.speechSynthesis.paused) {
+            window.speechSynthesis.resume();
+          }
+        }, 1500);
+      }
+    },
+
+    pickVoice() {
+      if (!window.speechSynthesis) return;
+      const list = window.speechSynthesis.getVoices();
+      if (!list || list.length === 0) return;
+
+      // 1. British / UK English Female (Highest elegance, clear articulation & storytelling cadence)
+      let v = list.find((x) => 
+        /en[-_]GB/i.test(x.lang) && 
+        /female|sonia|libby|hazel|maisie|susan|victoria|amy|serena|kate/i.test(x.name)
+      );
+      if (!v) {
+        v = list.find((x) => /en[-_]GB/i.test(x.lang) && !/male|david|george|oliver|brian/i.test(x.name));
+      }
+
+      // 2. Commonwealth / Foreign Accented English Female (Irish, Australian, South African)
+      if (!v) {
+        v = list.find((x) => 
+          /en[-_](IE|AU|NZ|ZA|IN)/i.test(x.lang) && 
+          /female|karen|moira|catherine|clara|fiona|neerja|natasha/i.test(x.name)
+        );
+      }
+      if (!v) {
+        v = list.find((x) => /en[-_](IE|AU|NZ|ZA)/i.test(x.lang) && !/male/i.test(x.name));
+      }
+
+      // 3. High-quality natural English female voice
+      if (!v) {
+        v = list.find((x) => 
+          x.lang.startsWith('en') && 
+          /female|natural|samantha|aria|jenny|zira/i.test(x.name) && 
+          !/male|david|mark/i.test(x.name)
+        );
+      }
+
+      // 4. Any en-GB voice
+      if (!v) {
+        v = list.find((x) => /en[-_]GB/i.test(x.lang));
+      }
+
+      // 5. Fallback English
+      if (!v) {
+        v = list.find((x) => x.lang.startsWith('en')) || list[0];
+      }
+
+      this.voice = v;
+    },
+
+    cleanText(t) {
+      if (!t) return '';
+      return t
+        .replace(/\[.*?\]/g, '') // remove prompts
+        .replace(/-105°C/g, 'minus one hundred and five degrees Celsius')
+        .replace(/19,000 km\/h/g, 'nineteen thousand kilometers per hour')
+        .replace(/42-kilometer/g, 'forty-two kilometer')
+        .replace(/45\.16 km/g, 'forty-five point one six kilometers')
+        .replace(/192 meters/g, 'one hundred and ninety-two meters')
+        .replace(/1 meter/g, 'one meter')
+        .replace(/5-DOF/g, 'five-degree-of-freedom')
+        .replace(/APXS/g, 'A-P-X-S')
+        .replace(/Pancam/g, 'Pan-cam')
+        .replace(/Navcam/g, 'Nav-cam')
+        .replace(/tau > 10\.8/g, 'tau greater than ten point eight')
+        .replace(/645 watt-hours/g, 'six hundred forty-five watt-hours')
+        .replace(/22 watt-hours/g, 'twenty-two watt-hours')
+        .replace(/2004/g, 'two thousand and four')
+        .replace(/2005/g, 'two thousand and five')
+        .replace(/2007/g, 'two thousand and seven')
+        .replace(/2010/g, 'twenty ten')
+        .replace(/2015/g, 'twenty fifteen')
+        .replace(/2018/g, 'twenty eighteen')
+        .replace(/2019/g, 'twenty nineteen')
+        .replace(/90-day/g, 'ninety-day')
+        .replace(/90 days/g, 'ninety days')
+        .replace(/14 Years/g, 'fourteen years')
+        .replace(/15 years/g, 'fifteen years')
+        .replace(/—/g, ', ')
+        .replace(/–/g, ' to ')
+        .replace(/'/g, "'")
+        .trim();
+    },
+
+    stop() {
+      if (typeof window === 'undefined' || !window.speechSynthesis) return;
+      try {
+        window.speechSynthesis.cancel();
+      } catch (e) {}
+      this.speaking = false;
+      this.currentId = null;
+      this.currentUtterance = null;
+      window.__activeNarratorUtterance = null;
+      if (typeof audio !== 'undefined' && audio.unduck) audio.unduck();
+    },
+
+    speak(rawText, id) {
+      if (!this.enabled || !rawText) return;
+      if (typeof window === 'undefined' || !window.speechSynthesis) return;
+
+      const text = this.cleanText(rawText);
+      if (!text) return;
+
+      // Avoid repeating same caption if currently active
+      if (id && this.currentId === id && this.speaking) return;
+
+      // STOP previous voice immediately: guarantee NO overlapping voices!
+      this.stop();
+
+      this.currentId = id || text;
+      this.pickVoice();
+
+      const u = new SpeechSynthesisUtterance(text);
+      if (this.voice) {
+        u.voice = this.voice;
+        u.lang = this.voice.lang || 'en-GB';
+      } else {
+        u.lang = 'en-GB';
+      }
+
+      // Elegant, measured storytelling cadence
+      u.rate = 0.91;  // slightly relaxed, articulate pacing for clear storytelling
+      u.pitch = 1.02; // warm, resonant tone
+      u.volume = 1.0;
+
+      u.onstart = () => {
+        this.speaking = true;
+        if (typeof audio !== 'undefined' && audio.duck) audio.duck(0.38);
+      };
+
+      u.onend = () => {
+        this.speaking = false;
+        this.currentUtterance = null;
+        window.__activeNarratorUtterance = null;
+        if (typeof audio !== 'undefined' && audio.unduck) audio.unduck();
+      };
+
+      u.onerror = () => {
+        this.speaking = false;
+        this.currentUtterance = null;
+        window.__activeNarratorUtterance = null;
+        if (typeof audio !== 'undefined' && audio.unduck) audio.unduck();
+      };
+
+      this.currentUtterance = u;
+      window.__activeNarratorUtterance = u; // prevent Chrome GC bug
+
+      try {
+        window.speechSynthesis.speak(u);
+      } catch (e) {
+        console.warn('SpeechSynthesis error:', e);
+      }
     }
   };
 
@@ -157,10 +398,11 @@
 
   // ---------- subtitles & prompts ----------
   let subTok = 0, prTok = 0, curPrompt = '';
-  function say(t) {
+  function say(t, id) {
     const box = $('cinematicSubtitleBox'), el = $('cinematicSubtitleText'); if (!box || !el) return;
     const tok = ++subTok;
-    if (!t) { box.style.opacity = '0'; return; }
+    if (!t) { box.style.opacity = '0'; narrator.stop(); return; }
+    narrator.speak(t, id || t);
     if (box.style.opacity === '1') { box.style.opacity = '0'; setTimeout(() => { if (tok === subTok) { el.textContent = t; box.style.opacity = '1'; } }, 650); }
     else { el.textContent = t; requestAnimationFrame(() => { if (tok === subTok) box.style.opacity = '1'; }); }
   }
@@ -182,7 +424,7 @@
     const st = STEPS[i]; if (!st) return;
     if (st.env) S.target = ENV[st.env];
     S.speedMul = st.sp || 1; S.pressE = 0; S.pressSpace = 0;
-    say(st.say);
+    say(st.say, st.id);
     if (st.id === 'jam') { S.jam = 1; S.facing = -1; }
     if (st.id === 'p2d') S.spark = 1;
     if (st.id === 'cl1') S.spark = 1;
@@ -220,7 +462,7 @@
     if (S.drilled && S.blue < 1) S.blue = Math.min(1, S.blue + dt * 0.5);
 
     if (st.id === 'look') { if (arrived && S.pressSpace && S.fin < 0) { S.fin = 0; S.pressSpace = 0; } return; }
-    if (S.stepT >= st.min && arrived && needOk) {
+    if (S.stepT >= st.min && arrived && needOk && (!narrator.speaking || S.stepT >= st.min + 4.5)) {
       if (S.stepI < STEPS.length - 1) enterStep(S.stepI + 1);
     }
   }
@@ -326,13 +568,18 @@
       const b = $('finalBlackoutScreen'), q = $('finalQuoteBox');
       if (b) { b.style.opacity = '1'; }
       if (q) { q.style.opacity = '1'; q.style.transform = 'scale(1)'; }
+      narrator.speak("My battery is low and it's getting dark.", 'quote');
     }
     if (f > 10.5 && !S._b2) { S._b2 = 1; const q = $('finalQuoteBox'); if (q) q.style.opacity = '0'; }
-    if (f > 12 && !S._b3) { S._b3 = 1; const m = $('finalMemorialText'); if (m) m.style.opacity = '1'; }
+    if (f > 12 && !S._b3) {
+      S._b3 = 1; const m = $('finalMemorialText'); if (m) m.style.opacity = '1';
+      narrator.speak("For eight months, Earth called out into the silence more than a thousand times. On February 13, 2019, NASA beamed one last song across the stars, I'll Be Seeing You, and let her rest. 90 Days Planned. 14 Years Survived.", 'memorial');
+    }
     if (f > 23 && !S._b4) { S._b4 = 1; S.finished = 1; const a = $('finalActionBtn'); if (a) { a.style.opacity = '1'; a.style.pointerEvents = 'auto'; } }
   }
 
   function restart() {
+    narrator.stop();
     ['finalBlackoutScreen', 'finalQuoteBox', 'finalMemorialText', 'finalActionBtn'].forEach((id) => { const e = $(id); if (e) { e.style.opacity = '0'; if (id === 'finalActionBtn') e.style.pointerEvents = 'none'; } });
     const q = $('finalQuoteBox'); if (q) q.style.transform = 'scale(.95)';
     const b = $('finalBlackoutScreen'); if (b) b.style.pointerEvents = 'none';
@@ -637,7 +884,11 @@
     const kmap = { KeyD: 'd', ArrowRight: 'd', KeyA: 'a', ArrowLeft: 'a', Space: 'space', KeyE: 'e' };
     window.addEventListener('keydown', (ev) => {
       if (!window.__experienceActive || !S) return;
-      if (ev.code === 'Escape') { if (typeof window.closeOverlays === 'function') window.closeOverlays(); return; }
+      if (ev.code === 'Escape') { 
+        narrator.stop();
+        if (typeof window.closeOverlays === 'function') window.closeOverlays(); 
+        return; 
+      }
       if (ev.code === 'KeyR' && S.finished) { restart(); return; }
       const k = kmap[ev.code]; if (!k) return; ev.preventDefault(); audio.init();
       if (!ev.repeat && !keys[k]) {
@@ -651,6 +902,24 @@
     window.addEventListener('blur', () => { keys.d = keys.a = keys.space = keys.e = 0; });
     const btn = $('btnAudioToggle');
     if (btn) btn.addEventListener('click', () => { audio.init(); audio.setMuted(!audio.muted); btn.textContent = audio.muted ? '🔇 SFX: OFF' : '🔊 SFX: ON'; });
+    const vb = $('btnVoiceToggle');
+    if (vb) {
+      vb.addEventListener('click', () => {
+        narrator.enabled = !narrator.enabled;
+        if (!narrator.enabled) {
+          narrator.stop();
+        } else {
+          const cur = STEPS[S.stepI];
+          if (cur && cur.say) narrator.speak(cur.say, cur.id);
+        }
+        const textSpan = $('btnVoiceText');
+        if (textSpan) textSpan.textContent = narrator.enabled ? 'VOICE: ON' : 'VOICE: OFF';
+        else vb.textContent = narrator.enabled ? '🎙️ VOICE: ON' : '🎙️ VOICE: OFF';
+        vb.className = narrator.enabled
+          ? 'px-3 py-1 rounded-full border border-oppy-accent/70 bg-black/60 hover:border-oppy-accent backdrop-blur-md text-white text-[11px] font-sans uppercase transition-colors cursor-pointer shadow-lg flex items-center space-x-1.5'
+          : 'px-3 py-1 rounded-full border border-white/20 bg-black/60 hover:border-white/40 backdrop-blur-md text-oppy-textMuted text-[11px] font-sans uppercase transition-colors cursor-pointer shadow-lg flex items-center space-x-1.5';
+      });
+    }
     const rb = $('finalActionBtn'); if (rb) rb.addEventListener('click', () => { if (S && S.finished) restart(); });
     // touch / mouse: action prompts map to a tap, otherwise left/right halves = A / D
     const pd = (ev, down) => {
@@ -670,7 +939,9 @@
     window.__experienceActive = true;
     cvs = $('storyCanvas'); if (!cvs) return; c = cvs.getContext('2d');
     resize(); setupControls();
+    narrator.init();
     if (!S || S.finished) restart();
+    else if (S && STEPS[S.stepI]) narrator.speak(STEPS[S.stepI].say, STEPS[S.stepI].id);
     lastT = performance.now(); if (raf) cancelAnimationFrame(raf);
     audio.init();
     const loop = (now) => {
@@ -687,6 +958,7 @@
     if (S && S.fin >= 0) S.finished = 1;
     keys.d = keys.a = keys.space = keys.e = 0;
     if (audio.ok) { audio.sg.gain.setTargetAtTime(0, audio.ctx.currentTime, 0.05); }
+    narrator.stop();
   };
   window.resizeMissionExperience = resize;
   window.addEventListener('resize', () => { if (window.__experienceActive) resize(); });

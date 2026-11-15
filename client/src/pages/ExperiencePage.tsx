@@ -1,5 +1,6 @@
 import React, { useEffect } from 'react';
 import { useMissionStore } from '../stores/missionStore';
+import { useStoryNarrator } from '../hooks/useStoryNarrator';
 import { Navigation } from '../components/ui/Navigation';
 import { RoverCanvas } from '../components/3d/RoverCanvas';
 import { StoryOverlay } from '../components/story/StoryOverlay';
@@ -14,6 +15,10 @@ interface ExperiencePageProps {
 export const ExperiencePage: React.FC<ExperiencePageProps> = ({ isAudioPlaying, onToggleAudio }) => {
   const { phases, currentPhaseIndex, isPlaying, simSpeed, nextPhase, prevPhase } = useMissionStore();
   const currentPhase = phases[currentPhaseIndex] || phases[0];
+
+  // Story Narration with Female Elegant Foreign Accent & Zero Overlap
+  const narrationText = `${currentPhase.title}. ${currentPhase.headline}. ${currentPhase.narrativeText}`;
+  const { isVoiceEnabled, toggleVoice } = useStoryNarrator(narrationText, currentPhase.id);
 
   // Auto progression timer when isPlaying is true
   useEffect(() => {
@@ -48,13 +53,28 @@ export const ExperiencePage: React.FC<ExperiencePageProps> = ({ isAudioPlaying, 
       {/* Top Navigation */}
       <Navigation isAudioPlaying={isAudioPlaying} onToggleAudio={onToggleAudio} />
 
-      {/* Top Floating Telemetry Status */}
-      <div className="absolute top-16 left-6 right-6 z-20 pointer-events-none">
-        <TelemetryHUD
-          statusText={`MISSION: ${currentPhase.phaseNumber} · ${currentPhase.title.toUpperCase()}`}
-          odometerKm={currentPhase.odometerKm}
-          subsystemState={`SOL RANGE: ${currentPhase.solRange[0]}–${currentPhase.solRange[1]}`}
-        />
+      {/* Top Floating Telemetry Status & Narration Toggle */}
+      <div className="absolute top-16 left-6 right-6 z-20 flex flex-wrap items-center justify-between gap-3 pointer-events-none">
+        <div className="flex-1 min-w-[280px]">
+          <TelemetryHUD
+            statusText={`MISSION: ${currentPhase.phaseNumber} · ${currentPhase.title.toUpperCase()}`}
+            odometerKm={currentPhase.odometerKm}
+            subsystemState={`SOL RANGE: ${currentPhase.solRange[0]}–${currentPhase.solRange[1]}`}
+          />
+        </div>
+
+        <button
+          onClick={toggleVoice}
+          className={`pointer-events-auto px-3.5 py-2 rounded-md border text-[11px] font-mono uppercase transition-all backdrop-blur-md flex items-center space-x-2 shadow-2xl ${
+            isVoiceEnabled
+              ? 'border-oppy-accent bg-[#0c0d0f]/90 text-white shadow-oppy-accent/20'
+              : 'border-oppy-border bg-[#0c0d0f]/70 text-oppy-textMuted hover:text-white'
+          }`}
+          title="Toggle Female Elegant Storytelling Voice"
+        >
+          <span className={`w-2 h-2 rounded-full ${isVoiceEnabled ? 'bg-oppy-accent animate-pulse' : 'bg-oppy-textMuted'}`} />
+          <span>{isVoiceEnabled ? '🎙️ NARRATOR: ON' : '🎙️ NARRATOR: OFF'}</span>
+        </button>
       </div>
 
       {/* Primary Fullscreen 3D Viewport */}

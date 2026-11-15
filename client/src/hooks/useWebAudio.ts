@@ -51,6 +51,34 @@ export function useWebAudio() {
       masterGain.gain.setValueAtTime(0.01, ctx.currentTime);
       gainNodeRef.current = masterGain;
 
+      // 3.5 Light Celestial BGM Pad (peaceful storytelling ambience)
+      const bgmGain = ctx.createGain();
+      bgmGain.gain.setValueAtTime(0.04, ctx.currentTime);
+      const padFilter = ctx.createBiquadFilter();
+      padFilter.type = 'lowpass';
+      padFilter.frequency.setValueAtTime(360, ctx.currentTime);
+
+      const padLfo = ctx.createOscillator();
+      padLfo.frequency.setValueAtTime(0.07, ctx.currentTime);
+      const padLfoGain = ctx.createGain();
+      padLfoGain.gain.setValueAtTime(50, ctx.currentTime);
+      padLfo.connect(padLfoGain);
+      padLfoGain.connect(padFilter.frequency);
+      padLfo.start();
+
+      [146.83, 220.00, 185.00].forEach((freq) => {
+        const osc = ctx.createOscillator();
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(freq, ctx.currentTime);
+        const noteGain = ctx.createGain();
+        noteGain.gain.setValueAtTime(0.33, ctx.currentTime);
+        osc.connect(noteGain);
+        noteGain.connect(padFilter);
+        osc.start();
+      });
+      padFilter.connect(bgmGain);
+      bgmGain.connect(masterGain);
+
       noiseNode.connect(filter);
       filter.connect(masterGain);
       masterGain.connect(ctx.destination);
@@ -135,5 +163,19 @@ export function useWebAudio() {
     }
   }, [isPlaying]);
 
-  return { isPlaying, toggleAudio, triggerSound };
+  const duckAudio = useCallback((level: number = 0.35) => {
+    if (!audioCtxRef.current || !gainNodeRef.current || !isPlaying) return;
+    const now = audioCtxRef.current.currentTime;
+    gainNodeRef.current.gain.cancelScheduledValues(now);
+    gainNodeRef.current.gain.setTargetAtTime(0.35 * level, now, 0.2);
+  }, [isPlaying]);
+
+  const unduckAudio = useCallback(() => {
+    if (!audioCtxRef.current || !gainNodeRef.current || !isPlaying) return;
+    const now = audioCtxRef.current.currentTime;
+    gainNodeRef.current.gain.cancelScheduledValues(now);
+    gainNodeRef.current.gain.setTargetAtTime(0.35, now, 0.6);
+  }, [isPlaying]);
+
+  return { isPlaying, toggleAudio, triggerSound, duckAudio, unduckAudio };
 }

@@ -367,6 +367,10 @@
           <button id="hw-toggle-bg" class="px-3 py-1 rounded-full border border-oppy-border/80 bg-oppy-card/90 text-oppy-textPrimary hover:text-white hover:border-oppy-accent text-[11px] uppercase font-sans font-medium transition-all cursor-pointer" title="Switch between Mars Dark Atmosphere and NASA Studio White">
             WHITE BG
           </button>
+          <button id="hw-toggle-voice" class="px-3 py-1 rounded-full border border-oppy-accent/70 bg-oppy-card/90 hover:border-oppy-accent text-white text-[11px] uppercase font-sans font-medium transition-all cursor-pointer flex items-center space-x-1.5" title="Toggle Hardware Voice Explanation">
+            <span class="w-1.5 h-1.5 rounded-full bg-oppy-accent animate-pulse" id="hw-voice-dot"></span>
+            <span id="hw-voice-label">VOICE: ON</span>
+          </button>
           <button onclick="closeOverlays()" class="px-3.5 py-1 rounded-full border border-oppy-border/80 bg-oppy-surface hover:border-red-400 hover:text-red-400 text-white text-[11px] font-sans font-medium uppercase transition-colors cursor-pointer">
             ✕ RETURN
           </button>
@@ -545,6 +549,9 @@
         clearTimeout(overlayCloseTimer);
         overlayCloseTimer = null;
       }
+      if (window.stopHardwareNarration) {
+        try { window.stopHardwareNarration(); } catch (e) {}
+      }
       const hw = document.getElementById('hardware-overlay');
       if (hw) {
         hw.classList.add('opacity-0');
@@ -576,6 +583,9 @@
       if (window.pauseMissionExperience) {
         try { window.pauseMissionExperience(); } catch (e) {}
       }
+      if (window.stopHardwareNarration) {
+        try { window.stopHardwareNarration(); } catch (e) {}
+      }
       const exp = document.getElementById('experience-overlay');
       if (exp) {
         exp.classList.add('opacity-0');
@@ -591,6 +601,10 @@
         if (!window.__hw3dInitialized) {
           init3DHardwareViewer();
           window.__hw3dInitialized = true;
+        } else {
+          if (window.__hwSelectSubsystem) {
+            window.__hwSelectSubsystem(window.__hwSelectedKey || 'all', false);
+          }
         }
       });
     }
@@ -603,6 +617,9 @@
       }
       if (window.pauseMissionExperience) {
         try { window.pauseMissionExperience(); } catch (e) {}
+      }
+      if (window.stopHardwareNarration) {
+        try { window.stopHardwareNarration(); } catch (e) {}
       }
       ['hardware-overlay', 'experience-overlay'].forEach(id => {
         const el = document.getElementById(id);
@@ -2092,9 +2109,246 @@ function createSolarTopTexture() {
         });
       }
 
+      // =========================================================================
+      // HARDWARE STORYTELLING NARRATOR (FEMALE FOREIGN ACCENT, ZERO OVERLAP)
+      // =========================================================================
+      const hwNarrator = {
+        enabled: true,
+        speaking: false,
+        currentKey: null,
+        currentUtterance: null,
+        voice: null,
+        heartbeat: null,
+        pendingTimer: null,
+
+        init() {
+          if (typeof window === 'undefined' || !window.speechSynthesis) return;
+          this.pickVoice();
+          if (window.speechSynthesis.onvoiceschanged !== undefined) {
+            window.speechSynthesis.onvoiceschanged = () => this.pickVoice();
+          }
+          if (!this.heartbeat) {
+            this.heartbeat = setInterval(() => {
+              if (this.speaking && window.speechSynthesis.paused) {
+                window.speechSynthesis.resume();
+              }
+            }, 1500);
+          }
+        },
+
+        pickVoice() {
+          if (typeof window === 'undefined' || !window.speechSynthesis) return null;
+          const list = window.speechSynthesis.getVoices();
+          if (!list || list.length === 0) return null;
+
+          // 1. British / UK English Female (Highest elegance, articulate & clear foreign storytelling tone)
+          let v = list.find((x) => 
+            /en[-_]GB/i.test(x.lang) && 
+            /female|sonia|libby|hazel|maisie|susan|victoria|amy|serena|kate/i.test(x.name)
+          );
+          if (!v) {
+            v = list.find((x) => /en[-_]GB/i.test(x.lang) && !/male|david|george|oliver|brian/i.test(x.name));
+          }
+
+          // 2. Commonwealth / Foreign Accented English Female (Irish, Australian, South African)
+          if (!v) {
+            v = list.find((x) => 
+              /en[-_](IE|AU|NZ|ZA|IN)/i.test(x.lang) && 
+              /female|karen|moira|catherine|clara|fiona|neerja|natasha/i.test(x.name)
+            );
+          }
+          if (!v) {
+            v = list.find((x) => /en[-_](IE|AU|NZ|ZA)/i.test(x.lang) && !/male/i.test(x.name));
+          }
+
+          // 3. High-quality natural English female voice
+          if (!v) {
+            v = list.find((x) => 
+              x.lang.startsWith('en') && 
+              /female|natural|samantha|aria|jenny|zira/i.test(x.name) && 
+              !/male|david|mark/i.test(x.name)
+            );
+          }
+
+          // 4. Any en-GB voice
+          if (!v) {
+            v = list.find((x) => /en[-_]GB/i.test(x.lang));
+          }
+
+          // 5. Fallback English
+          if (!v) {
+            v = list.find((x) => x.lang.startsWith('en')) || list[0];
+          }
+
+          this.voice = v;
+          return v;
+        },
+
+        cleanText(t) {
+          if (!t) return '';
+          return t
+            .replace(/\[.*?\]/g, '')
+            .replace(/MER-B/g, 'M-E-R B')
+            .replace(/5-DOF/g, 'five-degree-of-freedom')
+            .replace(/\bIDD-RAT\b/g, 'I-D-D and RAT')
+            .replace(/\bIDD\b/g, 'I-D-D')
+            .replace(/\bRAT\b/g, 'Rock Abrasion Tool, or RAT')
+            .replace(/\bAPXS\b/g, 'A-P-X-S')
+            .replace(/\bMI\b/g, 'Microscopic Imager')
+            .replace(/\bMB\b/g, 'Mössbauer Spectrometer')
+            .replace(/\bPMA\b/g, 'P-M-A')
+            .replace(/\bPancam\b/g, 'Pan-cam')
+            .replace(/\bNavcams\b/g, 'Nav-cams')
+            .replace(/\bNavcam\b/g, 'Nav-cam')
+            .replace(/\bMini-TES\b/g, 'Mini-T-E-S')
+            .replace(/\bWEB\b/g, 'Warm Electronics Box')
+            .replace(/\bRAD6000\b/g, 'Rad six-thousand')
+            .replace(/\bPu-238\b/g, 'Plutonium two thirty-eight')
+            .replace(/\bRHU\b/g, 'R-H-U')
+            .replace(/\bHGA\b/g, 'H-G-A')
+            .replace(/\bUHF\b/g, 'U-H-F')
+            .replace(/\bGaAs\b/g, 'gallium arsenide')
+            .replace(/GaInP\/GaAs\/Ge/g, 'gallium indium phosphide, gallium arsenide, and germanium')
+            .replace(/8-Ah/g, 'eight amp-hour')
+            .replace(/Li-Ion/g, 'lithium-ion')
+            .replace(/28–32 VDC/g, 'twenty-eight to thirty-two volts direct current')
+            .replace(/−105°C|-105°C/g, 'minus one hundred and five degrees Celsius')
+            .replace(/45\.16 km/g, 'forty-five point one six kilometers')
+            .replace(/4\.5 mm/g, 'four point five millimeters')
+            .replace(/5,111 Sols/g, 'five thousand one hundred and eleven sols')
+            .replace(/5111/g, 'fifty-one eleven')
+            .replace(/Sol 30\b/g, 'Sol thirty')
+            .replace(/Sol 446–484/g, 'Sol four forty-six to four eighty-four')
+            .replace(/Sol 4027/g, 'Sol four thousand twenty-seven')
+            .replace(/217,594/g, 'two hundred seventeen thousand five hundred ninety-four')
+            .replace(/55×/g, 'fifty-five times')
+            .replace(/55 times/g, 'fifty-five times')
+            .replace(/90 Sols|90-sol|90 days/g, 'ninety sols')
+            .replace(/25 km/g, 'twenty-five kilometers')
+            .replace(/128 Wh/g, 'one hundred twenty-eight watt-hours')
+            .replace(/900 Wh\/sol/g, 'nine hundred watt-hours per sol')
+            .replace(/~100 Wh/g, 'approximately one hundred watt-hours')
+            .replace(/140 W/g, 'one hundred forty watts')
+            .replace(/1 Watt/g, 'one watt')
+            .replace(/1\.5m/g, 'one point five meters')
+            .replace(/2\.3m/g, 'two point three meters')
+            .replace(/1\.6m/g, 'one point six meters')
+            .replace(/0\.28m/g, 'zero point two eight meters')
+            .replace(/20 MHz/g, 'twenty megahertz')
+            .replace(/128 MB/g, 'one hundred twenty-eight megabytes')
+            .replace(/256 MB/g, 'two hundred fifty-six megabytes')
+            .replace(/25 cm/g, 'twenty-five centimeter')
+            .replace(/32°/g, 'thirty-two degrees')
+            .replace(/360°/g, 'three hundred sixty degrees')
+            .replace(/±90°/g, 'plus or minus ninety degrees')
+            .replace(/2003/g, 'two thousand and three')
+            .replace(/2004/g, 'two thousand and four')
+            .replace(/2007/g, 'two thousand and seven')
+            .replace(/2014/g, 'twenty fourteen')
+            .replace(/2018/g, 'twenty eighteen')
+            .replace(/—/g, ', ')
+            .replace(/–/g, ' to ')
+            .replace(/·/g, ', ')
+            .replace(/"/g, '')
+            .trim();
+        },
+
+        stop() {
+          if (this.pendingTimer) {
+            clearTimeout(this.pendingTimer);
+            this.pendingTimer = null;
+          }
+          if (typeof window !== 'undefined' && window.speechSynthesis) {
+            try {
+              window.speechSynthesis.cancel();
+            } catch (e) {}
+          }
+          this.speaking = false;
+          this.currentKey = null;
+          this.currentUtterance = null;
+          window.__activeHwUtterance = null;
+        },
+
+        speakSubsystem(key) {
+          // Zero overlap guarantee: stop any running speech immediately
+          this.stop();
+          if (!this.enabled) return;
+          if (typeof window === 'undefined' || !window.speechSynthesis) return;
+
+          const item = SUBSYSTEM_DATA[key] || SUBSYSTEM_DATA.all;
+          this.currentKey = key;
+
+          let rawText = '';
+          if (key === 'all') {
+            rawText = `${item.name}. ${item.desc} Scientific legacy: ${item.link}`;
+          } else {
+            rawText = `${item.name}. ${item.desc} Engineering to discovery link: ${item.link}`;
+          }
+
+          const cleaned = this.cleanText(rawText);
+          if (!cleaned) return;
+
+          // Short tick prevents browser audio pipeline collision
+          this.pendingTimer = setTimeout(() => {
+            if (!this.enabled || this.currentKey !== key) return;
+
+            this.pickVoice();
+            const u = new SpeechSynthesisUtterance(cleaned);
+            if (this.voice) {
+              u.voice = this.voice;
+              u.lang = this.voice.lang || 'en-GB';
+            } else {
+              u.lang = 'en-GB';
+            }
+
+            // Elegant, articulate foreign-accent storytelling cadence
+            u.rate = 0.91;
+            u.pitch = 1.02;
+            u.volume = 1.0;
+
+            u.onstart = () => {
+              this.speaking = true;
+            };
+
+            u.onend = () => {
+              this.speaking = false;
+              this.currentUtterance = null;
+              window.__activeHwUtterance = null;
+            };
+
+            u.onerror = () => {
+              this.speaking = false;
+              this.currentUtterance = null;
+              window.__activeHwUtterance = null;
+            };
+
+            this.currentUtterance = u;
+            window.__activeHwUtterance = u; // protect from garbage collection
+
+            try {
+              window.speechSynthesis.speak(u);
+            } catch (err) {
+              console.warn('Speech synthesis speak error:', err);
+            }
+          }, 60);
+        }
+      };
+
+      window.stopHardwareNarration = function() {
+        if (typeof hwNarrator !== 'undefined' && hwNarrator.stop) {
+          hwNarrator.stop();
+        }
+      };
+
       function selectSubsystem(key, moveCam = true) {
         selectedSubsystemKey = key;
+        window.__hwSelectedKey = key;
         const item = SUBSYSTEM_DATA[key] || SUBSYSTEM_DATA.all;
+
+        // Dynamic storytelling voice narration (guaranteed single-voice, zero-overlap)
+        if (typeof hwNarrator !== 'undefined' && hwNarrator.enabled) {
+          hwNarrator.speakSubsystem(key);
+        }
 
         // Highlight bottom pill bar button
         document.querySelectorAll('.hw-sub-btn').forEach((btn) => {
@@ -2329,6 +2583,31 @@ function createSolarTopTexture() {
           } else {
             cardBody.classList.add('hidden');
             btnCardToggle.textContent = 'INFO';
+          }
+        });
+      }
+
+      // Hardware Storytelling Voice Toggle & Initialization
+      hwNarrator.init();
+      const btnToggleHwVoice = document.getElementById('hw-toggle-voice');
+      const hwVoiceLabel = document.getElementById('hw-voice-label');
+      const hwVoiceDot = document.getElementById('hw-voice-dot');
+
+      if (btnToggleHwVoice) {
+        btnToggleHwVoice.addEventListener('click', () => {
+          hwNarrator.enabled = !hwNarrator.enabled;
+          if (hwNarrator.enabled) {
+            btnToggleHwVoice.classList.add('border-oppy-accent');
+            btnToggleHwVoice.classList.remove('border-white/20');
+            if (hwVoiceDot) hwVoiceDot.className = 'w-1.5 h-1.5 rounded-full bg-oppy-accent animate-pulse';
+            if (hwVoiceLabel) hwVoiceLabel.textContent = 'VOICE: ON';
+            hwNarrator.speakSubsystem(selectedSubsystemKey || 'all');
+          } else {
+            hwNarrator.stop();
+            btnToggleHwVoice.classList.remove('border-oppy-accent');
+            btnToggleHwVoice.classList.add('border-white/20');
+            if (hwVoiceDot) hwVoiceDot.className = 'w-1.5 h-1.5 rounded-full bg-gray-500';
+            if (hwVoiceLabel) hwVoiceLabel.textContent = 'VOICE: OFF';
           }
         });
       }

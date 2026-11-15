@@ -80,12 +80,17 @@
         this.windFilter.frequency.value = 240;
         this.windFilter.Q.value = 1.6;
 
+        // Ducking gain to duck ambient audio when narrator speaks
+        this.duckGain = this.ctx.createGain();
+        this.duckGain.gain.value = 1.0;
+        this.duckGain.connect(this.ctx.destination);
+
         this.windGain = this.ctx.createGain();
-        this.windGain.gain.value = 0.04;
+        this.windGain.gain.value = 0.035;
 
         windSource.connect(this.windFilter);
         this.windFilter.connect(this.windGain);
-        this.windGain.connect(this.ctx.destination);
+        this.windGain.connect(this.duckGain);
         windSource.start();
 
         // Electric DC servo motor whirr
@@ -102,13 +107,49 @@
 
         this.servoOsc.connect(this.servoFilter);
         this.servoFilter.connect(this.servoGain);
-        this.servoGain.connect(this.ctx.destination);
+        this.servoGain.connect(this.duckGain);
         this.servoOsc.start();
+
+        // Light BGM Pad: gentle warm space ambience
+        this.bgmGain = this.ctx.createGain();
+        this.bgmGain.gain.value = 0.026;
+        const padFilter = this.ctx.createBiquadFilter();
+        padFilter.type = 'lowpass';
+        padFilter.frequency.value = 360;
+        padFilter.Q.value = 1.0;
+
+        const chordFreqs = [146.83, 220.00, 185.00];
+        chordFreqs.forEach((freq) => {
+          const osc = this.ctx.createOscillator();
+          osc.type = 'sine';
+          osc.frequency.value = freq;
+          const noteGain = this.ctx.createGain();
+          noteGain.gain.value = 0.33;
+          osc.connect(noteGain);
+          noteGain.connect(padFilter);
+          osc.start();
+        });
+        padFilter.connect(this.bgmGain);
+        this.bgmGain.connect(this.duckGain);
 
         this.initialized = true;
       } catch (err) {
         // Audio will initialize upon first user gesture
       }
+    }
+
+    duck(level) {
+      if (!this.initialized || !this.ctx || !this.duckGain) return;
+      const now = this.ctx.currentTime;
+      this.duckGain.gain.cancelScheduledValues(now);
+      this.duckGain.gain.setTargetAtTime(level || 0.35, now, 0.2);
+    }
+
+    unduck() {
+      if (!this.initialized || !this.ctx || !this.duckGain) return;
+      const now = this.ctx.currentTime;
+      this.duckGain.gain.cancelScheduledValues(now);
+      this.duckGain.gain.setTargetAtTime(1.0, now, 0.6);
     }
 
     setDriving(isDriving) {
@@ -265,6 +306,182 @@
       gain.connect(this.ctx.destination);
       src.start(now);
     } catch (e) {}
+  };
+
+  // ---------- female elegant narrator engine (cinematic storytelling) ----------
+  const narrator = {
+    enabled: true,
+    speaking: false,
+    currentId: null,
+    currentUtterance: null,
+    voice: null,
+    heartbeat: null,
+
+    init() {
+      if (typeof window === 'undefined' || !window.speechSynthesis) return;
+      this.pickVoice();
+      if (window.speechSynthesis.onvoiceschanged !== undefined) {
+        window.speechSynthesis.onvoiceschanged = () => this.pickVoice();
+      }
+      if (!this.heartbeat) {
+        this.heartbeat = setInterval(() => {
+          if (this.speaking && window.speechSynthesis.paused) {
+            window.speechSynthesis.resume();
+          }
+        }, 1500);
+      }
+    },
+
+    pickVoice() {
+      if (!window.speechSynthesis) return;
+      const list = window.speechSynthesis.getVoices();
+      if (!list || list.length === 0) return;
+
+      // 1. British / UK English Female (Highest elegance, clear articulation & storytelling cadence)
+      let v = list.find((x) => 
+        /en[-_]GB/i.test(x.lang) && 
+        /female|sonia|libby|hazel|maisie|susan|victoria|amy|serena|kate/i.test(x.name)
+      );
+      if (!v) {
+        v = list.find((x) => /en[-_]GB/i.test(x.lang) && !/male|david|george|oliver|brian/i.test(x.name));
+      }
+
+      // 2. Commonwealth / Foreign Accented English Female (Irish, Australian, South African)
+      if (!v) {
+        v = list.find((x) => 
+          /en[-_](IE|AU|NZ|ZA|IN)/i.test(x.lang) && 
+          /female|karen|moira|catherine|clara|fiona|neerja|natasha/i.test(x.name)
+        );
+      }
+      if (!v) {
+        v = list.find((x) => /en[-_](IE|AU|NZ|ZA)/i.test(x.lang) && !/male/i.test(x.name));
+      }
+
+      // 3. High-quality natural English female voice
+      if (!v) {
+        v = list.find((x) => 
+          x.lang.startsWith('en') && 
+          /female|natural|samantha|aria|jenny|zira/i.test(x.name) && 
+          !/male|david|mark/i.test(x.name)
+        );
+      }
+
+      // 4. Any en-GB voice
+      if (!v) {
+        v = list.find((x) => /en[-_]GB/i.test(x.lang));
+      }
+
+      // 5. Fallback English
+      if (!v) {
+        v = list.find((x) => x.lang.startsWith('en')) || list[0];
+      }
+
+      this.voice = v;
+    },
+
+    cleanText(t) {
+      if (!t) return '';
+      return t
+        .replace(/\[.*?\]/g, '')
+        .replace(/-105°C/g, 'minus one hundred and five degrees Celsius')
+        .replace(/19,000 km\/h/g, 'nineteen thousand kilometers per hour')
+        .replace(/42-kilometer/g, 'forty-two kilometer')
+        .replace(/45\.16 km/g, 'forty-five point one six kilometers')
+        .replace(/192 meters/g, 'one hundred and ninety-two meters')
+        .replace(/1 meter/g, 'one meter')
+        .replace(/5-DOF/g, 'five-degree-of-freedom')
+        .replace(/APXS/g, 'A-P-X-S')
+        .replace(/Pancam/g, 'Pan-cam')
+        .replace(/Navcam/g, 'Nav-cam')
+        .replace(/tau > 10\.8/g, 'tau greater than ten point eight')
+        .replace(/645 watt-hours/g, 'six hundred forty-five watt-hours')
+        .replace(/22 watt-hours/g, 'twenty-two watt-hours')
+        .replace(/2004/g, 'two thousand and four')
+        .replace(/2005/g, 'two thousand and five')
+        .replace(/2007/g, 'two thousand and seven')
+        .replace(/2010/g, 'twenty ten')
+        .replace(/2015/g, 'twenty fifteen')
+        .replace(/2018/g, 'twenty eighteen')
+        .replace(/2019/g, 'twenty nineteen')
+        .replace(/90-day/g, 'ninety-day')
+        .replace(/90 days/g, 'ninety days')
+        .replace(/14 Years/g, 'fourteen years')
+        .replace(/15 years/g, 'fifteen years')
+        .replace(/—/g, ', ')
+        .replace(/–/g, ' to ')
+        .replace(/'/g, "'")
+        .trim();
+    },
+
+    stop() {
+      if (typeof window === 'undefined' || !window.speechSynthesis) return;
+      try {
+        window.speechSynthesis.cancel();
+      } catch (e) {}
+      this.speaking = false;
+      this.currentId = null;
+      this.currentUtterance = null;
+      window.__activeNarratorUtterance = null;
+      if (audioEngine && audioEngine.unduck) audioEngine.unduck();
+    },
+
+    speak(rawText, id) {
+      if (!this.enabled || !rawText) return;
+      if (typeof window === 'undefined' || !window.speechSynthesis) return;
+
+      const text = this.cleanText(rawText);
+      if (!text) return;
+
+      // Avoid repeating same caption if currently active
+      if (id && this.currentId === id && this.speaking) return;
+
+      // STOP previous voice immediately: guarantee NO overlapping voices!
+      this.stop();
+
+      this.currentId = id || text;
+      this.pickVoice();
+
+      const u = new SpeechSynthesisUtterance(text);
+      if (this.voice) {
+        u.voice = this.voice;
+        u.lang = this.voice.lang || 'en-GB';
+      } else {
+        u.lang = 'en-GB';
+      }
+
+      // Elegant, measured storytelling cadence
+      u.rate = 0.91;  // slightly relaxed, articulate pacing for clear storytelling
+      u.pitch = 1.02; // warm, resonant tone
+      u.volume = 1.0;
+
+      u.onstart = () => {
+        this.speaking = true;
+        if (audioEngine && audioEngine.duck) audioEngine.duck(0.38);
+      };
+
+      u.onend = () => {
+        this.speaking = false;
+        this.currentUtterance = null;
+        window.__activeNarratorUtterance = null;
+        if (audioEngine && audioEngine.unduck) audioEngine.unduck();
+      };
+
+      u.onerror = () => {
+        this.speaking = false;
+        this.currentUtterance = null;
+        window.__activeNarratorUtterance = null;
+        if (audioEngine && audioEngine.unduck) audioEngine.unduck();
+      };
+
+      this.currentUtterance = u;
+      window.__activeNarratorUtterance = u;
+
+      try {
+        window.speechSynthesis.speak(u);
+      } catch (e) {
+        console.warn('SpeechSynthesis error:', e);
+      }
+    }
   };
 
   // =========================================================================
@@ -490,7 +707,7 @@
 
   function $(id) { return document.getElementById(id); }
 
-  function holdFor(text) { return 2.4 + text.length * 0.038; }
+  function holdFor(text) { return Math.max(4.5, 2.5 + text.length * 0.055); }
 
   function say(key, holdOverride) {
     if (state.said.has(key)) return;
@@ -515,6 +732,7 @@
         subCurrent = subQueue.shift();
         if (el) el.textContent = subCurrent.text;
         if (box) box.style.opacity = '1';
+        narrator.speak(subCurrent.text);
       }
     }
   }
@@ -1283,6 +1501,7 @@
         const q = $('finalQuoteBox');
         if (q) q.style.opacity = '1';
         audioEngine.playFinaleChord();
+        narrator.speak(STORY.quote, 'quote');
       }
       if (r >= 10.0 && !S.quoteOff) {
         S.quoteOff = true;
@@ -1293,6 +1512,7 @@
         S.memorial = true;
         const m = $('finalMemorialText');
         if (m) m.style.opacity = '1';
+        narrator.speak(STORY.memorial, 'memorial');
       }
       if (r >= 27.0 && !state.endDone) {
         state.endDone = true;
@@ -1523,6 +1743,7 @@
   }
 
   function leaveExperience() {
+    narrator.stop();
     if (typeof window.closeOverlays === 'function') window.closeOverlays();
   }
 
@@ -1629,6 +1850,7 @@
     if (!storyCanvas) return;
     ctx2d = storyCanvas.getContext('2d');
 
+    narrator.init();
     state = makeState();
     resetUI();
     initParticles();
@@ -1662,6 +1884,7 @@
 
   window.pauseMissionExperience = function () {
     window.__experienceActive = false;
+    narrator.stop();
     if (animId) {
       cancelAnimationFrame(animId);
       animId = null;

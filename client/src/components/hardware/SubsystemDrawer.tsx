@@ -1,6 +1,7 @@
 import React from 'react';
 import { useHardwareStore } from '../../stores/hardwareStore';
-import { Layers, RotateCcw, Eye, Sparkles } from 'lucide-react';
+import { useStoryNarrator } from '../../hooks/useStoryNarrator';
+import { Layers, RotateCcw, Eye, Sparkles, Volume2, VolumeX } from 'lucide-react';
 
 export const SubsystemDrawer: React.FC = () => {
   const {
@@ -17,13 +18,37 @@ export const SubsystemDrawer: React.FC = () => {
 
   const activeSubsystem = subsystems.find((s) => s.key === selectedSubsystemKey) || subsystems[0];
 
+  const speechScript = activeSubsystem
+    ? `${activeSubsystem.name}. ${activeSubsystem.desc} Engineering to discovery link: ${activeSubsystem.discoveryLink.scienceFinding} ${activeSubsystem.discoveryLink.significance}`
+    : '';
+
+  const { isVoiceEnabled, toggleVoice } = useStoryNarrator(speechScript, selectedSubsystemKey);
+
   return (
     <aside className="w-full lg:w-96 flex flex-col space-y-4 font-mono text-xs z-20">
       
       {/* Subsystem Selection Grid */}
       <div className="bg-oppy-card p-4 rounded-md border border-oppy-border">
-        <div className="text-[10px] text-oppy-textMuted uppercase tracking-wider mb-3">
-          SELECT SUBSYSTEM FOCUS
+        <div className="flex items-center justify-between mb-3">
+          <span className="text-[10px] text-oppy-textMuted uppercase tracking-wider">
+            SELECT SUBSYSTEM FOCUS
+          </span>
+          <button
+            onClick={toggleVoice}
+            className={`px-2.5 py-1 rounded-full text-[10px] uppercase font-mono flex items-center space-x-1.5 transition-colors border cursor-pointer ${
+              isVoiceEnabled
+                ? 'border-oppy-accent bg-oppy-surface text-white'
+                : 'border-oppy-border bg-oppy-bg text-oppy-textMuted hover:text-white'
+            }`}
+            title="Toggle Hardware Storyteller Voice"
+          >
+            {isVoiceEnabled ? (
+              <Volume2 className="w-3 h-3 text-oppy-accent animate-pulse" />
+            ) : (
+              <VolumeX className="w-3 h-3 text-oppy-textMuted" />
+            )}
+            <span>VOICE: {isVoiceEnabled ? 'ON' : 'OFF'}</span>
+          </button>
         </div>
         <div className="grid grid-cols-2 gap-2">
           {subsystems.map((sub, idx) => {
