@@ -48,7 +48,7 @@
   <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>
 
   <!-- NASA MER-B Mission Experience Simulation Engine -->
-  <script src="legacy/mission-experience.js?v=8"></script>
+  <script src="legacy/mission-experience.js?v=audio-v2"></script>
 
   <style>
     /* Prevent any scrolling on landing page */
@@ -113,71 +113,6 @@
       color: #101113 !important;
       box-shadow: 0 4px 22px rgba(255, 255, 255, 0.45) !important;
       z-index: 30 !important;
-    }
-
-    /* ---------- Cinematic story text & control prompts (the ONLY in-game text) ---------- */
-    .cine-shade {
-      height: 38%;
-      background: linear-gradient(to top, rgba(0,0,0,0.62) 0%, rgba(0,0,0,0.32) 45%, rgba(0,0,0,0) 100%);
-      z-index: 11;
-    }
-    .cine-subtitle {
-      bottom: 11%;
-      transform: translateX(-50%);
-      width: min(880px, 88vw);
-      text-align: center;
-      z-index: 14;
-      transition: opacity 0.9s ease;
-    }
-    .cine-subtitle p {
-      margin: 0;
-      font-family: 'Poppins', sans-serif;
-      font-weight: 300;
-      font-size: clamp(0.95rem, 1.5vw + 0.45rem, 1.45rem);
-      line-height: 1.6;
-      letter-spacing: 0.015em;
-      color: #f5efe6;
-      text-shadow: 0 1px 14px rgba(0,0,0,0.9), 0 0 2px rgba(0,0,0,0.9);
-    }
-    .cine-prompt {
-      bottom: 4.5%;
-      transform: translateX(-50%);
-      z-index: 15;
-      transition: opacity 0.35s ease;
-      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
-      font-size: clamp(0.7rem, 0.5vw + 0.55rem, 0.9rem);
-      letter-spacing: 0.14em;
-      color: rgba(253, 230, 190, 0.82);
-      text-shadow: 0 1px 8px rgba(0,0,0,0.95);
-      white-space: nowrap;
-      animation: cine-pulse 2.4s ease-in-out infinite;
-    }
-    @keyframes cine-pulse { 0%, 100% { filter: brightness(0.85); } 50% { filter: brightness(1.2); } }
-    .cine-blackout {
-      background: #000;
-      z-index: 13;
-      transition: opacity 2.6s ease;
-    }
-    .cine-quote {
-      position: absolute;
-      width: min(900px, 88vw);
-      font-family: Georgia, 'Times New Roman', serif;
-      font-style: italic;
-      font-size: clamp(1.5rem, 3vw + 0.6rem, 2.6rem);
-      line-height: 1.35;
-      color: #fff;
-      text-shadow: 0 0 24px rgba(255,255,255,0.25);
-      transition: opacity 1.8s ease;
-    }
-    .cine-memorial {
-      position: absolute;
-      width: min(780px, 86vw);
-      font-family: 'Poppins', sans-serif;
-      font-weight: 300;
-      font-size: clamp(0.95rem, 1.2vw + 0.5rem, 1.35rem);
-      line-height: 1.75;
-      color: #d9d2c7;
-      transition: opacity 2.2s ease;
     }
   </style>
 </head>
@@ -442,36 +377,105 @@
   <!-- ========================================================================= -->
   <!-- 3. INTERACTIVE MARS ODYSSEY MISSION EXPERIENCE OVERLAY                   -->
   <!-- ========================================================================= -->
-  <div id="experience-overlay" class="fixed inset-0 z-50 bg-[#101113] flex flex-col hidden opacity-0 transition-opacity duration-300 select-none">
+  <div id="experience-overlay" class="fixed inset-0 z-50 bg-[#070606] flex flex-col hidden opacity-0 transition-opacity duration-300 select-none">
+    
+    <!-- Minimal Floating Exit & Audio in Top-Right -->
+    <div class="absolute top-4 right-4 flex items-center space-x-2 z-50 opacity-30 hover:opacity-100 transition-opacity duration-300">
+      <button 
+        id="btnAudioToggle" 
+        class="px-3 py-1 rounded-full border border-white/20 bg-black/60 hover:border-white/40 backdrop-blur-md text-white text-[11px] font-sans uppercase transition-colors cursor-pointer shadow-lg"
+        title="Toggle Audio"
+      >
+        🔊 SFX: ON
+      </button>
+      <button 
+        id="btnVoiceToggle" 
+        class="px-3 py-1 rounded-full border border-oppy-accent/70 bg-black/60 hover:border-oppy-accent backdrop-blur-md text-white text-[11px] font-sans uppercase transition-colors cursor-pointer shadow-lg flex items-center space-x-1.5"
+        title="Toggle Female Storyteller Voice"
+      >
+        <span class="w-1.5 h-1.5 rounded-full bg-oppy-accent animate-pulse"></span>
+        <span id="btnVoiceText">VOICE: ON</span>
+      </button>
+      <button 
+        onclick="closeOverlays()" 
+        class="px-3.5 py-1 rounded-full border border-white/20 bg-black/60 hover:bg-white/20 hover:border-white/40 backdrop-blur-md text-white text-[11px] font-sans font-medium uppercase transition-colors cursor-pointer shadow-lg"
+        title="Return to Landing (or press Esc)"
+      >
+        ✕ RETURN
+      </button>
+    </div>
 
-    <!-- Fullscreen 2D simulation viewport. No HUD, no menus, no buttons:
-         the only text ever shown is cinematic story text + minimal control prompts. -->
+    <!-- Main Fullscreen Interactive Simulation Viewport -->
     <div class="relative flex-1 w-full h-full overflow-hidden bg-[#070606]">
+      
+      <!-- HTML5 High-Performance 2.5D Canvas -->
+      <canvas id="storyCanvas" class="w-full h-full block cursor-pointer"></canvas>
 
-      <!-- HTML5 2D Canvas -->
-      <canvas id="storyCanvas" class="w-full h-full block"></canvas>
+      <!-- Subtle Parallax Film Grain Overlay -->
+      <div id="filmGrainOverlay" class="pointer-events-none absolute inset-0 z-10" style="background:radial-gradient(ellipse at center,transparent 60%,rgba(0,0,0,.35) 100%)"></div>
 
-      <!-- Soft bottom shade so story text stays readable (no text, purely visual) -->
-      <div class="cine-shade pointer-events-none absolute inset-x-0 bottom-0"></div>
+      <!-- Amnesia Cosmic Radiation Glitch / Scanline Overlay (Phase 4) -->
+      <div id="amnesiaGlitchOverlay" class="pointer-events-none absolute inset-0 bg-white/10 mix-blend-overlay opacity-0 transition-opacity duration-150 z-20"></div>
 
-      <!-- FINAL BLACKOUT (Phase 5 ending): story text only -->
-      <div id="finalBlackoutScreen" class="cine-blackout pointer-events-none absolute inset-0 flex flex-col items-center justify-center text-center px-6" style="opacity:0;">
-        <div id="finalQuoteBox" class="cine-quote" style="opacity:0;">
-          <span id="finalQuoteText">&ldquo;My battery is low and it&rsquo;s getting dark.&rdquo;</span>
-        </div>
-        <div id="finalMemorialText" class="cine-memorial" style="opacity:0;">
-          For eight months, Earth called out into the silence more than a thousand times. On February 13, 2019, NASA beamed one last song across the stars&mdash;&lsquo;I&rsquo;ll Be Seeing You&rsquo;&mdash;and let her rest. 90 Days Planned. 14 Years Survived.
+      <!-- Minimal Control Text Prompt: Simple, unobtrusive prompt appearing when action needed -->
+      <div class="pointer-events-none absolute bottom-36 sm:bottom-40 left-0 right-0 flex justify-center z-20 px-4">
+        <div 
+          id="controlPromptBox" 
+          class="opacity-0 transition-opacity duration-300"
+          style="opacity:0"
+        >
+          <span id="controlPromptText" class="font-sans font-medium text-xs sm:text-sm text-amber-200/90 tracking-[0.2em] drop-shadow-[0_2px_6px_rgba(0,0,0,0.9)]"></span>
         </div>
       </div>
 
-      <!-- CINEMATIC STORY TEXT (type 1) -->
-      <div id="cinematicSubtitleBox" class="cine-subtitle pointer-events-none absolute left-1/2" style="opacity:0;">
-        <p id="cinematicSubtitleText"></p>
+      <!-- Cinematic Story Text: Movie-style narrative subtitles fading in/out at bottom-center -->
+      <div class="pointer-events-none absolute bottom-8 sm:bottom-10 left-0 right-0 flex justify-center z-20 px-6">
+        <div 
+          id="cinematicSubtitleBox" 
+          class="transition-opacity duration-500 max-w-3xl w-full text-center"
+          style="opacity:0"
+        >
+          <p id="cinematicSubtitleText" class="font-serif italic text-sm sm:text-base md:text-lg text-white leading-relaxed"
+             style="text-shadow:0 2px 10px rgba(0,0,0,.95),0 0 3px rgba(0,0,0,.9)"></p>
+        </div>
       </div>
 
-      <!-- MINIMAL CONTROL PROMPT (type 2) -->
-      <div id="controlPromptBox" class="cine-prompt pointer-events-none absolute left-1/2" style="opacity:0;">
-        <span id="controlPromptText"></span>
+      <!-- Fullscreen Pitch Black Memorial Sequence (Phase 5 Climax) -->
+      <div 
+        id="finalBlackoutScreen" 
+        class="opacity-0 pointer-events-none transition-opacity duration-1000 fixed inset-0 bg-black z-40 flex flex-col items-center justify-center p-6 text-center select-none"
+      >
+        <!-- The Famous Quote -->
+        <div 
+          id="finalQuoteBox" 
+          class="opacity-0 scale-95 transition-all duration-1000 max-w-xl"
+        >
+          <div class="font-serif italic text-2xl sm:text-3xl md:text-4xl text-white font-medium tracking-wide drop-shadow-2xl">
+            “My battery is low and it's getting dark.”
+          </div>
+        </div>
+
+        <!-- Memorial Tribute Text -->
+        <div 
+          id="finalMemorialText" 
+          class="opacity-0 transition-opacity duration-1000 max-w-lg"
+          style="position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:calc(100% - 3rem)"
+        >
+          <p class="font-sans text-xs sm:text-sm text-slate-300 leading-relaxed font-light">
+            For eight months, Earth called out into the silence more than a thousand times. On February 13, 2019, NASA beamed one last song across the stars—<span class="text-amber-300 font-normal">“I’ll Be Seeing You”</span>—and let her rest.
+          </p>
+          <div class="mt-4 font-sans text-[11px] sm:text-xs text-oppy-textMuted uppercase tracking-widest">
+            90 Days Planned &bull; 14 Years Survived
+          </div>
+        </div>
+
+        <!-- Action / Replay Button -->
+        <button 
+          id="finalActionBtn" 
+          class="opacity-0 transition-opacity duration-700 absolute bottom-10 left-1/2 -translate-x-1/2 font-sans text-xs tracking-[0.2em] text-amber-200/80 pointer-events-none cursor-pointer"
+        >
+          [Press R to Replay]
+        </button>
       </div>
 
     </div>
@@ -551,6 +555,10 @@
       }
       if (window.stopHardwareNarration) {
         try { window.stopHardwareNarration(); } catch (e) {}
+      }
+      // Instantly unlock and resume audio on user gesture
+      if (window.__merAudioUnlock) {
+        try { window.__merAudioUnlock(); } catch (e) {}
       }
       const hw = document.getElementById('hardware-overlay');
       if (hw) {

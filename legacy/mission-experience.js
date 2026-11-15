@@ -106,20 +106,37 @@
     return BASE + h;
   }
 
-  // ---------- audio (light BGM + atmospheric wind + motor SFX) ----------
+  // ---------- audio (light BGM + atmospheric wind + motor SFX + sound FX) ----------
   const audio = {
-    ctx: null, muted: false, ok: false, duckLevel: 1.0,
+    ctx: null, muted: false, ok: false, duckLevel: 1.0, _lastClick: 0,
     init() {
-      if (this.ok) { if (this.ctx && this.ctx.state === 'suspended') this.ctx.resume().catch(() => {}); return; }
+      if (this.ok) {
+        this.resume();
+        return;
+      }
       try {
-        const A = window.AudioContext || window.webkitAudioContext; if (!A) return;
-        const x = this.ctx = new A(), n = x.sampleRate * 2, buf = x.createBuffer(1, n, x.sampleRate), o = buf.getChannelData(0);
+        const A = window.AudioContext || window.webkitAudioContext;
+        if (!A) return;
+        const x = this.ctx = new A();
+
+        // Immediate resume check
+        if (x.state === 'suspended') {
+          x.resume().catch(() => {});
+        }
+
+        const n = x.sampleRate * 2, buf = x.createBuffer(1, n, x.sampleRate), o = buf.getChannelData(0);
         let b0 = 0, b1 = 0, b2 = 0;
-        for (let i = 0; i < n; i++) { const w = Math.random() * 2 - 1; b0 = 0.99 * b0 + w * 0.06; b1 = 0.96 * b1 + w * 0.2; b2 = 0.7 * b2 + w * 0.5; o[i] = (b0 + b1 + b2) * 0.1; }
-        
+        for (let i = 0; i < n; i++) {
+          const w = Math.random() * 2 - 1;
+          b0 = 0.99 * b0 + w * 0.06;
+          b1 = 0.96 * b1 + w * 0.2;
+          b2 = 0.7 * b2 + w * 0.5;
+          o[i] = (b0 + b1 + b2) * 0.12;
+        }
+
         // Master gain
-        this.master = x.createGain(); 
-        this.master.gain.value = this.muted ? 0 : 1; 
+        this.master = x.createGain();
+        this.master.gain.value = this.muted ? 0 : 1;
         this.master.connect(x.destination);
 
         // Ducking gain: ducks background sounds smoothly when narrator speaks
@@ -127,42 +144,59 @@
         this.duckGain.gain.value = 1.0;
         this.duckGain.connect(this.master);
 
-        // Martian wind
-        const src = x.createBufferSource(); src.buffer = buf; src.loop = true;
-        this.wf = x.createBiquadFilter(); this.wf.type = 'bandpass'; this.wf.frequency.value = 240; this.wf.Q.value = 1.4;
-        this.wg = x.createGain(); this.wg.gain.value = 0.035; 
-        src.connect(this.wf); this.wf.connect(this.wg); this.wg.connect(this.duckGain); src.start();
+        // Martian atmospheric wind
+        const src = x.createBufferSource();
+        src.buffer = buf;
+        src.loop = true;
+        this.wf = x.createBiquadFilter();
+        this.wf.type = 'bandpass';
+        this.wf.frequency.value = 240;
+        this.wf.Q.value = 1.4;
+        this.wg = x.createGain();
+        this.wg.gain.value = 0.065;
+        src.connect(this.wf);
+        this.wf.connect(this.wg);
+        this.wg.connect(this.duckGain);
+        src.start();
 
         // Driving DC servo motor
-        this.so = x.createOscillator(); this.so.type = 'sawtooth'; this.so.frequency.value = 60;
-        const sf = x.createBiquadFilter(); sf.type = 'lowpass'; sf.frequency.value = 220;
-        this.sg = x.createGain(); this.sg.gain.value = 0; 
-        this.so.connect(sf); sf.connect(this.sg); this.sg.connect(this.duckGain); this.so.start();
+        this.so = x.createOscillator();
+        this.so.type = 'sawtooth';
+        this.so.frequency.value = 60;
+        const sf = x.createBiquadFilter();
+        sf.type = 'lowpass';
+        sf.frequency.value = 240;
+        this.sg = x.createGain();
+        this.sg.gain.value = 0;
+        this.so.connect(sf);
+        sf.connect(this.sg);
+        this.sg.connect(this.duckGain);
+        this.so.start();
 
         // Light BGM Pad: gentle, warm celestial synth pad (peaceful storytelling ambience)
         this.bgmGain = x.createGain();
-        this.bgmGain.gain.value = 0.026;
+        this.bgmGain.gain.value = 0.075;
 
         const padFilter = x.createBiquadFilter();
         padFilter.type = 'lowpass';
-        padFilter.frequency.value = 360;
-        padFilter.Q.value = 1.0;
+        padFilter.frequency.value = 420;
+        padFilter.Q.value = 1.2;
 
         const padLfo = x.createOscillator();
-        padLfo.frequency.value = 0.07; // 14-second peaceful breathing cycle
+        padLfo.frequency.value = 0.07;
         const padLfoGain = x.createGain();
-        padLfoGain.gain.value = 55;
+        padLfoGain.gain.value = 70;
         padLfo.connect(padLfoGain);
         padLfoGain.connect(padFilter.frequency);
         padLfo.start();
 
-        const chordFreqs = [146.83, 220.00, 185.00];
+        const chordFreqs = [146.83, 220.00, 185.00, 293.66];
         chordFreqs.forEach((freq) => {
           const osc = x.createOscillator();
           osc.type = 'sine';
           osc.frequency.value = freq;
           const noteGain = x.createGain();
-          noteGain.gain.value = 0.33;
+          noteGain.gain.value = 0.28;
           osc.connect(noteGain);
           noteGain.connect(padFilter);
           osc.start();
@@ -172,33 +206,102 @@
         this.bgmGain.connect(this.duckGain);
 
         this.ok = true;
-      } catch (e) {}
+      } catch (e) {
+        console.warn('WebAudio init error:', e);
+      }
+    },
+    resume() {
+      if (this.ctx && this.ctx.state === 'suspended') {
+        this.ctx.resume().catch(() => {});
+      }
     },
     duck(level) {
       if (!this.ok || !this.ctx || !this.duckGain) return;
-      this.duckLevel = level || 0.35;
+      this.duckLevel = level || 0.25;
       const t = this.ctx.currentTime;
       this.duckGain.gain.cancelScheduledValues(t);
-      this.duckGain.gain.setTargetAtTime(this.duckLevel, t, 0.2);
+      this.duckGain.gain.setTargetAtTime(this.duckLevel, t, 0.15);
     },
     unduck() {
       if (!this.ok || !this.ctx || !this.duckGain) return;
       this.duckLevel = 1.0;
       const t = this.ctx.currentTime;
       this.duckGain.gain.cancelScheduledValues(t);
-      this.duckGain.gain.setTargetAtTime(1.0, t, 0.6);
+      this.duckGain.gain.setTargetAtTime(1.0, t, 0.5);
     },
     setMuted(m) { 
       this.muted = !!m; 
       if (this.ok && this.ctx) this.master.gain.setValueAtTime(m ? 0 : 1, this.ctx.currentTime); 
     },
+    playClick() {
+      if (!this.ok || !this.ctx) return;
+      try {
+        const now = this.ctx.currentTime;
+        const osc = this.ctx.createOscillator();
+        const g = this.ctx.createGain();
+        osc.type = 'triangle';
+        osc.frequency.setValueAtTime(1200 + Math.random() * 600, now);
+        osc.frequency.exponentialRampToValueAtTime(240, now + 0.035);
+        g.gain.setValueAtTime(0.08, now);
+        g.gain.exponentialRampToValueAtTime(0.001, now + 0.035);
+        osc.connect(g);
+        g.connect(this.master);
+        osc.start(now);
+        osc.stop(now + 0.04);
+      } catch (e) {}
+    },
+    playSpark() {
+      if (!this.ok || !this.ctx) return;
+      try {
+        const now = this.ctx.currentTime;
+        const osc = this.ctx.createOscillator();
+        const g = this.ctx.createGain();
+        osc.type = 'sawtooth';
+        osc.frequency.setValueAtTime(380, now);
+        osc.frequency.exponentialRampToValueAtTime(70, now + 0.09);
+        g.gain.setValueAtTime(0.12, now);
+        g.gain.exponentialRampToValueAtTime(0.001, now + 0.09);
+        osc.connect(g);
+        g.connect(this.master);
+        osc.start(now);
+        osc.stop(now + 0.1);
+      } catch (e) {}
+    },
+    playFarewellChord() {
+      if (!this.ok || !this.ctx) return;
+      try {
+        const now = this.ctx.currentTime;
+        [185.00, 220.00, 277.18, 440.00, 554.37].forEach((freq, idx) => {
+          const osc = this.ctx.createOscillator();
+          const g = this.ctx.createGain();
+          osc.type = idx < 2 ? 'triangle' : 'sine';
+          osc.frequency.setValueAtTime(freq, now + idx * 0.18);
+          g.gain.setValueAtTime(0.001, now + idx * 0.18);
+          g.gain.linearRampToValueAtTime(0.06, now + idx * 0.18 + 1.2);
+          g.gain.exponentialRampToValueAtTime(0.0001, now + idx * 0.18 + 8.0);
+          osc.connect(g);
+          g.connect(this.master);
+          osc.start(now + idx * 0.18);
+          osc.stop(now + idx * 0.18 + 8.5);
+        });
+      } catch (e) {}
+    },
     update() {
-      if (!this.ok || !S) return; const t = this.ctx.currentTime, st = S.E.hz;
-      this.wg.gain.setTargetAtTime(0.035 + st * 0.14 + (S.gustOn ? 0.1 : 0), t, 0.2);
-      this.wf.frequency.setTargetAtTime(220 + st * 360 + (S.gustOn ? 300 : 0), t, 0.2);
+      if (!this.ok || !S) return;
+      if (this.ctx && this.ctx.state === 'suspended') {
+        this.ctx.resume().catch(() => {});
+      }
+      const t = this.ctx.currentTime, st = S.E.hz;
+      this.wg.gain.setTargetAtTime(0.065 + st * 0.18 + (S.gustOn ? 0.12 : 0), t, 0.2);
+      this.wf.frequency.setTargetAtTime(220 + st * 360 + (S.gustOn ? 320 : 0), t, 0.2);
       const sp = Math.abs(S.v) + (S.trapped ? 70 : 0) + (S.drillOn ? 90 : 0);
-      this.sg.gain.setTargetAtTime(sp > 4 ? Math.min(0.06, 0.015 + sp * 0.0002) : 0, t, 0.08);
-      this.so.frequency.setTargetAtTime(52 + Math.min(150, sp * 0.5) + (S.drillOn ? 120 : 0), t, 0.08);
+      this.sg.gain.setTargetAtTime(sp > 4 ? Math.min(0.075, 0.02 + sp * 0.0003) : 0, t, 0.08);
+      this.so.frequency.setTargetAtTime(55 + Math.min(160, sp * 0.5) + (S.drillOn ? 120 : 0), t, 0.08);
+
+      if (S.drillOn && performance.now() - this._lastClick > 90) {
+        this._lastClick = performance.now();
+        this.playClick();
+      }
     }
   };
 
@@ -210,6 +313,7 @@
     currentUtterance: null,
     voice: null,
     heartbeat: null,
+    pendingTimer: null,
 
     init() {
       if (typeof window === 'undefined' || !window.speechSynthesis) return;
@@ -217,21 +321,24 @@
       if (window.speechSynthesis.onvoiceschanged !== undefined) {
         window.speechSynthesis.onvoiceschanged = () => this.pickVoice();
       }
+      if (window.speechSynthesis.paused) {
+        window.speechSynthesis.resume();
+      }
       if (!this.heartbeat) {
         this.heartbeat = setInterval(() => {
           if (this.speaking && window.speechSynthesis.paused) {
             window.speechSynthesis.resume();
           }
-        }, 1500);
+        }, 1200);
       }
     },
 
     pickVoice() {
-      if (!window.speechSynthesis) return;
+      if (typeof window === 'undefined' || !window.speechSynthesis) return;
       const list = window.speechSynthesis.getVoices();
       if (!list || list.length === 0) return;
 
-      // 1. British / UK English Female (Highest elegance, clear articulation & storytelling cadence)
+      // 1. British / UK English Female (Highest elegance & storytelling cadence)
       let v = list.find((x) => 
         /en[-_]GB/i.test(x.lang) && 
         /female|sonia|libby|hazel|maisie|susan|victoria|amy|serena|kate/i.test(x.name)
@@ -240,7 +347,7 @@
         v = list.find((x) => /en[-_]GB/i.test(x.lang) && !/male|david|george|oliver|brian/i.test(x.name));
       }
 
-      // 2. Commonwealth / Foreign Accented English Female (Irish, Australian, South African)
+      // 2. Commonwealth / Foreign Accented English Female (Irish, Australian, South African, Indian)
       if (!v) {
         v = list.find((x) => 
           /en[-_](IE|AU|NZ|ZA|IN)/i.test(x.lang) && 
@@ -265,7 +372,7 @@
         v = list.find((x) => /en[-_]GB/i.test(x.lang));
       }
 
-      // 5. Fallback English
+      // 5. Fallback English or system default
       if (!v) {
         v = list.find((x) => x.lang.startsWith('en')) || list[0];
       }
@@ -308,6 +415,10 @@
     },
 
     stop() {
+      if (this.pendingTimer) {
+        clearTimeout(this.pendingTimer);
+        this.pendingTimer = null;
+      }
       if (typeof window === 'undefined' || !window.speechSynthesis) return;
       try {
         window.speechSynthesis.cancel();
@@ -333,48 +444,56 @@
       this.stop();
 
       this.currentId = id || text;
-      this.pickVoice();
 
-      const u = new SpeechSynthesisUtterance(text);
-      if (this.voice) {
-        u.voice = this.voice;
-        u.lang = this.voice.lang || 'en-GB';
-      } else {
-        u.lang = 'en-GB';
-      }
+      // Asynchronous scheduling avoids Chrome cancel/speak collision
+      this.pendingTimer = setTimeout(() => {
+        if (!this.enabled || this.currentId !== (id || text)) return;
+        this.pickVoice();
 
-      // Elegant, measured storytelling cadence
-      u.rate = 0.91;  // slightly relaxed, articulate pacing for clear storytelling
-      u.pitch = 1.02; // warm, resonant tone
-      u.volume = 1.0;
+        if (window.speechSynthesis.paused) {
+          window.speechSynthesis.resume();
+        }
 
-      u.onstart = () => {
-        this.speaking = true;
-        if (typeof audio !== 'undefined' && audio.duck) audio.duck(0.38);
-      };
+        const u = new SpeechSynthesisUtterance(text);
+        if (this.voice) {
+          u.voice = this.voice;
+          u.lang = this.voice.lang || 'en-GB';
+        } else {
+          u.lang = navigator.language || 'en-US';
+        }
 
-      u.onend = () => {
-        this.speaking = false;
-        this.currentUtterance = null;
-        window.__activeNarratorUtterance = null;
-        if (typeof audio !== 'undefined' && audio.unduck) audio.unduck();
-      };
+        u.rate = 0.92;
+        u.pitch = 1.02;
+        u.volume = 1.0;
 
-      u.onerror = () => {
-        this.speaking = false;
-        this.currentUtterance = null;
-        window.__activeNarratorUtterance = null;
-        if (typeof audio !== 'undefined' && audio.unduck) audio.unduck();
-      };
+        u.onstart = () => {
+          this.speaking = true;
+          if (typeof audio !== 'undefined' && audio.duck) audio.duck(0.25);
+        };
 
-      this.currentUtterance = u;
-      window.__activeNarratorUtterance = u; // prevent Chrome GC bug
+        u.onend = () => {
+          this.speaking = false;
+          this.currentUtterance = null;
+          window.__activeNarratorUtterance = null;
+          if (typeof audio !== 'undefined' && audio.unduck) audio.unduck();
+        };
 
-      try {
-        window.speechSynthesis.speak(u);
-      } catch (e) {
-        console.warn('SpeechSynthesis error:', e);
-      }
+        u.onerror = () => {
+          this.speaking = false;
+          this.currentUtterance = null;
+          window.__activeNarratorUtterance = null;
+          if (typeof audio !== 'undefined' && audio.unduck) audio.unduck();
+        };
+
+        this.currentUtterance = u;
+        window.__activeNarratorUtterance = u;
+
+        try {
+          window.speechSynthesis.speak(u);
+        } catch (e) {
+          console.warn('SpeechSynthesis speak error:', e);
+        }
+      }, 45);
     }
   };
 
@@ -426,8 +545,8 @@
     S.speedMul = st.sp || 1; S.pressE = 0; S.pressSpace = 0;
     say(st.say, st.id);
     if (st.id === 'jam') { S.jam = 1; S.facing = -1; }
-    if (st.id === 'p2d') S.spark = 1;
-    if (st.id === 'cl1') S.spark = 1;
+    if (st.id === 'p2d') { S.spark = 1; audio.playSpark(); }
+    if (st.id === 'cl1') { S.spark = 1; audio.playSpark(); }
   }
 
   function stepUpdate(dt) {
@@ -568,6 +687,7 @@
       const b = $('finalBlackoutScreen'), q = $('finalQuoteBox');
       if (b) { b.style.opacity = '1'; }
       if (q) { q.style.opacity = '1'; q.style.transform = 'scale(1)'; }
+      audio.playFarewellChord();
       narrator.speak("My battery is low and it's getting dark.", 'quote');
     }
     if (f > 10.5 && !S._b2) { S._b2 = 1; const q = $('finalQuoteBox'); if (q) q.style.opacity = '0'; }
@@ -934,6 +1054,28 @@
     ['mousedown', 'touchstart'].forEach((n) => cvs.addEventListener(n, (e) => pd(e, true), { passive: true }));
     ['mouseup', 'touchend', 'touchcancel'].forEach((n) => window.addEventListener(n, (e) => pd(e, false)));
   }
+
+  window.__merAudioUnlock = function () {
+    audio.init();
+    audio.resume();
+    narrator.init();
+    if (typeof window !== 'undefined' && window.speechSynthesis && window.speechSynthesis.paused) {
+      window.speechSynthesis.resume();
+    }
+  };
+
+  // Automatic user gesture audio unlock
+  ['pointerdown', 'keydown', 'touchstart'].forEach((evt) => {
+    window.addEventListener(evt, () => {
+      if (window.__experienceActive) {
+        audio.init();
+        audio.resume();
+        if (typeof window !== 'undefined' && window.speechSynthesis && window.speechSynthesis.paused) {
+          window.speechSynthesis.resume();
+        }
+      }
+    }, { passive: true });
+  });
 
   window.startMissionExperience = function () {
     window.__experienceActive = true;
