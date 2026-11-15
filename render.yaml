@@ -3,7 +3,6 @@ services:
   - type: web
     name: oppy-mars-rover
     runtime: static
-    plan: free
     buildCommand: echo "Deploying static assets"
     staticPublishPath: .
     routes:
