@@ -955,63 +955,9 @@
                 ctx.restore();
             }
 
-            // Helper to draw elevated floating Holographic Landmark Callout Pin (Never collides with rover!)
+            // Landmark Callout Pin (Text and boxes removed for clean screen)
             function drawFloatingWaypointPin(ctx, screenX, groundY, labelText, subText, colorHex, dpr) {
-                const pinTopY = groundY - 122 * dpr;
-                ctx.save();
-
-                const accentColor = colorHex === '#f59e0b' || colorHex === '#fbbf24' ? '#38bdf8' : colorHex;
-
-                // Vertical laser leader line to ground
-                const lineGrad = ctx.createLinearGradient(screenX, pinTopY, screenX, groundY);
-                lineGrad.addColorStop(0, accentColor);
-                lineGrad.addColorStop(1, 'rgba(56, 189, 248, 0.05)');
-                ctx.strokeStyle = lineGrad;
-                ctx.lineWidth = 1.5 * dpr;
-                ctx.setLineDash([4 * dpr, 4 * dpr]);
-                ctx.beginPath();
-                ctx.moveTo(screenX, pinTopY + 14 * dpr);
-                ctx.lineTo(screenX, groundY - 6 * dpr);
-                ctx.stroke();
-                ctx.setLineDash([]);
-
-                // Ground target ring
-                ctx.strokeStyle = accentColor;
-                ctx.lineWidth = 1.2 * dpr;
-                ctx.beginPath();
-                ctx.ellipse(screenX, groundY - 4 * dpr, 14 * dpr, 4 * dpr, 0, 0, Math.PI * 2);
-                ctx.stroke();
-
-                // Floating pill badge high in the sky (matching Home Screen sleek pill aesthetic)
-                ctx.font = `600 ${10.5 * dpr}px 'Poppins', sans-serif`;
-                const textW = Math.max(ctx.measureText(labelText).width, ctx.measureText(subText).width) + 26 * dpr;
-                const boxH = 32 * dpr;
-                ctx.fillStyle = 'rgba(16, 17, 19, 0.92)';
-                ctx.strokeStyle = 'rgba(255, 255, 255, 0.18)';
-                ctx.lineWidth = 1.2 * dpr;
-                ctx.beginPath();
-                ctx.roundRect(screenX - textW * 0.5, pinTopY - boxH * 0.5, textW, boxH, 16 * dpr);
-                ctx.fill();
-                ctx.stroke();
-
-                // Dot accent inside badge
-                ctx.fillStyle = accentColor;
-                ctx.beginPath();
-                ctx.arc(screenX - textW * 0.5 + 12 * dpr, pinTopY - 2 * dpr, 2.5 * dpr, 0, Math.PI * 2);
-                ctx.fill();
-
-                // Title in pure white Poppins
-                ctx.fillStyle = '#FFFFFF';
-                ctx.textAlign = 'center';
-                ctx.font = `600 ${10 * dpr}px 'Poppins', sans-serif`;
-                ctx.fillText(labelText, screenX + 4 * dpr, pinTopY - 2 * dpr);
-
-                // Subtitle in soft sleek secondary gray
-                ctx.fillStyle = '#A1A5AA';
-                ctx.font = `400 ${8.5 * dpr}px 'Poppins', sans-serif`;
-                ctx.fillText(subText, screenX, pinTopY + 10 * dpr);
-
-                ctx.restore();
+                return;
             }
 
             function render2DStory(dt, timeSec) {

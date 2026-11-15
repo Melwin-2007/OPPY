@@ -438,25 +438,6 @@
       <!-- Subtle Parallax Film Grain Overlay -->
       <div id="filmGrainOverlay" class="pointer-events-none absolute inset-0 film-grain opacity-25 z-10"></div>
 
-      <!-- Minimal Translucent Top Ribbon -->
-      <div class="pointer-events-none absolute top-3 left-4 right-4 flex items-center justify-between z-20">
-        <div class="px-3.5 py-1.5 rounded-full bg-[#101113]/90 backdrop-blur-md border border-white/15 flex items-center gap-2.5 shadow-xl">
-          <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-          <span id="cinemaChapterHeader" class="font-sans text-[11px] uppercase text-white font-semibold tracking-wider">
-            ACT I // THE INTERPLANETARY HOLE-IN-ONE (EAGLE CRATER)
-          </span>
-          <span id="cinemaYearBadge" class="px-2 py-0.5 rounded-full bg-white/10 text-[9px] font-sans font-medium text-oppy-textSecondary border border-white/10">
-            JAN 2004
-          </span>
-        </div>
-        <div class="flex items-center gap-2">
-          <span id="cinemaDriveModeBadge" class="px-3 py-1 rounded-full bg-[#101113]/90 backdrop-blur-md border border-white/15 text-[10px] font-sans font-semibold text-emerald-400 tracking-wide shadow-xl">
-            ▶ FWD DRIVE
-          </span>
-          <span id="active2DHardwareText" class="hidden"></span>
-        </div>
-      </div>
-
       <!-- Sol 5111 Pancam Sky Noise PiP Frame (Triggered during Act VI) -->
       <div id="pancamStaticPip" class="hidden absolute top-14 right-4 w-32 h-32 bg-black border border-red-500/80 rounded-lg overflow-hidden shadow-2xl z-20 flex flex-col font-sans">
         <div class="bg-red-950/90 px-2 py-0.5 text-[8.5px] font-sans font-medium text-red-200 flex justify-between items-center">
@@ -466,18 +447,6 @@
         <canvas id="staticNoiseCanvas" width="120" height="90" class="w-full flex-1 block"></canvas>
         <div class="bg-black/95 px-1 py-0.5 text-[8px] font-sans text-slate-400 text-center">
           TAU &gt; 10.8 · PITCH BLACK
-        </div>
-      </div>
-
-      <!-- Floating Subtitle & Science Telemetry Box (Compact, Bottom Center) -->
-      <div class="pointer-events-none absolute bottom-16 left-4 right-4 flex flex-col items-center z-20">
-        <div class="max-w-2xl w-full text-center px-5 py-3 rounded-2xl bg-[#101113]/90 backdrop-blur-md border border-white/15 shadow-2xl space-y-1">
-          <p id="movieSubtitleText" class="text-xs sm:text-[13px] font-normal text-white leading-relaxed font-sans drop-shadow">
-            “Designed for just 90 sols and 1 kilometer. Inside Eagle Crater, Oppy reaches out its robotic arm and discovers hematite ‘blueberries’—proving ancient liquid water once soaked Mars.”
-          </p>
-          <div id="movieScienceNote" class="text-[10px] font-sans text-oppy-accent uppercase font-medium tracking-wider">
-            [SCIENCE TELEMETRY]: Mössbauer MIMOS II & APXS confirm jarosite + gray crystalline hematite concretions
-          </div>
         </div>
       </div>
 
